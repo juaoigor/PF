@@ -10,6 +10,7 @@
         <th>Conta</th>
         <th>RecDes</th>
         <th>FixVar</th>
+        <th></th>
       </tr>
       {% for d in tb %}
       <tr>
@@ -17,6 +18,7 @@
         <td>{{ d['Conta'] }}</td>
         <td>{{ d['RecDes'] }}</td>
         <td>{{ d['FixVar'] }}</td>
+        <td><a href="/config/contas?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
       </tr>
       {% endfor %}
     </table>
@@ -45,6 +47,21 @@
               </div>
             </div>
           </fieldset>
+          <fieldset class="form-group">
+            <div class="row">
+              <legend class="col-form-label col-2 pt-0">Recorrencia</legend>
+              <div class="col-10">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="FixVar" id="gridRadios3" value="0" checked>
+                  <label class="form-check-label" for="gridRadios3">Fixa</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="FixVar" id="gridRadios4" value="1">
+                  <label class="form-check-label" for="gridRadios4">Variavel</label>
+                </div>
+              </div>
+            </div>
+          </fieldset>          
           <div class="form-group row">
             <div class="col-10">
               <button type="submit" class="btn btn-primary" name="Criar" value="Criar">Criar</button>

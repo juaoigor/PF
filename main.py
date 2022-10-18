@@ -2,6 +2,8 @@ import sys
 
 sys.path.insert(0, '/home/juaoigor/pf')
 sys.path.insert(0, '/home/juaoigor/pf/py')
+sys.path.insert(0, '/home/runner/PF')
+sys.path.insert(0, '/home/runner/PF/py')
 
 from flask import Flask
 from flask import render_template, request, redirect, url_for, session, jsonify
@@ -30,7 +32,7 @@ def login():
 
 @app.route('/config/contas', methods=['GET', 'POST'])
 def configContas():
-  from py.database import sqlQuery
+  from database import sqlQuery
   tb = sqlQuery("SELECT * FROM Contas")
   return render_template('config.contas.html', tb=tb)
 
@@ -42,15 +44,21 @@ def configDebug():
   info['FOLDER'] =  os.getcwd()
   return render_template('config.debug.html', info=info)
 
-
 @app.route('/config/setup', methods=['GET', 'POST'])
 def configSetup():
   if request.method == 'POST':
     if request.form['Setup'] == 'Setup':
       from database import DataBaseReset
       DataBaseReset()
-      
   return render_template('config.setup.html')
+
+@app.route('/despesas/resumo', methods=['GET', 'POST'])
+def despesasResumo():
+  from database import sqlQuery
+  
+  labels = sqlQuery("SELECT id, conta from Contas ORDER BY RecDes, conta")
+  return render_template('despesas.resumo.html',
+                        labels=labels)
 
   
 #app.run(host='0.0.0.0', port=81)

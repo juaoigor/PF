@@ -1,13 +1,9 @@
 from flask import Flask
 from flask import render_template, request, redirect, url_for, session, jsonify
 
-
-
 app = Flask(__name__)
 app.secret_key = 'financas'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-
-
 
 @app.route('/')
 @app.route('/index.html')
@@ -26,6 +22,12 @@ def login():
       return render_template('login.html')
   else:
     return render_template('login.html')
+
+@app.route('/config/contas', methods=['GET', 'POST'])
+def configContas():
+  from py.database import sqlQuery
+  tb = sqlQuery("SELECT * FROM Contas")
+  return render_template('config.contas.html', tb=tb)
 
 @app.route('/config/setup', methods=['GET', 'POST'])
 def configSetup():

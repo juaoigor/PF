@@ -3,12 +3,12 @@
 {% block content %}
 
 <div class="row">
-  <div class="col-9">
+  <div class="col-6">
 
   </div>
-  <div class="col-3">
+  <div class="col-6">
     <div class="card">
-      <div class="card-header">Setup</div>
+      <div class="card-header">Despesas</div>
       <div class="card-body">
         <form  action="/despesas/resumo" method="post">
 
@@ -30,20 +30,29 @@
             </div>
           </div>
 
+          <div class="form-group row">
+            <label for="idValor" class="col-2 col-form-label">Valor</label>
+            <div class="col-10"><input type="text" class="form-control" id="idValor" placeholder="Valor 1.234,56"></div>
+          </div>
           
           <div class="form-group row">
             <div class="col-10">
-              <button type="submit" class="btn btn-primary" name="Criar" value="Criar">Criar</button>
+              <button type="submit" class="btn btn-primary" name="Inserir" value="Criar">Inserir</button>
             </div>
           </div>
+
+          
         </form>
       </div>
     </div>
   </div>
 </div>
 
-<script type="text/javascript">
-  $("#idDatePicker").datetimepicker();
+<script>
+  $(function() {
+    $("#idDatePicker").datepicker();
+    $("#idDatePicker").datepicker("option", "dateFormat", "dd/mm/yyyy");
+  });
 </script>
 
 {% endblock %}

@@ -31,8 +31,8 @@ def login():
 def configSetup():
   if request.method == 'POST':
     if request.form['Setup'] == 'Setup':
-      from py.database import execScript
-      execScript(mysql, 'sql/setup.sql')
+      from py.database import DataBaseReset
+      DataBaseReset()
       
   return render_template('config.setup.html')
 

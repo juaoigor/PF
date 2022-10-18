@@ -1,11 +1,14 @@
 from flask import Flask
+from flask import render_template, request, url_for, flash, redirect, jsonify
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
 @app.route('/')
+@app.route('/index.html')
 def index():
-    return 'Hello from Flask!'
+    return render_template('index.html')
 
 
 #app.run(host='0.0.0.0', port=81)

@@ -29,6 +29,15 @@ def configContas():
   tb = sqlQuery("SELECT * FROM Contas")
   return render_template('config.contas.html', tb=tb)
 
+@app.route('/config/debug', methods=['GET', 'POST'])
+def configDebug():
+  info = {}
+  
+  import os
+  info['FOLDER'] =  os.getcwd()
+  return render_template('config.debug.html', info=info)
+
+
 @app.route('/config/setup', methods=['GET', 'POST'])
 def configSetup():
   if request.method == 'POST':

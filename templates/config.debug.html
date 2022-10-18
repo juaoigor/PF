@@ -1,0 +1,23 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-12">
+    <table>
+      <tr>
+        <th>INFO</th>
+        <th>VAL</th>
+      </tr>
+      {% for k, v in info.items() %}
+      <tr>
+        <td>{{ k }}</td>
+        <td>{{ v }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+
+
+{% endblock %}

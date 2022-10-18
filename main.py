@@ -1,17 +1,13 @@
 from flask import Flask
 from flask import render_template, request, redirect, url_for, session, jsonify
-from flask_mysqldb import MySQL 
+
 
 
 app = Flask(__name__)
 app.secret_key = 'financas'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-app.config['MYSQL_HOST'] = 'juaoigor.mysql.pythonanywhere-services.com'
-app.config['MYSQL_USER'] = 'juaoigor'
-app.config['MYSQL_PASSWORD'] = 'database'
-app.config['MYSQL_DB'] = 'juaoigor$pf'
-mysql = MySQL(app)
+
 
 @app.route('/')
 @app.route('/index.html')

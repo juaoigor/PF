@@ -1,11 +1,11 @@
-import mysql.connector
+import sqlite3
 
+db = 'db\database.db'
 
-def execScript(db, name):
-  cur = db.connection.cursor()
-  with open(name) as f:
-      cur.execute(f.read().decode('utf-8'), multi=True)
+def DataBaseReset():
+  db = sqlite3.connect(db)
+  cursor = db.cursor()
+  cursor.executescript('sql/setup.sql')
+  db.commit()
+  db.close()
   
-  db.connection.commit()
-  cur.close()
-  db.connection.close()

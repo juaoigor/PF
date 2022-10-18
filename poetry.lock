@@ -202,6 +202,25 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "mysql"
+version = "0.0.3"
+description = "Virtual package for MySQL-python"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+mysqlclient = "*"
+
+[[package]]
+name = "mysqlclient"
+version = "2.1.1"
+description = "Python interface to MySQL"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[[package]]
 name = "packaging"
 version = "21.3"
 description = "Core utilities for Python packages"
@@ -469,7 +488,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8.0,<3.9"
-content-hash = "3129d438b61a31690692adaa3f3fa3c0d35f87d428b01a9afb75a13446b25ca3"
+content-hash = "fe6aa7f799c2b15e13dbd3959a4c6c5182f08ee9bc43bd148061d1ba25338f41"
 
 [metadata.files]
 aiohttp = []
@@ -490,6 +509,8 @@ jedi = []
 jinja2 = []
 markupsafe = []
 multidict = []
+mysql = []
+mysqlclient = []
 packaging = []
 parso = []
 pluggy = []

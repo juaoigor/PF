@@ -12,3 +12,7 @@ def index():
 
 
 #app.run(host='0.0.0.0', port=81)
+
+#Database host address:juaoigor.mysql.pythonanywhere-services.com
+#Username:juaoigor password database
+#database Start a console on:juaoigor$pf

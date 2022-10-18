@@ -1,3 +1,8 @@
+import sys
+
+sys.path.insert(0, '/home/juaoigor/pf')
+sys.path.insert(0, '/home/juaoigor/pf/py')
+
 from flask import Flask
 from flask import render_template, request, redirect, url_for, session, jsonify
 
@@ -42,13 +47,13 @@ def configDebug():
 def configSetup():
   if request.method == 'POST':
     if request.form['Setup'] == 'Setup':
-      from py.database import DataBaseReset
+      from database import DataBaseReset
       DataBaseReset()
       
   return render_template('config.setup.html')
 
   
-app.run(host='0.0.0.0', port=81)
+#app.run(host='0.0.0.0', port=81)
 
 #Database host address:juaoigor.mysql.pythonanywhere-services.com
 #Username:juaoigor password database

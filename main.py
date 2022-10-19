@@ -99,13 +99,33 @@ def despesasImportar():
 
 @app.route('/despesas/resumo', methods=['GET', 'POST'])
 def despesasResumo():
-  from database import sqlQuery
+  from datetime import datetime
+  from dateutil.relativedelta import relativedelta
 
+  mes = datetime.now().month
+  ano = datetime.now().year
+
+  if request.method == 'GET':
+    if request.args.get('mes') != None:
+      mes = int(request.args.get('mes'))
+    if request.args.get('ano') != None:
+      ano = int(request.args.get('ano'))
+
+  from database import sqlQuery
   labels = sqlQuery("SELECT id, conta from Contas ORDER BY RecDes, conta")
   pessoas = sqlQuery("SELECT id, nome from Pessoas ORDER BY Nome")
   bens = sqlQuery("SELECT id, nome from Bens ORDER BY Nome")
+
+  ant = (datetime(int(ano), int(mes), 1) + relativedelta(months=-1))
+  pos = (datetime(int(ano), int(mes), 1) + relativedelta(months=1))
+  links = {"ant": r"/despesas/resumo?mes={}&ano={}".format(ant.month, ant.year),
+           "pos": r"/despesas/resumo?mes={}&ano={}".format(pos.month, pos.year)}
+
+  from fUtils import MontaTabelaResumo
+
   return render_template('despesas.resumo.html',
-                        labels=labels, pessoas=pessoas, bens=bens)
+                        labels=labels, pessoas=pessoas, bens=bens, links=links,
+                        tb=MontaTabelaResumo(mes,ano))
 
 
-app.run(host='0.0.0.0', port=81)
+# app.run(host='0.0.0.0', port=81)

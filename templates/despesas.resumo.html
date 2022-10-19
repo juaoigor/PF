@@ -1,10 +1,47 @@
 {% extends 'index.html' %}
 
 {% block content %}
+<br>
+<div class="row">
+  <div class="col-4">
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item"><a class="page-link" href="{{ links['ant'] }}">Anterior</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['pos'] }}">Posterior</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>
 
 <div class="row">
   <div class="col-8">
-
+    <div class="card">
+      <div class="card-header">Detalhe do Mes</div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Data</th>
+              <th scope="col">Conta</th>
+              <th scope="col">Texto</th>
+              <th scope="col">Valor</th>
+              <th scope="col">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in tb['detalhe'] %}
+            <tr>
+              <td>{{ r['datahora']}}</td>
+              <td>{{ r['Conta']}}</td>
+              <td>{{ r['texto']}}</td>
+              <td class='alnright'>{{'{:,}'.format(r['valor'])}}</td>
+              <td class='alnright'>{{'{:,}'.format(r['total'])}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
   <div class="col-4">
     <div class="card">

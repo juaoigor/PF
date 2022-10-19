@@ -28,7 +28,8 @@ def MontaTabelaResumo(mes,ano):
   i = 0
   for l in r:
     t = t + l['valor']
-    r[i]['total'] = t
+    r[i]['total'] = "{:10.2f}".format(t)
+    r[i]['valor'] = "{:10.2f}".format(l['valor'])
     i = i + 1
 
 

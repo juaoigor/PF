@@ -40,7 +40,7 @@ def configContas():
 
 
   from database import sqlQuery
-  tb = sqlQuery("SELECT * FROM Contas")
+  tb = sqlQuery("SELECT * FROM Contas ORDER BY Inv, RecDes, conta")
   return render_template('config.contas.html', tb=tb)
 
 @app.route('/config/debug', methods=['GET', 'POST'])
@@ -128,4 +128,4 @@ def despesasResumo():
                         tb=MontaTabelaResumo(mes,ano))
 
 
-# app.run(host='0.0.0.0', port=81)
+#app.run(host='0.0.0.0', port=81)

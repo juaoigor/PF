@@ -1,0 +1,44 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">Classificar</div>
+      <div class="card-body">
+        <form  action="/despesas/classificar" method="post">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Data</th>
+                <th scope="col">Texto</th>
+                <th scope="col">Valor</th>
+                <th scope="col">Conta</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in tb %}
+              <tr>
+                <td><input type="text" class="form-control form-control-sm" name="{{ loop.index }}_ID" value="{{ r['id']}}" size="2" readonly></td>
+                <td>{{ r['datahora']}}</td>
+                <td>{{ r['texto']}}</td>
+                <td>{{ r['valor']}}</td>
+                <td><select class="form-control form-control-sm" name="{{ loop.index }}_Conta"><option value="0"></option>{% for d in labels %}<option value="{{ d['id'] }}">{{ d['Conta'] }}</option>{% endfor %}</select></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <div class="form-group row">
+            <div class="col-6">
+              <button type="submit" class="btn btn-primary" name="Salvar" value="Salvar">Salvar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -3,45 +3,67 @@
 {% block content %}
 
 <div class="row">
-  <div class="col-6">
+  <div class="col-8">
 
   </div>
-  <div class="col-6">
+  <div class="col-4">
     <div class="card">
       <div class="card-header">Despesas</div>
       <div class="card-body">
         <form  action="/despesas/resumo" method="post">
 
           <div class="form-group row">
-            <label for="idConta" class="col-2 col-form-label">Conta</label>
-            <div class="col-10">
-              <select class="form-control" id="idConta">
+            <label for="idConta" class="col-4 col-form-label">Conta</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="idConta">
                 {% for d in labels %}
                   <option value="{{ d['id'] }}">{{ d['Conta'] }}</option>
-                {% endfor %}                
+                {% endfor %}
               </select>
             </div>
           </div>
 
           <div class="form-group row">
-            <label for="idDatePicker" class="col-2 col-form-label">Conta</label>
-            <div class="col-10">
-              <input class="form-control" type="text" id="idDatePicker"/>
+            <label for="idDatePicker" class="col-4 col-form-label">Conta</label>
+            <div class="col-8">
+              <input class="form-control form-control-sm" type="text" id="idDatePicker"/>
             </div>
           </div>
 
           <div class="form-group row">
-            <label for="idValor" class="col-2 col-form-label">Valor</label>
-            <div class="col-10"><input type="text" class="form-control" id="idValor" placeholder="Valor 1.234,56"></div>
+            <label for="idValor" class="col-4 col-form-label">Valor</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" placeholder="Valor 1.234,56"></div>
           </div>
-          
+
           <div class="form-group row">
-            <div class="col-10">
+            <label for="idConta" class="col-4 col-form-label">Pessoa</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="idConta">
+                {% for d in pessoas %}
+                  <option value="{{ d['id'] }}">{{ d['Nome'] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label for="idConta" class="col-4 col-form-label">Bem</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="idConta">
+                {% for d in bens %}
+                  <option value="{{ d['id'] }}">{{ d['Nome'] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <div class="col-6">
               <button type="submit" class="btn btn-primary" name="Inserir" value="Criar">Inserir</button>
             </div>
           </div>
 
-          
+
         </form>
       </div>
     </div>
@@ -51,7 +73,7 @@
 <script>
   $(function() {
     $("#idDatePicker").datepicker();
-    $("#idDatePicker").datepicker("option", "dateFormat", "dd/mm/yyyy");
+    $("#idDatePicker").datepicker("option", "dateFormat", "dd/mm/yy");
   });
 </script>
 

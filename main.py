@@ -4,6 +4,7 @@ sys.path.insert(0, '/home/juaoigor/pf')
 sys.path.insert(0, '/home/juaoigor/pf/py')
 sys.path.insert(0, '/home/runner/PF')
 sys.path.insert(0, '/home/runner/PF/py')
+sys.path.insert(0, r'C:\dev\Projects\Python\Pessoal\py')
 
 from flask import Flask
 from flask import render_template, request, redirect, url_for, session, jsonify
@@ -32,6 +33,12 @@ def login():
 
 @app.route('/config/contas', methods=['GET', 'POST'])
 def configContas():
+  if request.method == 'POST' and 'Criar' in request.form:
+    if request.form['Criar'] == 'Criar':
+      from database import InsertValues
+      InsertValues("Contas", ['conta', 'recdes', 'fixvar', 'inv'], [request.form['conta'], request.form['RecDes'], request.form['FixVar'], request.form['Invest']])
+
+
   from database import sqlQuery
   tb = sqlQuery("SELECT * FROM Contas")
   return render_template('config.contas.html', tb=tb)
@@ -39,7 +46,7 @@ def configContas():
 @app.route('/config/debug', methods=['GET', 'POST'])
 def configDebug():
   info = {}
-  
+
   import os
   info['FOLDER'] =  os.getcwd()
   return render_template('config.debug.html', info=info)
@@ -52,17 +59,53 @@ def configSetup():
       DataBaseReset()
   return render_template('config.setup.html')
 
+@app.route('/despesas/classificar', methods=['GET', 'POST'])
+def despesasClassificar():
+  if request.method == 'POST' and 'Salvar' in request.form:
+    if request.form['Salvar'] == 'Salvar':
+      from database import sqlExec
+      for i in range(0,999):
+        if '{}_ID'.format(i) in request.form:
+          if int(request.form['{}_Conta'.format(i)]) > 0:
+            sql = "UPDATE Despesas SET id_conta = {} WHERE id = {}".format(request.form['{}_Conta'.format(i)],request.form['{}_ID'.format(i)])
+            sqlExec(sql)
+      return redirect(url_for('despesasResumo'))
+
+  from database import sqlQuery
+  tb = sqlQuery("SELECT * FROM Despesas WHERE id_conta = 0 ORDER BY id desc")
+  labels = sqlQuery("SELECT id, conta from Contas ORDER BY Inv, RecDes, conta")
+  return render_template('despesas.classificar.html',
+                         tb=tb,
+                         labels=labels)
+
+@app.route('/despesas/importar', methods=['GET', 'POST'])
+def despesasImportar():
+  if request.method == 'POST' and 'Processar' in request.form:
+    if request.form['Processar'] == 'Processar':
+      from fUtils import despProcessarTexto
+      r = despProcessarTexto(request.form['texto'])
+      return render_template('despesas.importar.html', tb=r)
+  if request.method == 'POST' and 'Inserir' in request.form:
+    if request.form['Inserir'] == 'Inserir':
+      from database import InsertValues
+      from fUtils import str2date, date2str
+      for i in range(0,999):
+        if '{}_Data'.format(i) in request.form:
+          InsertValues("Despesas", ["id_conta", "id_cartao", "id_bem", "id_pessoa", "datahora", "texto", "valor"], [0, 1, 1, 1, date2str(str2date(request.form['{}_Data'.format(i)], "%d/%m/%Y"),"%Y-%m-%d"), request.form['{}_Texto'.format(i)], request.form['{}_Valor'.format(i)]])
+      return redirect(url_for('despesasResumo'))
+  else:
+    return render_template('despesas.importar.html')
+
+
 @app.route('/despesas/resumo', methods=['GET', 'POST'])
 def despesasResumo():
   from database import sqlQuery
-  
+
   labels = sqlQuery("SELECT id, conta from Contas ORDER BY RecDes, conta")
+  pessoas = sqlQuery("SELECT id, nome from Pessoas ORDER BY Nome")
+  bens = sqlQuery("SELECT id, nome from Bens ORDER BY Nome")
   return render_template('despesas.resumo.html',
-                        labels=labels)
+                        labels=labels, pessoas=pessoas, bens=bens)
 
-  
-#app.run(host='0.0.0.0', port=81)
 
-#Database host address:juaoigor.mysql.pythonanywhere-services.com
-#Username:juaoigor password database
-#database Start a console on:juaoigor$pf
+app.run(host='0.0.0.0', port=81)

@@ -3,39 +3,43 @@
 {% block content %}
 
 <div class="row">
-  <div class="col-9">
-    <table>
-      <tr>
-        <th>ID</th>
-        <th>Conta</th>
-        <th>RecDes</th>
-        <th>FixVar</th>
-        <th></th>
-      </tr>
-      {% for d in tb %}
-      <tr>
-        <td>{{ d['id'] }}</td>
-        <td>{{ d['Conta'] }}</td>
-        <td>{{ d['RecDes'] }}</td>
-        <td>{{ d['FixVar'] }}</td>
-        <td><a href="/config/contas?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
-      </tr>
-      {% endfor %}
+  <div class="col-8">
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Conta</th>
+          <th scope="col">RecDes</th>
+          <th scope="col">FixVar</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in tb %}
+        <tr>
+          <td>{{ d['id'] }}</td>
+          <td>{{ d['Conta'] }}</td>
+          <td>{{ d['RecDes'] }}</td>
+          <td>{{ d['FixVar'] }}</td>
+          <td><a href="/config/contas?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
-  <div class="col-3">
+  <div class="col-4">
     <div class="card">
       <div class="card-header">Setup</div>
       <div class="card-body">
         <form  action="/config/contas" method="post">
           <div class="form-group row">
-            <label for="idContas" class="col-2 col-form-label">Conta</label>
-            <div class="col-10"><input type="text" class="form-control" id="idContas" placeholder="Conta"></div>
+            <label for="idContas" class="col-4 col-form-label">Conta</label>
+            <div class="col-8"><input type="text" class="form-control  form-control-sm" id="idContas" placeholder="Conta" name="conta"></div>
           </div>
           <fieldset class="form-group">
             <div class="row">
-              <legend class="col-form-label col-2 pt-0">Tipo</legend>
-              <div class="col-10">
+              <legend class="col-form-label col-4 pt-0">Tipo</legend>
+              <div class="col-8">
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="RecDes" id="gridRadios1" value="0" checked>
                   <label class="form-check-label" for="gridRadios1">Receita</label>
@@ -49,8 +53,8 @@
           </fieldset>
           <fieldset class="form-group">
             <div class="row">
-              <legend class="col-form-label col-2 pt-0">Recorrencia</legend>
-              <div class="col-10">
+              <legend class="col-form-label col-4 pt-0">Recorrencia</legend>
+              <div class="col-8">
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="FixVar" id="gridRadios3" value="0" checked>
                   <label class="form-check-label" for="gridRadios3">Fixa</label>
@@ -61,7 +65,22 @@
                 </div>
               </div>
             </div>
-          </fieldset>          
+          </fieldset>
+          <fieldset class="form-group">
+            <div class="row">
+              <legend class="col-form-label col-4 pt-0">Investimento</legend>
+              <div class="col-8">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="Invest" id="gridRadios5" value="0" checked>
+                  <label class="form-check-label" for="gridRadios3">Sim</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="Invest" id="gridRadios6" value="1">
+                  <label class="form-check-label" for="gridRadios4">Nao</label>
+                </div>
+              </div>
+            </div>
+          </fieldset>
           <div class="form-group row">
             <div class="col-10">
               <button type="submit" class="btn btn-primary" name="Criar" value="Criar">Criar</button>

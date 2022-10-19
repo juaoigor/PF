@@ -5,7 +5,7 @@ dbs = 'db/database.db'
 def DataBaseReset():
   with open('sql/setup.sql', 'r') as sql_file:
     sql_script = sql_file.read()
-  
+
   db = sqlite3.connect(dbs)
   cursor = db.cursor()
   cursor.executescript(sql_script)
@@ -20,4 +20,17 @@ def sqlQuery(sql):
   res = c.fetchall()
   d = [{k: item[k] for k in item.keys()} for item in res]
   db.close()
-  return d  
+  return d
+
+def sqlExec(sql):
+  db = sqlite3.connect(dbs)
+  db.execute(sql)
+  db.commit()
+  db.close()
+
+def InsertValues(table, flds, vals):
+  sql = "INSERT INTO {0} ({1}) VALUES ({2})".format(table, ", ".join(flds), ", ".join(['?'] * len(flds)))
+  db = sqlite3.connect(dbs)
+  db.execute(sql, vals)
+  db.commit()
+  db.close()

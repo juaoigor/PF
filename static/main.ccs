@@ -3,8 +3,7 @@ body {
   padding-top: 4.5rem;
 }
 
-* {
-   font-size: 10px;
-   line-height: 1.428;
-}
+html { font-size: 10px; }
+body { font-size: 1.6rem; } /* This will be 16px */
 
+.col-form-label { font-size: 1rem; }

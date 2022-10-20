@@ -15,6 +15,7 @@
               <tr>
                 <th>ID</th>
                 <th>Texto</th>
+                <th>Valor</th>
                 <th colspan="2">Probabilidade</th>
               </tr>
             </thead>
@@ -23,6 +24,7 @@
             <tr>
               <td rowspan="4">{{ v['ID'] }}</td>
               <td rowspan="4">{{ v['Texto'] }}</td>
+              <td rowspan="4" class='alnright'>{{ v['Valor'] }}</td>
               <td>
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="c_{{ k }}" id="radio{{ k }}_1" value="{{ v['IDMax1']}}">

@@ -79,7 +79,7 @@ def despesasClassificar():
       return redirect(url_for('despesasResumo'))
 
   from database import sqlQuery
-  tb = sqlQuery("SELECT * FROM Despesas WHERE id_conta = 0 ORDER BY id desc")
+  tb = sqlQuery("SELECT * FROM Despesas WHERE id_conta = 0 ORDER BY abs(valor) desc")
   labels = sqlQuery("SELECT id, conta from Contas ORDER BY Inv, RecDes, conta")
   return render_template('despesas.classificar.html',
                          tb=tb,

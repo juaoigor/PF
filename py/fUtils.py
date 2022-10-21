@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 
 def despProcessarTexto(s):
   r = []
@@ -401,7 +402,7 @@ def geraRelatorio():
         df.at[k,'P'] = (v['TOT']/ df.at[2001,'TOT'])*100
         df.at[k,'P_12M'] = (v['TOT_12M']/ df.at[2001,'TOT_12M'])*100
 
-  colexc = ['Nome', 'Lvl', 'TOT_12M', 'M_12M', 'TOT', 'M', 'P', 'P_12M', 'G']
+  colexc = ['Nome', 'Lvl']
   for k,v in df.iterrows():
     if c not in colexc:
       df.at[k, c] = round(df.at[k, c],2)
@@ -415,6 +416,6 @@ def geraRelatorio():
           elif c != 'Nome' and c != 'Lvl':
             df.at[k,c] = "{:0,.0f}".format(df.at[k,c])
   except:
-    pass
+    logging.exception("Erro ao converter o numero: '{}' ({})".format(df.at[k,c], type(df.at[k,c])))
 
   return df

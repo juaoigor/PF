@@ -23,7 +23,11 @@
             <td>{{ v['Nome'] }}</td>
             {% for k in rel %}
               {% if k not in ('Nome', 'Lvl') %}
-                <td  class='alnright rel_{{ v['Lvl'] }}'>{{v[k]}}</td>
+                {% if v[k] == '' %}
+                  <td  class='alnright rel_{{ v['Lvl'] }}'></td>
+                {% else %}
+                  <td  class='alnright rel_{{ v['Lvl'] }}'>{{ "{:0,.0f}".format(v[k]) }}</td>
+                {% endif %}
               {% endif %}
             {% endfor %}
           </tr>

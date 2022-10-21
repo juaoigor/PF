@@ -418,19 +418,4 @@ def geraRelatorio():
                 df.at[k,
                       'P_12M'] = (v['TOT_12M'] / df.at[2001, 'TOT_12M']) * 100
 
-    try:
-        for k, v in df.iterrows():
-            for c in df:
-                if c != 'Nome' and c != 'Lvl':
-                    if df.at[k, c] != 0 and df.at[k, c] != '':
-                        val = float(str(df.at[k, c]).replace(',', '.'))
-                        if val != "":
-                            if (c == 'P' or c == 'P_12M'):
-                                df.at[k, c] = "{:0,.0f}".format(val) + "%"
-                            else:
-                                df.at[k, c] = "{:0,.0f}".format(val)
-    except:
-        logging.exception("Erro ao converter o numero: '{}' ({})".format(
-            df.at[k, c], type(df.at[k, c])))
-
     return df

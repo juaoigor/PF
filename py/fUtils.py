@@ -21,31 +21,31 @@ def date2str(d, fmt):
 
 
 def MontaTabelaResumo(mes, ano):
+    # mes = 8
+    # ano = 2022
     from database import sqlQuery
+
+    contas = sqlQuery("SELECT * from Contas")
+    cts = {}
+    for r in contas:
+        cts[r['id']] = r['Conta']
+
+    cts[0] = 'SemClass'
+    cts[9999] = 'Ignorar'
+
     r = sqlQuery(
-        "SELECT t1.datahora, t1.texto, t1.valor, t2.conta FROM Despesas t1, Contas t2 where t1.id_conta = t2.id and cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t2.conta, t1.texto"
+        "SELECT t1.id, t1.datahora, t1.texto, t1.id_conta, t1.valor FROM Despesas t1 where cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t1.texto"
         .format(ano, mes))
     t = 0
     i = 0
     for l in r:
         t = t + l['valor']
+        r[i]['conta'] = cts[l['id_conta']]
         r[i]['total'] = "{:0,.2f}".format(t)
         r[i]['valor'] = "{:0,.2f}".format(l['valor'])
         i = i + 1
     res = {}
     res['detalhe'] = r
-
-    r = sqlQuery(
-        "SELECT t1.id, t1.datahora, t1.texto, t1.valor FROM Despesas t1 where t1.id_conta = 0 and cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t1.texto"
-        .format(ano, mes))
-    t = 0
-    i = 0
-    for l in r:
-        t = t + l['valor']
-        r[i]['total'] = "{:0,.2f}".format(t)
-        r[i]['valor'] = "{:0,.2f}".format(l['valor'])
-        i = i + 1
-    res['naoclass'] = r
 
     return res
 
@@ -282,6 +282,14 @@ def LabelTrain():
         pickle.dump(labels, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
+def isaNumber(n):
+    try:
+        tmp = float(n)
+        return True
+    except:
+        return False
+
+
 def geraRelatorio():
     from database import sqlQuery
     r = sqlQuery(
@@ -419,7 +427,7 @@ def geraRelatorio():
 
     for k, v in df.iterrows():
         for c in df:
-            if df.at[k, c] != "":
+            if df.at[k, c] != "" and isaNumber(df.at[k, c]):
                 if (c == 'P' or c == 'P_12M'):
                     df.at[k, c] = "{:0,.0f}".format(df.at[k, c]) + "%"
                 elif c != 'Nome' and c != 'Lvl':

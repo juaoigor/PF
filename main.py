@@ -200,7 +200,6 @@ def despesasNLP():
 
 @app.route('/despesas/resumo', methods=['GET', 'POST'])
 def despesasResumo():
-    print(request.method)
     if request.method == 'POST' and 'Update' in request.form:
         if request.form['Update'] == 'Update':
             from database import sqlExec
@@ -215,8 +214,8 @@ def despesasResumo():
     from datetime import datetime
     from dateutil.relativedelta import relativedelta
 
-    mes = datetime.now().month
-    ano = datetime.now().year
+    mes = (datetime.now() + relativedelta(months=-1)).month
+    ano = (datetime.now() + relativedelta(months=-1)).year
 
     if request.method == 'GET':
         if request.args.get('mes') != None:

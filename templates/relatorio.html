@@ -19,7 +19,7 @@
             </tr>
           </thead>
           {% for k,v in rel.iterrows() %}
-          <tr class="rel_{{ v['Lvl'] }}">
+          <tr class="rel_{{ v['Lvl']|round|int }}">
             <td>{{ v['Nome'] }}</td>
             {% for k in rel %}
               {% if k not in ('Nome', 'Lvl') %}

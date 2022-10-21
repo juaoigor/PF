@@ -163,7 +163,7 @@ def despesasImportar():
 
             r = sqlQuery("SELECT * FROM AutoUpdate")
             for l in r:
-                sql = 'UPDATE Contas set id_conta = {} WHERE id_conta = 0 and texto line "{}"'.format(
+                sql = 'UPDATE Despesas set id_conta = {} WHERE id_conta = 0 and texto like "{}"'.format(
                     l['id_conta'], l['texto'])
                 sqlExec(sql)
 

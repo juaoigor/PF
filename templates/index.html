@@ -20,8 +20,20 @@
 <style>
   body { font-size: 0.8rem; }
   table { font-size: 0.7rem; }
+
   .alnright { text-align: right; }
+  .alncenter { text-align: center; }
   .boxprob { font-size: 0.9rem; }
+
+  tr.rel_0 {background-color:#dcf3ff;margin:0;border:0;padding:0;font-weight: bold;font-size: 0.7rem; line-height:0.9;}
+  tr.rel_1 {background-color:#d6d6d6;margin:0;border:0;padding:0;font-weight: bold;font-size: 0.7rem; line-height:0.9}
+  tr.rel_2 {background-color:#f4f4f4;margin:0;border:0;padding:0;font-weight: bold;font-size: 0.7rem; line-height:0.9}
+  tr.rel_3 {background-color:#ffffff;margin:0;border:0;padding:0;font-size: 0.7rem;; line-height:0.9}
+  td.rel_0 {margin:0;padding:0; vertical-align:middle}
+  td.rel_1 {margin:0;padding:0; vertical-align:middle}
+  td.rel_2 {margin:0;padding:0; vertical-align:middle}
+  td.rel_3 {margin:0;padding:0; vertical-align:middle}
+
 </style>
 
 <body>
@@ -35,6 +47,9 @@
         <li class="nav-item">
           <a class="nav-link" href="/despesas/resumo">Resumo</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/relatorio">Relatorio</a>
+        </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Despesas</a>
           <div class="dropdown-menu" aria-labelledby="dropdown01">
@@ -46,8 +61,9 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Config</a>
           <div class="dropdown-menu" aria-labelledby="dropdown01">
-            <a class="dropdown-item" href="/config/geral">Geral</a>
+            <a class="dropdown-item" href="/config/autoupdate">Auto Update</a>
             <a class="dropdown-item" href="/config/contas">Contas</a>
+            <a class="dropdown-item" href="/config/geral">Geral</a>
             <a class="dropdown-item" href="/config/debug">Debug</a>
             <a class="dropdown-item" href="/config/setup">Setup</a>
           </div>

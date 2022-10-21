@@ -1,0 +1,38 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<br>
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">Relatorio</div>
+      <div class="card-body">
+        <table  class="table table-sm">
+          <thead>
+            <tr class='alncenter'>
+              <th>Nome</th>
+              {% for k in rel %}
+                {% if k not in ('Nome', 'Lvl') %}
+                  <th>{{k}}</th>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          </thead>
+          {% for k,v in rel.iterrows() %}
+          <tr class="rel_{{ v['Lvl'] }}">
+            <td>{{ v['Nome'] }}</td>
+            {% for k in rel %}
+              {% if k not in ('Nome', 'Lvl') %}
+                <td  class='alnright rel_{{ v['Lvl'] }}'>{{v[k]}}</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

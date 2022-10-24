@@ -23,8 +23,6 @@
 
             {% if v['Lvl'] == '' %}
               <tr class="rel_{{ v['Lvl'] }}">
-            {% else %}
-              <tr class="rel_{{ v['Lvl']|round|int }}">
             {% endif %}
             <td>{{ v['Nome'] }}</td>
             {% for k in rel %}
@@ -33,9 +31,9 @@
                   <td  class='alnright rel_{{ v['Lvl'] }}'></td>
                 {% else %}
                   {% if v['Lvl'] == 3 and rel[k][-1001] != '' %}
-                    <td class='alnright rel_{{ v['Lvl'] }}'><a href="/despesas/editarcontames?conta={{contas[v['Nome']]}}&mes={{rel[k][-1001]}}&ano={{rel[k][-1000]}}" style="text-decoration: none; color: inherit;">v[k]</a></td>
+                <td class='alnright rel_{{ v['Lvl'] }}'><a href="/despesas/editarcontames?conta={{contas[v['Nome']]}}&mes={{rel[k][-1001]}}&ano={{rel[k][-1000]}}" style="text-decoration: none; color: inherit;">{{v[k]}}</a></td>
                   {% else %}
-                    <td class='alnright rel_{{ v['Lvl'] }}' {% if rel[k][-1002] != '' %}style="{{rel[k][-1002]}}"{% endif %}>v[k]{% if k == 'P' or k == 'P_12M' %}%{% endif %}</td>
+                    <td class='alnright rel_{{ v['Lvl'] }}' {% if rel[k][-1002] != '' %}style="{{rel[k][-1002]}}"{% endif %}>{{v[k]}}{% if k == 'P' or k == 'P_12M' %}%{% endif %}</td>
                   {% endif %}
                 {% endif %}
               {% endif %}

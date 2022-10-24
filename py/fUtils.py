@@ -443,10 +443,11 @@ def geraRelatorio():
             df.at[-1000, c] = atmp[1]
             df.at[-1001, c] = atmp[0]
         else:
+            pass
             # df.at[-1000,c] = ""
             # df.at[-1001,c] = ""
-            if c == 'TOT_12M' or c == 'TOT' or c == 'M_12M':
-                df.at[-1002, c] = 'border-left: 1px solid #dee2e6;'
+            # if c == 'TOT_12M' or c == 'TOT' or c == 'M_12M':
+            #   df.at[-1002,c] = 'border-left: 1px solid #dee2e6;'
 
     r = sqlQuery("SELECT * from Contas")
     contas = {}

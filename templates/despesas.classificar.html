@@ -3,10 +3,27 @@
 {% block content %}
 
 <div class="row">
-  <div class="col-12">
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">Filtrar</div>
+      <div class="card-body">
+      <form  action="/despesas/classificar" method="get">
+        <div class="form-check form-check-inline">
+          <label class="form-check-label" for="idTexto">Texto</label>
+          <input type="text" class="form-control form-control-sm" id="idTexto" name="texto" value="" autocomplete="off">
+        </div>
+        <div class="form-check form-check-inline">
+          <label class="form-check-label" for="idTodos">Todos</label>
+          <input class="form-check-input" type="checkbox" name="todos" value="" id="idTodos">
+        </div>
+        <div class="form-check form-check-inline">
+          <button type="submit" class="btn btn-primary" name="Filtrar" value="Filtrar">Filtrar</button>        </div>
+        </div>
+      </form>
+      </div>
+    </div>
   </div>
 </div>
-
 <div class="row">
   <div class="col-12">
     <div class="card">
@@ -21,6 +38,7 @@
                 <th scope="col">Texto</th>
                 <th scope="col">Valor</th>
                 <th scope="col">Conta</th>
+                <th scope="col">Edit</th>
               </tr>
             </thead>
             <tbody>
@@ -31,6 +49,8 @@
                 <td>{{ r['texto']}}</td>
                 <td>{{ r['valor']}}</td>
                 <td><select class="form-control form-control-sm" name="{{ loop.index }}_Conta"><option value="0"></option>{% for d in labels %}<option value="{{ d['id'] }}">{{ d['Conta'] }}</option>{% endfor %}</select></td>
+                <td><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasClassificar" class="badge badge-danger">Edit</a></td>
+
               </tr>
               {% endfor %}
             </tbody>

@@ -35,19 +35,69 @@ def login():
         return render_template('login.html')
 
 
+@app.route('/config/autoupdate', methods=['GET', 'POST'])
+def configAutoupdate():
+    from database import sqlQuery, sqlExec, InsertValues
+    modo = 'I'
+
+    eid = 0
+    rs = ""
+    if request.method == 'GET':
+        if request.args.get('mode') == 'edit':
+            modo = 'E'
+            eid = request.args.get('id')
+            rs = sqlQuery(
+                "SELECT * FROM autoupdate WHERE id = {}".format(eid))[0]
+    elif request.method == 'POST' and 'Inserir' in request.form:
+        InsertValues('autoupdate', ['texto', 'id_conta'],
+                     [request.form['texto'], request.form['conta']])
+    elif request.method == 'POST' and 'Update' in request.form:
+        sql = "UPDATE autoupdate set texto = '{}', id_conta = {} where id = {}".format(
+            request.form['texto'], request.form['conta'], request.form['id'])
+        sqlExec(sql)
+    elif request.method == 'POST' and 'Apagar' in request.form:
+        sql = "DELETE FROM autoupdate WHERE id = {}".format(request.form['id'])
+        sqlExec(sql)
+
+    labels = sqlQuery("SELECT id, conta from Contas ORDER BY conta")
+
+    tb = sqlQuery(
+        "SELECT t1.id, t1.texto, t1.id_conta, t2.conta FROM autoupdate t1, contas t2 where t1.id_conta = t2.id order by texto"
+    )
+    return render_template('config.autoupdate.html',
+                           labels=labels,
+                           modo=modo,
+                           tb=tb,
+                           rs=rs)
+
+
 @app.route('/config/contas', methods=['GET', 'POST'])
 def configContas():
-    if request.method == 'POST' and 'Criar' in request.form:
+    from database import sqlQuery, sqlExec, InsertValues
+    modo = 'I'
+
+    eid = 0
+    rs = ""
+    if request.method == 'GET':
+        if request.args.get('mode') == 'edit':
+            modo = 'E'
+            eid = request.args.get('id')
+            rs = sqlQuery("SELECT * FROM Contas WHERE id = {}".format(eid))[0]
+    elif request.method == 'POST' and 'Criar' in request.form:
         if request.form['Criar'] == 'Criar':
-            from database import InsertValues
             InsertValues("Contas", ['conta', 'recdes', 'fixvar', 'inv'], [
                 request.form['conta'], request.form['RecDes'],
                 request.form['FixVar'], request.form['Invest']
             ])
+    elif request.method == 'POST' and 'Update' in request.form:
+        sql = "UPDATE Contas set Conta = '{}', RecDes = {}, FixVar = {}, Inv = {} where id = {}".format(
+            request.form['conta'], request.form['RecDes'],
+            request.form['FixVar'], request.form['Invest'], request.form['id'])
+        sqlExec(sql)
 
     from database import sqlQuery
     tb = sqlQuery("SELECT * FROM Contas ORDER BY Inv, RecDes, conta")
-    return render_template('config.contas.html', tb=tb)
+    return render_template('config.contas.html', modo=modo, tb=tb, rs=rs)
 
 
 @app.route('/config/debug', methods=['GET', 'POST'])
@@ -77,6 +127,7 @@ def configSetup():
 
 @app.route('/despesas/classificar', methods=['GET', 'POST'])
 def despesasClassificar():
+    sqlFilt = "SELECT * FROM Despesas WHERE id_conta = 0 ORDER BY abs(valor) desc LIMIT 50"
     if request.method == 'POST' and 'Salvar' in request.form:
         if request.form['Salvar'] == 'Salvar':
             from database import sqlExec
@@ -89,9 +140,19 @@ def despesasClassificar():
                         sqlExec(sql)
             return redirect(url_for('despesasResumo'))
 
+    elif request.method == 'GET':
+        if request.args.get('Filtrar') != None:
+            if request.args.get('Filtrar') == "Filtrar":
+                if request.args.get('texto') != "":
+                    if request.args.get('todos') != None:
+                        sqlFilt = "SELECT * FROM Despesas WHERE texto like '%{}%' ORDER BY abs(valor) desc LIMIT 50".format(
+                            request.args.get('texto'))
+                    else:
+                        sqlFilt = "SELECT * FROM Despesas WHERE id_conta = 0 and texto like '%{}%' ORDER BY abs(valor) desc LIMIT 50".format(
+                            request.args.get('texto'))
+
     from database import sqlQuery
-    tb = sqlQuery(
-        "SELECT * FROM Despesas WHERE id_conta = 0 ORDER BY abs(valor) desc")
+    tb = sqlQuery(sqlFilt)
     labels = sqlQuery(
         "SELECT id, conta from Contas ORDER BY Inv, RecDes, conta")
     return render_template('despesas.classificar.html', tb=tb, labels=labels)
@@ -136,6 +197,70 @@ def despesasClassNLPCat():
     return render_template('despesas.classnlpcat.html', tb=tb)
 
 
+@app.route('/despesas/editar', methods=['GET', 'POST'])
+def despesasEditar():
+    eid = 0
+    backto = ""
+    if request.method == 'GET':
+        eid = request.args.get('id')
+        backto = request.args.get('backto')
+
+    elif request.method == 'POST':
+        from database import sqlExec
+        if 'Apagar' in request.form:
+            sql = 'DELETE FROM Despesas WHERE ID = {}'.format(
+                request.form['id'])
+            sqlExec(sql)
+            return redirect(url_for(request.form['backTo']))
+        if 'Editar' in request.form:
+            sql = 'UPDATE Despesas set id_conta = {} WHERE ID = {}'.format(
+                request.form['id_conta'], request.form['id'])
+
+    from database import sqlQuery
+    sql = 'SELECT * from Despesas where id = "{}"'.format(eid)
+    rs = sqlQuery(sql)[0]
+
+    labels = sqlQuery("SELECT id, conta from Contas ORDER BY RecDes, conta")
+
+    return render_template('despesas.editar.html',
+                           rs=rs,
+                           backto=backto,
+                           labels=labels)
+
+
+@app.route('/despesas/editarcontames', methods=['GET', 'POST'])
+def despesasEditarContaMes():
+    mes = 0
+    ano = 0
+    conta = 0
+    if request.method == 'GET':
+        mes = int(request.args.get('mes'))
+        ano = int(request.args.get('ano'))
+        conta = int(request.args.get('conta'))
+    elif request.method == 'POST':
+        if request.form['Update'] == 'Update':
+            from database import sqlExec
+            for i in range(0, 999):
+                if 'id_{}'.format(i) in request.form:
+                    sql = 'UPDATE Despesas set id_conta = {}, texto = "{}" where id = {}'.format(
+                        request.form['conta_{}'.format(i)],
+                        request.form['texto_{}'.format(i)],
+                        request.form['id_{}'.format(i)])
+                    sqlExec(sql)
+            return redirect(url_for('relatorio'))
+
+    from database import sqlQuery
+    labels = sqlQuery("SELECT id, conta from Contas ORDER BY RecDes, conta")
+
+    r = sqlQuery(
+        "SELECT t1.id, t1.datahora, t1.texto, t1.id_conta, t1.valor FROM Despesas t1 where cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} and t1.id_conta = {} order by t1.datahora, t1.texto"
+        .format(ano, mes, conta))
+    return render_template('despesas.editarcontames.html',
+                           tb=r,
+                           labels=labels,
+                           id_conta=conta)
+
+
 @app.route('/despesas/importar', methods=['GET', 'POST'])
 def despesasImportar():
     if request.method == 'POST' and 'Processar' in request.form:
@@ -163,7 +288,7 @@ def despesasImportar():
 
             r = sqlQuery("SELECT * FROM AutoUpdate")
             for l in r:
-                sql = 'UPDATE Despesas set id_conta = {} WHERE id_conta = 0 and texto like "{}"'.format(
+                sql = 'UPDATE Despesas set id_conta = {} WHERE id_conta = 0 and texto like "{}" and texto not like "%EDITADO%"'.format(
                     l['id_conta'], l['texto'])
                 sqlExec(sql)
 
@@ -250,9 +375,12 @@ def despesasResumo():
 def relatorio():
     from fUtils import geraRelatorio
 
-    rel = geraRelatorio()
+    rel, contas, graph = geraRelatorio()
 
-    return render_template('relatorio.html', rel=rel)
+    return render_template('relatorio.html',
+                           rel=rel,
+                           contas=contas,
+                           graph=graph)
 
 
 #app.run(host='0.0.0.0', port=81)

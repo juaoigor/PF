@@ -19,18 +19,29 @@
             </tr>
           </thead>
           {% for k,v in rel.iterrows() %}
-          <tr class="rel_{{ v['Lvl']|round|int }}">
+            {% if k > 0 %}
+
+            {% if v['Lvl'] == '' %}
+              <tr class="rel_{{ v['Lvl'] }}">
+            {% else %}
+              <tr class="rel_{{ v['Lvl']|round|int }}">
+            {% endif %}
             <td>{{ v['Nome'] }}</td>
             {% for k in rel %}
               {% if k not in ('Nome', 'Lvl') %}
                 {% if v[k] == '' %}
                   <td  class='alnright rel_{{ v['Lvl'] }}'></td>
                 {% else %}
-                  <td  class='alnright rel_{{ v['Lvl'] }}'>{{ "{:0,.0f}".format(v[k]) }}</td>
+                  {% if v['Lvl'] == 3 and rel[k][-1001] != '' %}
+                    <td class='alnright rel_{{ v['Lvl'] }}'><a href="/despesas/editarcontames?conta={{contas[v['Nome']]}}&mes={{rel[k][-1001]}}&ano={{rel[k][-1000]}}" style="text-decoration: none; color: inherit;">{{ "{:0,.0f}".format(v[k]) }}</a></td>
+                  {% else %}
+                    <td class='alnright rel_{{ v['Lvl'] }}' {% if rel[k][-1002] != '' %}style="{{rel[k][-1002]}}"{% endif %}>{{ "{:0,.0f}".format(v[k]) }}{% if k == 'P' or k == 'P_12M' %}%{% endif %}</td>
+                  {% endif %}
                 {% endif %}
               {% endif %}
             {% endfor %}
           </tr>
+          {% endif %}
           {% endfor %}
         </table>
       </div>
@@ -38,5 +49,61 @@
   </div>
 </div>
 
+{% for v in graph %}
+<br>
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">{{v['nome']}}</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart1_{{loop.index}}' style='width: 100%;height:300px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart1_{{loop.index}}');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              tooltip: { trigger: 'item', axisPointer: { type: 'cross' } },
+              grid: { left: '7%', right: '1%', top: '10%', bottom: '8%' },
+              legend: {
+                show: true,
+                textStyle: { fontSize: 10 }
+              },
+              xAxis: {
+                type: 'category', data: ["{{ '", "'.join(v['x']) | safe }}"],
+                axisLabel: { fontSize: 10, rotate: 30, align: 'center', verticalAlign: 'top' },
+                splitLine: {
+                  show: true,
+                  lineStyle: { width: 1, type : 'dashed', dashOffset: 3 }
+                }
+              },
+              yAxis: [{
+                type: 'value', scale:  true,
+                splitLine: { show: false },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return value.toFixed(2); }
+                }
+              }],
+              series: [
+                { name: 'Mes', type: 'bar', symbol: 'none', smooth: true, showSymbol: false, data: [ {% for r in v['y'] %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] },
+                { name: 'Media', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [ {% for r in v['avg'] %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] },
+                { name: 'Media 12m', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [ {% for r in v['avg12'] %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+              ]
+            };
+
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endfor %}
 
 {% endblock %}

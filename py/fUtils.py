@@ -443,8 +443,8 @@ def geraRelatorio():
             df.at[-1000, c] = atmp[1]
             df.at[-1001, c] = atmp[0]
         else:
-            df.at[-1000, c] = ""
-            df.at[-1001, c] = ""
+            # df.at[-1000,c] = ""
+            # df.at[-1001,c] = ""
             if c == 'TOT_12M' or c == 'TOT' or c == 'M_12M':
                 df.at[-1002, c] = 'border-left: 1px solid #dee2e6;'
 

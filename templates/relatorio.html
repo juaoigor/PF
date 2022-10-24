@@ -26,7 +26,7 @@
             {% for x in rel %}
               {% if x not in ('Nome', 'Lvl') %}
                 {% if v['Lvl'] == "3" and rel[x][-1001] != "" %}
-                  <td class='alnright rel_{{ v['Lvl'] }}'><a href="/despesas/editarcontames?conta={{contas[v['Nome']]}}&mes={{rel[x][-1001]}}&ano={{rel[x][-1000]}}" style="text-decoration: none; color: inherit;">{{v[x]}}</a></td>
+                  <td class='alnright rel_{{ v['Lvl'] }}'><a href="/despesas/editarcontames?conta={{contas[v['Nome']]}}&mes={{rel[x][-1001]|round|int}}&ano={{rel[x][-1000]|round|int}}" style="text-decoration: none; color: inherit;">{{v[x]}}</a></td>
                 {% else %}
                   <td class="alnright rel_{{ v['Lvl'] }}">{{ v[x] }}</td>
                 {% endif %}

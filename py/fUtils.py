@@ -1,3 +1,4 @@
+import numpy as np
 from datetime import datetime
 import logging
 
@@ -437,7 +438,6 @@ def geraRelatorio():
     df.at[-1001, 'Nome'] = 'Mes'
     df.at[-1002, 'Nome'] = 'Format'
     for c in df:
-        df.at[-1002, c] = ""
         if c.count("/") > 0:
             atmp = c.split("/")
             df.at[-1000, c] = atmp[1]
@@ -500,9 +500,16 @@ def geraRelatorio():
         g['avg12'] = avg12
         graphs.append(g)
 
+    df = df.fillna('')
     for k, v in df.iterrows():
         for c in df:
-            if is_number_tryexcept(str(df.at[k, c])):
-                df.at[k, c] = "{:0,.0f}".format(float(df.at[k, c]))
+            if df.at[k, c] == "":
+                pass
+            elif df.at[k, c] == np.nan:
+                df.at[k, c] = ""
+            else:
+                if k not in [-1000, -1001, -1002]:
+                    if is_number_tryexcept(str(df.at[k, c])):
+                        df.at[k, c] = "{:0,.0f}".format(float(df.at[k, c]))
 
     return df, contas, graphs

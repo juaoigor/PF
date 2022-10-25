@@ -510,27 +510,27 @@ def geraRelatorio():
 
         i = 1
         t = 0
+        if v['Lvl'] <= 2:
+            g['nome'] = v['Nome']
+            for c in df:
+                if c not in ['Nome']:
+                    x.append(c)
+                    y.append(v[c])
 
-        g['nome'] = v['Nome']
-        for c in df:
-            if c not in ['Nome']:
-                x.append(c)
-                y.append(v[c])
+                    t = t + v[c]
+                    tot.append(t)
 
-                t = t + v[c]
-                tot.append(t)
+                    avg.append(t / i)
 
-                avg.append(t / i)
+                    avg12.append(sum(y[-12:]) / 12)
 
-                avg12.append(sum(y[-12:]) / 12)
+                    i = i + 1
 
-                i = i + 1
-
-        g['x'] = x
-        g['y'] = y
-        g['tot'] = tot
-        g['avg'] = avg
-        g['avg12'] = avg12
-        graphs.append(g)
+            g['x'] = x
+            g['y'] = y
+            g['tot'] = tot
+            g['avg'] = avg
+            g['avg12'] = avg12
+            graphs.append(g)
 
     return res, contas, graphs

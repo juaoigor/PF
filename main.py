@@ -69,7 +69,7 @@ def configAutoupdate():
     labels = sqlQuery("SELECT id, conta from Contas ORDER BY conta")
 
     tb = sqlQuery(
-        "SELECT t1.id, t1.texto, t1.id_conta, t2.conta FROM autoupdate t1, contas t2 where t1.id_conta = t2.id order by texto"
+        "SELECT t1.id, t1.texto, t1.id_conta, t2.conta FROM autoupdate t1, contas t2 where t1.id_conta = t2.id order by conta, texto"
     )
     return render_template('config.autoupdate.html',
                            labels=labels,
@@ -134,7 +134,7 @@ def configSetup():
 
 @app.route('/despesas/classificar', methods=['GET', 'POST'])
 def despesasClassificar():
-    sqlFilt = "SELECT * FROM Despesas WHERE id_conta = 0 ORDER BY abs(valor) desc LIMIT 50"
+    sqlFilt = "SELECT * FROM Despesas WHERE id_conta = 0 ORDER BY datahora, abs(valor) desc LIMIT 50"
     if request.method == 'POST' and 'Salvar' in request.form:
         if request.form['Salvar'] == 'Salvar':
             from database import sqlExec
@@ -152,10 +152,10 @@ def despesasClassificar():
             if request.args.get('Filtrar') == "Filtrar":
                 if request.args.get('texto') != "":
                     if request.args.get('todos') != None:
-                        sqlFilt = "SELECT * FROM Despesas WHERE texto like '%{}%' ORDER BY abs(valor) desc LIMIT 50".format(
+                        sqlFilt = "SELECT * FROM Despesas WHERE texto like '%{}%' ORDER BY datahora, abs(valor) desc LIMIT 50".format(
                             request.args.get('texto'))
                     else:
-                        sqlFilt = "SELECT * FROM Despesas WHERE id_conta = 0 and texto like '%{}%' ORDER BY abs(valor) desc LIMIT 50".format(
+                        sqlFilt = "SELECT * FROM Despesas WHERE id_conta = 0 and texto like '%{}%' ORDER BY datahora, abs(valor) desc LIMIT 50".format(
                             request.args.get('texto'))
 
     from database import sqlQuery

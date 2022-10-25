@@ -10,31 +10,43 @@
         <table  class="table table-sm">
           <thead>
             <tr class='alncenter'>
-              <th>Nome</th>
-              {% for k in rel %}
-                {% if k not in ('Nome', 'Lvl') %}
-                  <th>{{k}}</th>
-                {% endif %}
+              {% for l in rel['header'] %}
+                <th>{{l}}</th>
               {% endfor %}
+              <th>Med12</th>
+              <th>Med</th>
+              <th>Δ</th>
+              <th>Tot12</th>
+              <th>%</th>
+              <th>Tot</th>
+              <th>%</th>
             </tr>
           </thead>
-          {% for k,v in rel.iterrows() %}
-            {% if k >= 0 %}
-
-            <tr class="rel_{{ v['Lvl'] }}">
-            <td class="rel_{{ v['Lvl'] }}">{{ v['Nome'] }}</td>
-            {% for x in rel %}
-              {% if x not in ('Nome', 'Lvl') %}
-                {% if v['Lvl'] == "3" and rel[x][-1001] != "" %}
-                  <td class='alnright rel_{{ v['Lvl'] }}'><a href="/despesas/editarcontames?conta={{contas[v['Nome']]}}&mes={{rel[x][-1001]|round|int}}&ano={{rel[x][-1000]|round|int}}" style="text-decoration: none; color: inherit;">{{v[x]}}</a></td>
+          <tbody>
+            {% set c1 = namespace(value=0) %}
+            {% for l in rel['nome'] %}
+            <tr class="rel_{{ rel['lvl'][c1.value] }}">
+              <td class="rel_{{ rel['lvl'][c1.value] }}">{{l}}</td>
+              {% set c2 = namespace(value=0) %}
+              {% for sl in rel['tb'][c1.value] %}
+                {% if rel['lvl'][c1.value] == '3' %}
+                  <td class="alnright rel_{{ rel['lvl'][c1.value] }}"><a href="/despesas/editarcontames?conta={{ rel['contas'][c1.value] }}&mes={{ rel['mes'][c2.value] }}&ano={{ rel['ano'][c2.value] }}" style="text-decoration: none; color: inherit;">{{sl|safe}}</a></td>
                 {% else %}
-                  <td class="alnright rel_{{ v['Lvl'] }}">{{ v[x] }}</td>
+                  <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{sl|safe}}</td>
                 {% endif %}
-              {% endif %}
+              {% set c2.value = c2.value + 1 %}
+              {% endfor %}
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rel['avg12'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['avg'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['davg'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rel['tot12'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['p12'][c1.value]|safe }}%</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['tot'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['p'][c1.value]|safe }}%</td>
+            </tr>
+            {% set c1.value = c1.value + 1 %}
             {% endfor %}
-          </tr>
-          {% endif %}
-          {% endfor %}
+          </tbody>
         </table>
       </div>
     </div>

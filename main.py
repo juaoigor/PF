@@ -7,7 +7,7 @@ sys.path.insert(0, '/home/runner/PF/py')
 sys.path.insert(0, r'C:\dev\Projects\Python\Pessoal\py')
 
 from flask import Flask
-from flask import render_template, request, redirect, url_for, session, jsonify
+from flask import render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
 app.secret_key = 'financas'
@@ -48,6 +48,13 @@ def configAutoupdate():
             eid = request.args.get('id')
             rs = sqlQuery(
                 "SELECT * FROM autoupdate WHERE id = {}".format(eid))[0]
+        elif request.args.get('exec') == '1':
+            r = sqlQuery("SELECT * FROM AutoUpdate")
+            for l in r:
+                sql = 'UPDATE Despesas set id_conta = {} WHERE texto like "{}" and texto not like "%EDITADO%"'.format(
+                    l['id_conta'], l['texto'])
+                sqlExec(sql)
+
     elif request.method == 'POST' and 'Inserir' in request.form:
         InsertValues('autoupdate', ['texto', 'id_conta'],
                      [request.form['texto'], request.form['conta']])

@@ -295,17 +295,24 @@ def is_number_tryexcept(s):
 
 def geraRelatorio():
     from database import sqlQuery
+
+    r = sqlQuery("SELECT * from Contas")
+    contas = {}
+    for l in r:
+        contas[l['Conta']] = str(l['id'])
+
     r = sqlQuery(
         "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Despesas t1, Contas t2 where t1.id_conta = t2.id GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id"
     )
 
-    import numpy as np
     import pandas as pd
     df = pd.DataFrame()
 
     for l in r:
         df.at[int(l['conta']), 'Nome'] = l['NomeConta']
-        df.at[int(l['conta']), '{}/{}'.format(l['Mes'], l['Ano'])] = l['Valor']
+        df.at[int(l['conta']),
+              '{:02}/{}'.format(l['Mes'],
+                                int(l['Ano']) - 2000)] = l['Valor']
 
     df = df.sort_values('Nome')
 
@@ -364,7 +371,8 @@ def geraRelatorio():
         "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, sum(t1.valor) as Valor FROM Despesas t1 where t1.id_conta = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer) ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer)"
     )
     for l in r:
-        df.at[4000, '{}/{}'.format(l['Mes'], l['Ano'])] = l['Valor']
+        df.at[4000, '{:02}/{}'.format(l['Mes'],
+                                      int(l['Ano']) - 2000)] = l['Valor']
 
     df = df.reindex(df.index.values.tolist() + [3000])
     df = df.fillna(0)
@@ -376,6 +384,13 @@ def geraRelatorio():
     df.at[3001, 'Nome'] = 'TOTAL'
     df.at[3001, 'ToSort'] = 5
 
+    df = df.reindex(df.index.values.tolist() + [3002])
+    df = df.fillna(0)
+    df.at[3002, 'Nome'] = '[Salario Fixo] - [Despesas Total]'
+    df.at[3002, 'ToSort'] = 6
+    df.at[3002, 'Lvl'] = 1
+
+    id_fixo = df.index[df['Nome'] == 'Receitas -> Salario -> Fixo'].tolist()[0]
     for c in df:
         if c != 'Nome' and c != 'Lvl' and c != 'ToSort':
             df.at[3000, c] = df.at[2000, c] + df.at[2001, c] + df.at[4000, c]
@@ -384,91 +399,108 @@ def geraRelatorio():
                                                                c] + df.at[4000,
                                                                           c]
 
+            df.at[3002,
+                  c] = df.at[id_fixo, c] + df.at[2001, c] + df.at[4000, c]
+
     df = df.sort_values(['ToSort', 'Nome'])
     df = df.drop('ToSort', axis=1)
     lvl = df.pop('Lvl')
     df.insert(0, 'Lvl', lvl)
 
-    df['TOT_12M'] = 0
-    df['P_12M'] = ""
-    df['TOT'] = 0
-    df['P'] = ""
-    df['M_12M'] = 0
-    df['M'] = 0
-    df['G'] = 0
+    res = {}
+    res['header'] = []
+    res['lvl'] = []
+    res['contas'] = []
+    res['nome'] = []
+    res['tb'] = []
+    res['tot'] = []
+    res['tot12'] = []
+    res['avg'] = []
+    res['avg12'] = []
+    res['mes'] = []
+    res['ano'] = []
+    res['davg'] = []
+    res['p'] = []
+    res['p12'] = []
 
-    colexc = ['Nome', 'Lvl', 'TOT_12M', 'M_12M', 'TOT', 'M', 'P', 'P_12M', 'G']
-    j = len(df.columns)
-    for k, v in df.iterrows():
-        tot = 0
-        tot12m = 0
-        i = 0
-        for c in df:
-            if c not in colexc:
-                # print("{} {} {}".format(c, j-i-4, 2))
-                if (j - i - len(colexc)) <= 12:
-                    tot12m = tot12m + v[c]
-                tot = tot + v[c]
-                i = i + 1
-        df.at[k, 'TOT'] = tot
-        df.at[k, 'M'] = tot / (j - len(colexc))
-        df.at[k, 'TOT_12M'] = tot12m
-        df.at[k, 'M_12M'] = tot12m / 12
-
-    for k, v in df.iterrows():
-        df.at[k, 'G'] = df.at[k, 'M_12M'] - df.at[k, 'M']
-        if v['Nome'].count('->') > 0:
-            atmp = v['Nome'].split(' -> ')
-            if atmp[0] == 'Receitas':
-                df.at[k, 'P'] = (v['TOT'] / df.at[2000, 'TOT']) * 100
-                df.at[k,
-                      'P_12M'] = (v['TOT_12M'] / df.at[2000, 'TOT_12M']) * 100
-            elif atmp[0] == 'Despesas':
-                df.at[k, 'P'] = (v['TOT'] / df.at[2001, 'TOT']) * 100
-                df.at[k,
-                      'P_12M'] = (v['TOT_12M'] / df.at[2001, 'TOT_12M']) * 100
-
-    for k, v in df.iterrows():
-        for c in df:
-            if c != 'Nome':
-                if df.at[k, c] != '':
-                    df.at[k, c] = float(df.at[k, c])
-
-    df.at[-1000, 'Nome'] = 'Ano'
-    df.at[-1001, 'Nome'] = 'Mes'
-    df.at[-1002, 'Nome'] = 'Format'
     for c in df:
-        if c.count("/") > 0:
-            atmp = c.split("/")
-            df.at[-1000, c] = atmp[1]
-            df.at[-1001, c] = atmp[0]
-        else:
-            pass
-            # df.at[-1000,c] = ""
-            # df.at[-1001,c] = ""
-            # if c == 'TOT_12M' or c == 'TOT' or c == 'M_12M':
-            #   df.at[-1002,c] = 'border-left: 1px solid #dee2e6;'
+        if c != 'Lvl':
+            res['header'].append(c)
+        if c != 'Lvl' and c != 'Nome':
+            if c.count("/") > 0:
+                atmp = c.split("/")
+                res['ano'].append('{:.0f}'.format(int(atmp[1]) + 2000))
+                res['mes'].append('{:.0f}'.format(int(atmp[0])))
 
-    r = sqlQuery("SELECT * from Contas")
-    contas = {}
-    for l in r:
-        contas[l['Conta']] = str(l['id'])
+    tot_rec = 0
+    tot_des = 0
+    tot_rec12 = 0
+    tot_des12 = 0
+    for k, v in df.iterrows():
+        l = []
+        lv = []
+        i = 0
+        tot = 0
+        for c in df:
+            if c == 'Nome':
+                res['nome'].append(str(df.at[k, c]))
+                if str(df.at[k, c]) in contas:
+                    res['contas'].append(contas[str(df.at[k, c])])
+                else:
+                    res['contas'].append(0)
+            elif c == 'Lvl':
+                res['lvl'].append('{:.0f}'.format(int(df.at[k, c])))
+            else:
+                tot = tot + df.at[k, c]
+                l.append("{:0,.0f}".format(float(df.at[k, c])))
+                lv.append(float(df.at[k, c]))
+                i = i + 1
 
-    dfg = df.copy()
-    dfg = dfg.drop('TOT', axis=1)
-    dfg = dfg.drop('TOT_12M', axis=1)
-    dfg = dfg.drop('M', axis=1)
-    dfg = dfg.drop('M_12M', axis=1)
-    dfg = dfg.drop('P_12M', axis=1)
-    dfg = dfg.drop('G', axis=1)
-    dfg = dfg.drop('P', axis=1)
-    dfg = dfg.drop('Lvl', axis=1)
-    dfg = dfg.drop(-1000, axis=0)
-    dfg = dfg.drop(-1001, axis=0)
-    dfg = dfg.drop(-1002, axis=0)
+        res['tb'].append(l)
+
+        res['tot'].append("{:0,.0f}".format(tot))
+
+        if res['nome'][-1] == 'Receitas':
+            tot_rec = tot
+            tot_rec12 = sum(lv[-12:])
+        elif res['nome'][-1] == 'Despesas':
+            tot_des = tot
+            tot_des12 = sum(lv[-12:])
+
+        avg = tot / i
+        res['avg'].append("{:0,.0f}".format(avg))
+
+        avg12 = sum(lv[-12:]) / len(lv[-12:])
+        res['avg12'].append("{:0,.0f}".format(avg12))
+
+        tot12 = sum(lv[-12:])
+        res['tot12'].append("{:0,.0f}".format(tot12))
+
+        if lv[-1] > avg12:
+            res['tb'][-1][-1] = '<span style="color: green;">' + res['tb'][-1][
+                -1] + '</span>'
+        elif lv[-1] < avg12:
+            res['tb'][-1][-1] = '<span style="color: red;">' + res['tb'][-1][
+                -1] + '</span>'
+
+        if avg12 > avg:
+            res['avg12'][-1] = '<span style="color: green;">' + res['avg12'][
+                -1] + '</span>'
+        elif avg12 < avg:
+            res['avg12'][-1] = '<span style="color: red;">' + res['avg12'][
+                -1] + '</span>'
+
+        res['davg'].append("{:0,.0f}".format(avg12 - avg))
+
+        if v['Nome'][:3] == 'Rec':
+            res['p'].append("{:0,.0f}".format(100 * tot / tot_rec))
+            res['p12'].append("{:0,.0f}".format(100 * tot12 / tot_rec12))
+        elif v['Nome'][:3] == 'Des':
+            res['p'].append("{:0,.0f}".format(100 * tot / tot_des))
+            res['p12'].append("{:0,.0f}".format(100 * tot12 / tot_des12))
 
     graphs = []
-    for k, v in dfg.iterrows():
+    for k, v in df.iterrows():
         g = {}
         x = []
         y = []
@@ -480,7 +512,7 @@ def geraRelatorio():
         t = 0
 
         g['nome'] = v['Nome']
-        for c in dfg:
+        for c in df:
             if c not in ['Nome']:
                 x.append(c)
                 y.append(v[c])
@@ -501,16 +533,4 @@ def geraRelatorio():
         g['avg12'] = avg12
         graphs.append(g)
 
-    df = df.fillna('')
-    for k, v in df.iterrows():
-        for c in df:
-            if df.at[k, c] == "":
-                pass
-            elif df.at[k, c] == np.nan:
-                df.at[k, c] = ""
-            else:
-                if k not in [-1000, -1001, -1002]:
-                    if is_number_tryexcept(str(df.at[k, c])):
-                        df.at[k, c] = "{:0,.0f}".format(float(df.at[k, c]))
-
-    return df, contas, graphs
+    return res, contas, graphs

@@ -390,7 +390,29 @@ def geraRelatorio():
     df.at[3002, 'ToSort'] = 6
     df.at[3002, 'Lvl'] = 1
 
+    df = df.reindex(df.index.values.tolist() + [3003])
+    df = df.fillna(0)
+    df.at[3003,
+          'Nome'] = '[Salario Fixo] - [Despesas Total - Ferias - Educacao]'
+    df.at[3003, 'ToSort'] = 7
+    df.at[3003, 'Lvl'] = 1
+
+    df = df.reindex(df.index.values.tolist() + [3004])
+    df = df.fillna(0)
+    df.at[
+        3004,
+        'Nome'] = '[Salario Fixo] - [Despesas Total - Ferias - Educacao - Compras Casa]'
+    df.at[3004, 'ToSort'] = 8
+    df.at[3004, 'Lvl'] = 1
+
     id_fixo = df.index[df['Nome'] == 'Receitas -> Salario -> Fixo'].tolist()[0]
+    id_ferias = df.index[df['Nome'] ==
+                         'Despesas -> Lazer -> Ferias'].tolist()[0]
+    id_educacao = df.index[df['Nome'] ==
+                           'Despesas -> Filhos -> Educacao'].tolist()[0]
+    id_comprascasa = df.index[df['Nome'] ==
+                              'Despesas -> Bens-> Compras'].tolist()[0]
+
     for c in df:
         if c != 'Nome' and c != 'Lvl' and c != 'ToSort':
             df.at[3000, c] = df.at[2000, c] + df.at[2001, c] + df.at[4000, c]
@@ -401,6 +423,9 @@ def geraRelatorio():
 
             df.at[3002,
                   c] = df.at[id_fixo, c] + df.at[2001, c] + df.at[4000, c]
+            df.at[3003, c] = df.at[3002, c] - df.at[id_ferias,
+                                                    c] - df.at[id_educacao, c]
+            df.at[3004, c] = df.at[3003, c] - df.at[id_comprascasa, c]
 
     df = df.sort_values(['ToSort', 'Nome'])
     df = df.drop('ToSort', axis=1)
@@ -513,7 +538,7 @@ def geraRelatorio():
         if v['Lvl'] <= 2:
             g['nome'] = v['Nome']
             for c in df:
-                if c not in ['Nome']:
+                if c not in ['Nome', 'Lvl']:
                     x.append(c)
                     y.append(v[c])
 

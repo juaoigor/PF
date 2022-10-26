@@ -219,9 +219,12 @@ def despesasEditar():
                 request.form['id'])
             sqlExec(sql)
             return redirect(url_for(request.form['backTo']))
-        if 'Editar' in request.form:
-            sql = 'UPDATE Despesas set id_conta = {} WHERE ID = {}'.format(
-                request.form['id_conta'], request.form['id'])
+        elif 'Editar' in request.form:
+            sql = 'UPDATE Despesas set id_conta = {}, texto = "{}" WHERE ID = {}'.format(
+                request.form['conta'], request.form['texto'],
+                request.form['id'])
+            sqlExec(sql)
+            return redirect(url_for(request.form['backTo']))
 
     from database import sqlQuery
     sql = 'SELECT * from Despesas where id = "{}"'.format(eid)
@@ -405,4 +408,4 @@ def relatorio():
                            graph=graph)
 
 
-#app.run(host='0.0.0.0', port=81)
+app.run(host='0.0.0.0', port=81)

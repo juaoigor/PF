@@ -408,4 +408,4 @@ def relatorio():
                            graph=graph)
 
 
-app.run(host='0.0.0.0', port=81)
+#app.run(host='0.0.0.0', port=81)

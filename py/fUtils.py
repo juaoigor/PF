@@ -427,6 +427,8 @@ def geraRelatorio():
                            'Despesas -> Filhos -> Educacao'].tolist()[0]
     id_aquisicoes = df.index[df['Nome'] ==
                              'Despesas -> Bens -> Aquisicao'].tolist()[0]
+    id_aquisicoes_vei = df.index[
+        df['Nome'] == 'Despesas -> Transporte -> Aquisicao'].tolist()[0]
 
     for c in df:
         if c != 'Nome' and c != 'Lvl' and c != 'ToSort':
@@ -439,8 +441,9 @@ def geraRelatorio():
             df.at[3011, c] = df.at[id_fixo, c]
             df.at[3012, c] = -df.at[id_educacao, c]
             df.at[3013, c] = -df.at[id_ferias, c]
-            df.at[3014, c] = -df.at[id_aquisicoes, c]
-            df.at[3015, c] = df.at[2001, c]
+            df.at[3014,
+                  c] = -df.at[id_aquisicoes, c] + -df.at[id_aquisicoes_vei, c]
+            df.at[3015, c] = df.at[2001, c] + df.at[4000, c]
 
             df.at[3010, c] = df.at[3011, c] + df.at[3012, c] + df.at[
                 3013, c] + df.at[3014, c] + df.at[3015, c]

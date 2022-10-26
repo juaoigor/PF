@@ -26,7 +26,7 @@
             {% set c1 = namespace(value=0) %}
             {% for l in rel['nome'] %}
             <tr class="rel_{{ rel['lvl'][c1.value] }}">
-              <td class="rel_{{ rel['lvl'][c1.value] }}">{{l}}</td>
+              <td class="rel_{{ rel['lvl'][c1.value] }}">{{l|safe}}</td>
               {% set c2 = namespace(value=0) %}
               {% for sl in rel['tb'][c1.value] %}
                 {% if rel['lvl'][c1.value] == '3' %}

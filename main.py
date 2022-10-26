@@ -268,6 +268,15 @@ def despesasEditarContaMes():
                            id_conta=conta)
 
 
+@app.route('/despesas/ignorados', methods=['GET', 'POST'])
+def despesasIgnorados():
+    from database import sqlQuery
+    r = sqlQuery(
+        "SELECT * FROM Despesas t1 where t1.id_conta = 9999 order by t1.datahora"
+    )
+    return render_template('despesas.ignorados.html', tb=r)
+
+
 @app.route('/despesas/importar', methods=['GET', 'POST'])
 def despesasImportar():
     if request.method == 'POST' and 'Processar' in request.form:
@@ -361,10 +370,16 @@ def despesasResumo():
     bens = sqlQuery("SELECT id, nome from Bens ORDER BY Nome")
 
     ant = (datetime(int(ano), int(mes), 1) + relativedelta(months=-1))
+    anta = (datetime(int(ano), int(mes), 1) + relativedelta(months=-12))
     pos = (datetime(int(ano), int(mes), 1) + relativedelta(months=1))
+    posa = (datetime(int(ano), int(mes), 1) + relativedelta(months=12))
     links = {
         "ant": r"/despesas/resumo?mes={}&ano={}".format(ant.month, ant.year),
         "pos": r"/despesas/resumo?mes={}&ano={}".format(pos.month, pos.year),
+        "anta":
+        r"/despesas/resumo?mes={}&ano={}".format(anta.month, anta.year),
+        "posa":
+        r"/despesas/resumo?mes={}&ano={}".format(posa.month, posa.year),
         "atual": r"/despesas/resumo?mes={}&ano={}".format(mes, ano)
     }
 

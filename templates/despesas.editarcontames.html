@@ -15,6 +15,7 @@
               <th scope="col">Conta</th>
               <th scope="col">Texto</th>
               <th scope="col">Valor</th>
+              <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
@@ -33,6 +34,7 @@
                 </td>
                 <td><input type="text" class="form-control form-control-sm" name="texto_{{ loop.index }}" value="{{ r['texto']}}"></td>
                 <td class='alnright'>{{ "{:0,.2f}".format(r['valor']) }}</td>
+                <td><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasClassificar" class="badge badge-danger">Edit</a></td>
               </tr>
             {% endfor %}
           </tbody>

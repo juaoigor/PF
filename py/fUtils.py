@@ -384,31 +384,49 @@ def geraRelatorio():
     df.at[3001, 'Nome'] = 'TOTAL'
     df.at[3001, 'ToSort'] = 5
 
-    df = df.reindex(df.index.values.tolist() + [3002])
+    df = df.reindex(df.index.values.tolist() + [3010])
     df = df.fillna(0)
-    df.at[3002, 'Nome'] = '[Salario Fixo] - [Despesas Total] (A)'
-    df.at[3002, 'ToSort'] = 6
-    df.at[3002, 'Lvl'] = 1
+    df.at[3010, 'Nome'] = 'TOTAL LIMPO'
+    df.at[3010, 'ToSort'] = 7
+    df.at[3010, 'Lvl'] = 2
 
-    df = df.reindex(df.index.values.tolist() + [3003])
+    df = df.reindex(df.index.values.tolist() + [3011])
     df = df.fillna(0)
-    df.at[3003, 'Nome'] = '(A) - [Ferias] - [Educacao] (C)'
-    df.at[3003, 'ToSort'] = 7
-    df.at[3003, 'Lvl'] = 1
+    df.at[3011, 'Nome'] = '&nbsp;&nbsp;&nbsp;&nbsp;1. (+) Salario Fixo'
+    df.at[3011, 'ToSort'] = 6
+    df.at[3011, 'Lvl'] = 3
 
-    df = df.reindex(df.index.values.tolist() + [3004])
+    df = df.reindex(df.index.values.tolist() + [3012])
     df = df.fillna(0)
-    df.at[3004, 'Nome'] = '(C) - [Compras Casa] (D)'
-    df.at[3004, 'ToSort'] = 8
-    df.at[3004, 'Lvl'] = 1
+    df.at[3012, 'Nome'] = '&nbsp;&nbsp;&nbsp;&nbsp;2. (+) Filhos Educacao'
+    df.at[3012, 'ToSort'] = 6
+    df.at[3012, 'Lvl'] = 3
+
+    df = df.reindex(df.index.values.tolist() + [3013])
+    df = df.fillna(0)
+    df.at[3013, 'Nome'] = '&nbsp;&nbsp;&nbsp;&nbsp;3. (+) Ferias'
+    df.at[3013, 'ToSort'] = 6
+    df.at[3013, 'Lvl'] = 3
+
+    df = df.reindex(df.index.values.tolist() + [3014])
+    df = df.fillna(0)
+    df.at[3014, 'Nome'] = '&nbsp;&nbsp;&nbsp;&nbsp;4. (+) Aquisicoes Bens'
+    df.at[3014, 'ToSort'] = 6
+    df.at[3014, 'Lvl'] = 3
+
+    df = df.reindex(df.index.values.tolist() + [3015])
+    df = df.fillna(0)
+    df.at[3015, 'Nome'] = '&nbsp;&nbsp;&nbsp;&nbsp;5. (-) Total Despesas'
+    df.at[3015, 'ToSort'] = 6
+    df.at[3015, 'Lvl'] = 3
 
     id_fixo = df.index[df['Nome'] == 'Receitas -> Salario -> Fixo'].tolist()[0]
     id_ferias = df.index[df['Nome'] ==
                          'Despesas -> Lazer -> Ferias'].tolist()[0]
     id_educacao = df.index[df['Nome'] ==
                            'Despesas -> Filhos -> Educacao'].tolist()[0]
-    id_comprascasa = df.index[df['Nome'] ==
-                              'Despesas -> Bens-> Compras'].tolist()[0]
+    id_aquisicoes = df.index[df['Nome'] ==
+                             'Despesas -> Bens -> Aquisicao'].tolist()[0]
 
     for c in df:
         if c != 'Nome' and c != 'Lvl' and c != 'ToSort':
@@ -418,11 +436,14 @@ def geraRelatorio():
                                                                c] + df.at[4000,
                                                                           c]
 
-            df.at[3002,
-                  c] = df.at[id_fixo, c] + df.at[2001, c] + df.at[4000, c]
-            df.at[3003, c] = df.at[3002, c] - df.at[id_ferias,
-                                                    c] - df.at[id_educacao, c]
-            df.at[3004, c] = df.at[3003, c] - df.at[id_comprascasa, c]
+            df.at[3011, c] = df.at[id_fixo, c]
+            df.at[3012, c] = -df.at[id_educacao, c]
+            df.at[3013, c] = -df.at[id_ferias, c]
+            df.at[3014, c] = -df.at[id_aquisicoes, c]
+            df.at[3015, c] = df.at[2001, c]
+
+            df.at[3010, c] = df.at[3011, c] + df.at[3012, c] + df.at[
+                3013, c] + df.at[3014, c] + df.at[3015, c]
 
     df = df.sort_values(['ToSort', 'Nome'])
     df = df.drop('ToSort', axis=1)
@@ -445,14 +466,17 @@ def geraRelatorio():
     res['p'] = []
     res['p12'] = []
 
+    res['header'].append('Nome')
+    i = 0
     for c in df:
-        if c != 'Lvl':
-            res['header'].append(c)
         if c != 'Lvl' and c != 'Nome':
-            if c.count("/") > 0:
-                atmp = c.split("/")
-                res['ano'].append('{:.0f}'.format(int(atmp[1]) + 2000))
-                res['mes'].append('{:.0f}'.format(int(atmp[0])))
+            if (len(df.columns) - i - 2) <= 12:
+                res['header'].append(c)
+                if c.count("/") > 0:
+                    atmp = c.split("/")
+                    res['ano'].append('{:.0f}'.format(int(atmp[1]) + 2000))
+                    res['mes'].append('{:.0f}'.format(int(atmp[0])))
+            i = i + 1
 
     tot_rec = 0
     tot_des = 0
@@ -465,7 +489,9 @@ def geraRelatorio():
         tot = 0
         for c in df:
             if c == 'Nome':
-                res['nome'].append(str(df.at[k, c]))
+                res['nome'].append("{}{}".format(
+                    "&nbsp;&nbsp;&nbsp;" * str(df.at[k, c]).count("->"),
+                    str(df.at[k, c])))
                 if str(df.at[k, c]) in contas:
                     res['contas'].append(contas[str(df.at[k, c])])
                 else:
@@ -474,7 +500,8 @@ def geraRelatorio():
                 res['lvl'].append('{:.0f}'.format(int(df.at[k, c])))
             else:
                 tot = tot + df.at[k, c]
-                l.append("{:0,.0f}".format(float(df.at[k, c])))
+                if (len(df.columns) - i - 2) <= 12:
+                    l.append("{:0,.0f}".format(float(df.at[k, c])))
                 lv.append(float(df.at[k, c]))
                 i = i + 1
 
@@ -544,7 +571,7 @@ def geraRelatorio():
 
                     avg.append(t / i)
 
-                    avg12.append(sum(y[-12:]) / 12)
+                    avg12.append(sum(y[-12:]) / len(y[-12:]))
 
                     i = i + 1
 

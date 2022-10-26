@@ -1,0 +1,38 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">Ignorados</div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Data</th>
+              <th scope="col">Texto</th>
+              <th scope="col">Valor</th>
+              <th scope="col">Edit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in tb %}
+            <tr>
+              <td>{{ r['id']}}</td>
+              <td>{{ r['datahora']}}</td>
+              <td>{{ r['texto']}}</td>
+              <td>{{ r['valor']}}</td>
+              <td><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasIgnorados" class="badge badge-danger">Edit</a></td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -17,6 +17,7 @@
                 <tr>
                   <th>ID</th>
                   <th>Texto</th>
+                  <th>Texto</th>
                   <th>Valor</th>
                   <th>Probabilidade</th>
                   <th></th>
@@ -41,7 +42,7 @@
                     <input class="form-check-input" type="checkbox" name="check_{{ x }}">
                   </div>
                 </td>
-                <td><a href="/despesas/editar?id={{ y['id'] }}&backto=despesasClassNLPCat" class="badge badge-danger">Edit</a></td>
+                <td><a href="/despesas/editar?id={{ y['ID'] }}&backto=despesasClassNLPCat" class="badge badge-danger">Edit</a></td>
               </tr>
               {% endfor %}
             </table>

@@ -48,7 +48,7 @@
                 <td>{{ r['datahora']}}</td>
                 <td>{{ r['texto']}}</td>
                 <td>{{ r['valor']}}</td>
-                <td><select class="form-control form-control-sm" name="{{ loop.index }}_Conta"><option value="0"></option>{% for d in labels %}<option value="{{ d['id'] }}">{{ d['Conta'] }}</option>{% endfor %}</select></td>
+                <td><select class="form-control form-control-sm" name="{{ loop.index }}_Conta"><option value="0"></option>{% for d in labels %}<option value="{{ d['id'] }}" {{ 'Selected' if d['id'] == r['id_conta'] else '' }}>{{ d['Conta'] }}</option>{% endfor %}</select></td>
                 <td><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasClassificar" class="badge badge-danger">Edit</a></td>
 
               </tr>

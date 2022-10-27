@@ -297,15 +297,15 @@ def geraRelatorio():
 
   # Distribui as contas passadas
   acct_zero = "Despesas -> Zero -> Zero"
-  acct_dist = ["Despesas -> Bens-> Compras",
+  acct_dist = ["Despesas -> Compras -> Casa",
                "Despesas -> Filhos -> Presentes",
                "Despesas -> Lazer -> Ferias",
                "Despesas -> Lazer -> Mensal",
                "Despesas -> Living -> Mercado",
-               "Despesas -> Pessoais -> Alimentacao",
-               "Despesas -> Pessoais -> Compras",
+               "Despesas -> Living -> Alimentacao",
+               "Despesas -> Compras -> Pessoais",
                "Despesas -> Saude -> Mensal",
-               "Despesas -> Transporte -> Mensal" ]
+               "Despesas -> Living -> Transporte" ]
 
   acct_zero_id = df.index[df['Nome'] == acct_zero].tolist()[0]
   acct_dist_tot = {}
@@ -318,13 +318,11 @@ def geraRelatorio():
         x = x + df.at[acct_id, c]
     acct_dist_tot[a] = x
     s = s + x
-
   for a in acct_dist:
     acct_id = df.index[df['Nome'] == a].tolist()[0]
     for c in df:
       if c != 'Nome':
         df.at[acct_id, c] = df.at[acct_id, c] + df.at[acct_zero_id, c] * (acct_dist_tot[a]/s)
-
   df = df.drop(acct_zero_id)
 
   # Segue
@@ -374,6 +372,57 @@ def geraRelatorio():
     elif v['Nome'][:2] == 'In':
       df.at[k, 'ToSort'] = 4
 
+  # Evolucao do %
+  df_acum = pd.DataFrame().reindex_like(df)
+  for k,v in df.iterrows():
+    tot = 0
+    for c in df:
+      if c != 'Nome' and c != 'Lvl':
+        tot = tot + v[c]
+        df_acum.at[k, c] = tot
+      else:
+        df_acum.at[k,'Nome'] = str(v['Nome'])
+        df_acum.at[k,'Lvl'] = int(v['Lvl'])
+
+  for k,v in df_acum.iterrows():
+    if v['Nome'][:2] == 'De':
+      pass
+    else:
+      df_acum = df_acum.drop(k)
+
+  df_acum = df_acum.drop('ToSort', axis=1)
+  df_acum = df_acum.drop(df.columns[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]], axis=1)
+
+  for k,v in df_acum.iterrows():
+    df_acum.at[k, 'Nome'] = v['Nome'].replace("Despesas -> ","")
+
+  evol_lbs = []
+  evol_pct_l3 = {}
+  evol_pct_l2 = {}
+
+  evol_lbs = []
+  for c in df_acum:
+    if c != 'Nome' and c != 'Lvl':
+      evol_lbs.append(c)
+
+  for k,v in df_acum.iterrows():
+    for c in df_acum:
+      if c != 'Nome' and c != 'Lvl':
+        if v['Lvl'] == 3:
+          if v['Nome'] not in evol_pct_l3:
+            evol_pct_l3[v['Nome']] = []
+          evol_pct_l3[v['Nome']].append(df_acum.at[k, c]/df_acum.query("Lvl == 2")[c].sum())
+        elif v['Lvl'] == 2:
+          if v['Nome'] not in evol_pct_l2:
+            evol_pct_l2[v['Nome']] = []
+          evol_pct_l2[v['Nome']].append(df_acum.at[k, c]/df_acum.query("Lvl == 1")[c].sum())
+
+
+  df_acum = df_acum.drop('Lvl', axis=1)
+
+  evol_pct = [evol_lbs, evol_pct_l2, evol_pct_l3]
+
+
 
   df = df.reindex(df.index.values.tolist()+[4000])
   df = df.fillna(0)
@@ -422,29 +471,16 @@ def geraRelatorio():
 
   df = df.reindex(df.index.values.tolist()+[3014])
   df = df.fillna(0)
-  df.at[3014,'Nome'] = '&nbsp;&nbsp;&nbsp;&nbsp;4. (+) Aquisicoes Bens/Transportes'
+  df.at[3014,'Nome'] = '&nbsp;&nbsp;&nbsp;&nbsp;4. (-) Total Despesas'
   df.at[3014, 'ToSort'] = 6
   df.at[3014, 'Lvl'] = 3
-
-  df = df.reindex(df.index.values.tolist()+[3015])
-  df = df.fillna(0)
-  df.at[3015,'Nome'] = '&nbsp;&nbsp;&nbsp;&nbsp;5. (+) Manutencao Bens'
-  df.at[3015, 'ToSort'] = 6
-  df.at[3015, 'Lvl'] = 3
-
-  df = df.reindex(df.index.values.tolist()+[3016])
-  df = df.fillna(0)
-  df.at[3016,'Nome'] = '&nbsp;&nbsp;&nbsp;&nbsp;6. (-) Total Despesas'
-  df.at[3016, 'ToSort'] = 6
-  df.at[3016, 'Lvl'] = 3
 
 
   id_fixo = df.index[df['Nome'] == 'Receitas -> Salario -> Fixo'].tolist()[0]
   id_ferias = df.index[df['Nome'] == 'Despesas -> Lazer -> Ferias'].tolist()[0]
   id_educacao = df.index[df['Nome'] == 'Despesas -> Filhos -> Educacao'].tolist()[0]
-  id_aquisicoes = df.index[df['Nome'] == 'Despesas -> Bens -> Aquisicao'].tolist()[0]
-  id_aquisicoes_vei = df.index[df['Nome'] == 'Despesas -> Transporte -> Aquisicao'].tolist()[0]
-  id_manutencao = df.index[df['Nome'] == 'Despesas -> Bens -> Manutencao'].tolist()[0]
+  # id_aquisicoes = df.index[df['Nome'] == 'Despesas -> Aquisicao'].tolist()[0]
+  # id_manutencao = df.index[df['Nome'] == 'Despesas -> Manutencao'].tolist()[0]
 
   for c in df:
     if c != 'Nome' and c != 'Lvl' and c != 'ToSort':
@@ -454,11 +490,9 @@ def geraRelatorio():
       df.at[3011,c] = df.at[id_fixo,c]
       df.at[3012,c] = -df.at[id_educacao,c]
       df.at[3013,c] = -df.at[id_ferias,c]
-      df.at[3014,c] = -df.at[id_aquisicoes,c] + -df.at[id_aquisicoes_vei,c]
-      df.at[3015,c] = -df.at[id_manutencao,c]
-      df.at[3016,c] =  df.at[2001,c] + df.at[4000,c]
+      df.at[3014,c] =  df.at[2001,c] + df.at[4000,c]
 
-      df.at[3010,c] = df.at[3011,c] + df.at[3012,c] + df.at[3013,c] + df.at[3014,c] + df.at[3015,c] + df.at[3016,c]
+      df.at[3010,c] = df.at[3011,c] + df.at[3012,c] + df.at[3013,c] + df.at[3014,c]
 
   df = df.sort_values(['ToSort', 'Nome'])
   df = df.drop('ToSort', axis=1)
@@ -595,5 +629,5 @@ def geraRelatorio():
       graphs.append(g)
 
 
-  return res, contas, graphs
+  return res, contas, graphs, evol_pct
 

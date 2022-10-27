@@ -57,6 +57,81 @@
   </div>
 </div>
 
+<script type='text/javascript'>
+  function format(number, decimals = 2, decimalSeparator = '.', thousandsSeparator = ',') {
+    const roundedNumber = number.toFixed(decimals);
+    let integerPart = '',
+      fractionalPart = '';
+    if (decimals == 0) {
+      integerPart = roundedNumber;
+      decimalSeparator = '';
+    } else {
+      let numberParts = roundedNumber.split('.');
+      integerPart = numberParts[0];
+      fractionalPart = numberParts[1];
+    }
+    integerPart = integerPart.replace(/(\d)(?=(\d{3})+(?!\d))/g, `$1${thousandsSeparator}`);
+    return `${integerPart}${decimalSeparator}${fractionalPart}`;
+  }
+</script>
+
+<br>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Evoluçao %</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_evol_1' style='width: 100%;height:500px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_evol_1');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              tooltip: { trigger: 'item', axisPointer: { type: 'cross' } },
+              grid: { left: '7%', right: '1%', top: '10%', bottom: '7%' },
+              legend: {
+                show: true,
+                textStyle: { fontSize: 10 }
+              },
+              xAxis: {
+                type: 'category', data: ["{{ '", "'.join(evol_pct[0]) | safe }}"],
+                axisLabel: { fontSize: 10, rotate: 30, align: 'center', verticalAlign: 'top' },
+                splitLine: {
+                  show: false,
+                  lineStyle: { width: 1, type : 'dashed', dashOffset: 3 }
+                }
+              },
+              yAxis: [{
+                type: 'value', position: 'left', alignTicks: true,
+                splitLine: { show: true },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value, 0); }
+                }
+              }],
+              series: [
+                {% for k, v in evol_pct[1].items() %}
+                { yAxisIndex: 0, name: '{{k|safe}}', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v %}{{ r * 100 }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+                {{ ", " if not loop.last else "" }}
+                {% endfor %}
+              ]
+            };
+
+            option && myChart.setOption(option);
+          </script>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 {% for v in graph %}
 <br>
 <div class="row">
@@ -72,21 +147,6 @@
             var myChart = echarts.init(chartDom);
             var option;
 
-            function format(number, decimals = 2, decimalSeparator = '.', thousandsSeparator = ',') {
-              const roundedNumber = number.toFixed(decimals);
-              let integerPart = '',
-                fractionalPart = '';
-              if (decimals == 0) {
-                integerPart = roundedNumber;
-                decimalSeparator = '';
-              } else {
-                let numberParts = roundedNumber.split('.');
-                integerPart = numberParts[0];
-                fractionalPart = numberParts[1];
-              }
-              integerPart = integerPart.replace(/(\d)(?=(\d{3})+(?!\d))/g, `$1${thousandsSeparator}`);
-              return `${integerPart}${decimalSeparator}${fractionalPart}`;
-            }
 
 
             option = {

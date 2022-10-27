@@ -381,8 +381,8 @@ def geraRelatorio():
         tot = tot + v[c]
         df_acum.at[k, c] = tot
       else:
-        df_acum.at[k,'Nome'] = str(v['Nome'])
-        df_acum.at[k,'Lvl'] = int(v['Lvl'])
+        df_acum.at[k,'Nome'] = v['Nome']
+        df_acum.at[k,'Lvl'] = v['Lvl']
 
   for k,v in df_acum.iterrows():
     if v['Nome'][:2] == 'De':

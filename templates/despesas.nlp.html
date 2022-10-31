@@ -1,5 +1,4 @@
 {% extends 'index.html' %}
-
 {% block content %}
 <br>
 <div class="row">
@@ -11,13 +10,13 @@
     </nav>
   </div>
   <div class="col-1">
-    <a class="btn btn-primary" href="/despesas/classnlp" role="button">Bulk</a>
+    <a class="btn btn-primary btn-sm" href="/despesas/classnlp" role="button">Bulk</a>
   </div>
   <div class="col-1">
-    <a class="btn btn-primary" href="/despesas/classnlpcat" role="button">Categorias</a>
+    <a class="btn btn-primary btn-sm" href="/despesas/classnlpcat" role="button">Categorias</a>
   </div>
 </div>
-
+<br>
 <div class="row">
   <div class="col-8">
     <div class="card">
@@ -28,8 +27,7 @@
     </div>
   </div>
 </div>
-
-
+<br>
 <div class="row">
   <div class="col-8">
     <div class="card">
@@ -47,11 +45,11 @@
           <tr>
             <td>{{ r['Conta'] }}</td>
             {% if r['Prob'] >= 80 %}
-              <td class='alnright boxprob'><span class="badge badge-success">{{ r['Probs'] }}</span></td>
+            <td class='alnright boxprob'><span class="badge badge-success">{{ r['Probs'] }}</span></td>
             {% elif r['Prob'] >= 60 %}
-              <td class='alnright boxprob'><span class="badge badge-warning">{{ r['Probs'] }}</span></td>
+            <td class='alnright boxprob'><span class="badge badge-warning">{{ r['Probs'] }}</span></td>
             {% else %}
-              <td class='alnright boxprob'><span class="badge badge-danger">{{ r['Probs'] }}</span></td>
+            <td class='alnright boxprob'><span class="badge badge-danger">{{ r['Probs'] }}</span></td>
             {% endif %}
           </tr>
           {% endfor %}
@@ -60,6 +58,4 @@
     </div>
   </div>
 </div>
-
-
 {% endblock %}

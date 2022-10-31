@@ -1,3 +1,5 @@
+from flask import render_template, request, redirect, url_for, session
+from flask import Flask
 import sys
 
 sys.path.insert(0, '/home/juaoigor/pf')
@@ -5,9 +7,6 @@ sys.path.insert(0, '/home/juaoigor/pf/py')
 sys.path.insert(0, '/home/runner/PF')
 sys.path.insert(0, '/home/runner/PF/py')
 sys.path.insert(0, r'C:\dev\Projects\Python\Pessoal\py')
-
-from flask import Flask
-from flask import render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
 app.secret_key = 'financas'
@@ -377,8 +376,10 @@ def despesasResumo():
 
     ant = (datetime(int(ano), int(mes), 1) + relativedelta(months=-1))
     anta = (datetime(int(ano), int(mes), 1) + relativedelta(months=-12))
+    anta6 = (datetime(int(ano), int(mes), 1) + relativedelta(months=-6))
     pos = (datetime(int(ano), int(mes), 1) + relativedelta(months=1))
     posa = (datetime(int(ano), int(mes), 1) + relativedelta(months=12))
+    posa6 = (datetime(int(ano), int(mes), 1) + relativedelta(months=6))
     links = {
         "ant": r"/despesas/resumo?mes={}&ano={}".format(ant.month, ant.year),
         "pos": r"/despesas/resumo?mes={}&ano={}".format(pos.month, pos.year),
@@ -386,6 +387,10 @@ def despesasResumo():
         r"/despesas/resumo?mes={}&ano={}".format(anta.month, anta.year),
         "posa":
         r"/despesas/resumo?mes={}&ano={}".format(posa.month, posa.year),
+        "anta6":
+        r"/despesas/resumo?mes={}&ano={}".format(anta6.month, anta6.year),
+        "posa6":
+        r"/despesas/resumo?mes={}&ano={}".format(posa6.month, posa6.year),
         "atual": r"/despesas/resumo?mes={}&ano={}".format(mes, ano)
     }
 

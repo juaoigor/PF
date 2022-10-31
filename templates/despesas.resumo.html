@@ -1,76 +1,80 @@
 {% extends 'index.html' %}
-
 {% block content %}
 <br>
 <div class="row">
-  <div class="col-4">
+  <div class="col-3">
+  </div>
+  <div class="col-6">
     <nav aria-label="Page navigation example">
       <ul class="pagination">
         <li class="page-item"><a class="page-link" href="{{ links['anta'] }}">-1  Ano</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['anta6'] }}">-6  Meses</a></li>
         <li class="page-item"><a class="page-link" href="{{ links['ant'] }}">-1  Mes</a></li>
         <li class="page-item"><a class="page-link" href="{{ links['pos'] }}">+1 Mes</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['posa6'] }}">+6 Meses</a></li>
         <li class="page-item"><a class="page-link" href="{{ links['posa'] }}">+1 Ano</a></li>
       </ul>
     </nav>
   </div>
-</div>
-
-<div class="row">
-  <div class="col-10">
-    <div class="card">
-      <div class="card-header">Detalhe do Mes</div>
-      <div class="card-body">
-        <form  action="{{ links['atual'] }}" method="post">
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th scope="col">Data</th>
-              <th scope="col">Conta</th>
-              <th scope="col">Texto</th>
-              <th scope="col">Valor</th>
-              <th scope="col">Total</th>
-              <th scope="col"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for r in tb['detalhe'] %}
-            {% if r['conta'] == 'Ignorar' %}
-              {% elif r['conta'] == 'SemClass' %}
-                <input type="hidden" name="id_{{ loop.index }}" value="{{ r['id'] }}">
-                <tr>
-                  <td>{{ r['datahora']}}</td>
-                  <td>
-                    <select class="form-control form-control-sm" name="conta_{{ loop.index }}">
-                      <option value="0"></option>
-                      {% for d in labels %}
-                        <option value="{{ d['id'] }}">{{ d['Conta'] }}</option>
-                      {% endfor %}
-                      <option value="9999">Ignorar</option>
-                    </select>
-                  </td>
-                  <td>{{ r['texto']}}</td>
-                  <td class='alnright'>{{r['valor']}}</td>
-                  <td class='alnright'>{{r['total']}}</td>
-                </tr>
-              {% else %}
-                <tr>
-                  <td>{{ r['datahora']}}</td>
-                  <td>{{ r['conta']}}</td>
-                  <td>{{ r['texto']}}</td>
-                  <td class='alnright'>{{r['valor']}}</td>
-                  <td class='alnright'>{{r['total']}}</td>
-                  <td><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasResumo" class="badge badge-danger">Edit</a></td>
-                </tr>
-              {% endif %}
-            {% endfor %}
-          </tbody>
-        </table>
-        <button type="submit" class="btn btn-primary" name="Update" value="Update">Update</button>
-        </form>
-      </div>
-    </div>
+  <div class="col-3">
   </div>
 </div>
-
-
+<div class="row">
+  <div class="col-9">
+    <form  action="{{ links['atual'] }}" method="post">
+      <div class="card">
+        <div class="card-header">Detalhe do Mes</div>
+        <div class="card-body">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Conta</th>
+                <th>Texto</th>
+                <th>Valor</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {%- for r in tb['detalhe'] -%}
+              {%- if r['conta'] == 'Ignorar' -%}
+              {%- elif r['conta'] == 'SemClass' -%}
+              <input type="hidden" name="id_{{ loop.index }}" value="{{ r['id'] }}">
+              <tr>
+                <td>{{ r['datahora']}}</td>
+                <td>
+                  <select class="form-control form-control-sm" name="conta_{{ loop.index }}">
+                    <option value="0"></option>
+                    {% for d in labels %}
+                    <option value="{{ d['id'] }}">{{ d['Conta'] }}</option>
+                    {% endfor %}
+                    <option value="9999">Ignorar</option>
+                  </select>
+                </td>
+                <td>{{ r['texto']}}</td>
+                <td class='alnright'>{{r['valor']}}</td>
+                <td class='alnright'>{{r['total']}}</td>
+              </tr>
+              {% else %}
+              <tr class="padrao">
+                <td class="padrao">{{ r['datahora']}}</td>
+                <td class="padrao">{{ r['conta']}}</td>
+                <td class="padrao">{{ r['texto']}}</td>
+                <td class="padrao alnright">{{r['valor']}}</td>
+                <td class="padrao alnright">{{r['total']}}</td>
+                <td><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasResumo" class="badge badge-danger">Edit</a></td>
+              </tr>
+              {%- endif -%}
+              {%- endfor -%}
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary btn-sm" name="Update" value="Update">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}

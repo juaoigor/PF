@@ -1,14 +1,12 @@
 {% extends 'index.html' %}
-
 {% block content %}
-
-
+<br>
 <div class="row">
   <div class="col-12">
-    <div class="card">
-      <div class="card-header">Classificar</div>
-      <div class="card-body">
-        <form  action="/despesas/resumoconta" method="post">
+    <form  action="/despesas/resumoconta" method="post">
+      <div class="card">
+        <div class="card-header">Classificar</div>
+        <div class="card-body">
           <table class="table table-sm">
             <thead>
               <tr>
@@ -27,22 +25,23 @@
                 <td>{{ r['datahora']}}</td>
                 <td><input type="text" class="form-control form-control-sm" name="{{ loop.index }}_texto" value="{{ r['texto']}}" size="50"></td>
                 <td class="alnright">{{ "{:0,.2f}".format(r['valor']) }}</td>
-                <td><select class="form-control form-control-sm" name="{{ loop.index }}_Conta" style="max-width:100%;"><option value="0"></option>{% for d in labels %}<option value="{{ d['id'] }}" {{ 'Selected' if d['id'] == r['id_conta'] else '' }}>{{ d['Conta'] }}</option>{% endfor %}</select></td>
+                <td>
+                  <select class="form-control form-control-sm" name="{{ loop.index }}_Conta" style="max-width:100%;">
+                    <option value="0"></option>
+                    {% for d in labels %}<option value="{{ d['id'] }}" {{ 'Selected' if d['id'] == r['id_conta'] else '' }}>{{ d['Conta'] }}</option>{% endfor %}
+                  </select>
+                </td>
                 <td><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasClassificar" class="badge badge-danger">Edit</a></td>
-
               </tr>
               {% endfor %}
             </tbody>
           </table>
-          <div class="form-group row">
-            <div class="col-6">
-              <button type="submit" class="btn btn-primary" name="Salvar" value="Salvar">Salvar</button>
-            </div>
-          </div>
-        </form>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary btn-sm" name="Salvar" value="Salvar">Salvar</button>
+        </div>
       </div>
-    </div>
+    </form>
   </div>
 </div>
-
 {% endblock %}

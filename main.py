@@ -2,6 +2,9 @@ from flask import render_template, request, redirect, url_for, session
 from flask import Flask
 import sys
 
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
 sys.path.insert(0, '/home/juaoigor/pf')
 sys.path.insert(0, '/home/juaoigor/pf/py')
 sys.path.insert(0, '/home/runner/PF')
@@ -155,10 +158,10 @@ def despesasClassificar():
             if request.args.get('Filtrar') == "Filtrar":
                 if request.args.get('texto') != "":
                     if request.args.get('todos') != None:
-                        sqlFilt = "SELECT * FROM Despesas WHERE texto like '%{}%' ORDER BY datahora, abs(valor) desc LIMIT 50".format(
+                        sqlFilt = "SELECT * FROM Despesas WHERE texto like '%{}%' ORDER BY datahora, abs(valor) desc LIMIT 1000".format(
                             request.args.get('texto'))
                     else:
-                        sqlFilt = "SELECT * FROM Despesas WHERE id_conta = 0 and texto like '%{}%' ORDER BY datahora, abs(valor) desc LIMIT 50".format(
+                        sqlFilt = "SELECT * FROM Despesas WHERE id_conta = 0 and texto like '%{}%' ORDER BY datahora, abs(valor) desc LIMIT 1000".format(
                             request.args.get('texto'))
 
     from database import sqlQuery
@@ -233,7 +236,7 @@ def despesasEditar():
     sql = 'SELECT * from Despesas where id = "{}"'.format(eid)
     rs = sqlQuery(sql)[0]
 
-    labels = sqlQuery("SELECT id, conta from Contas ORDER BY RecDes, conta")
+    labels = sqlQuery("SELECT id, conta from Contas ORDER BY conta")
 
     return render_template('despesas.editar.html',
                            rs=rs,
@@ -263,7 +266,7 @@ def despesasEditarContaMes():
             return redirect(url_for('relatorio'))
 
     from database import sqlQuery
-    labels = sqlQuery("SELECT id, conta from Contas ORDER BY RecDes, conta")
+    labels = sqlQuery("SELECT id, conta from Contas ORDER BY conta")
 
     r = sqlQuery(
         "SELECT t1.id, t1.datahora, t1.texto, t1.id_conta, t1.valor FROM Despesas t1 where cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} and t1.id_conta = {} order by t1.datahora, t1.texto"
@@ -331,7 +334,6 @@ def despesasNLP():
         nid = sqlQuery(
             "SELECT id from Despesas WHERE id_conta = 0 order by id")[0]['id']
 
-    print(nid)
     linfo = sqlQuery("SELECT * from Despesas WHERE id = {}".format(nid))[0]
     lprox = sqlQuery(
         "SELECT id from Despesas WHERE id_conta = 0 and id > {} order by id".
@@ -346,8 +348,19 @@ def despesasNLP():
 
 @app.route('/despesas/resumo', methods=['GET', 'POST'])
 def despesasResumo():
+    mes = (datetime.now() + relativedelta(months=-1)).month
+    ano = (datetime.now() + relativedelta(months=-1)).year
+
+    if request.method == 'GET':
+        if request.args.get('mes') is not None:
+            mes = int(request.args.get('mes'))
+        if request.args.get('ano') is not None:
+            ano = int(request.args.get('ano'))
+
     if request.method == 'POST' and 'Update' in request.form:
         if request.form['Update'] == 'Update':
+            mes = int(request.form['mes'])
+            ano = int(request.form['ano'])
             from database import sqlExec
             for i in range(0, 999):
                 if 'id_{}'.format(i) in request.form:
@@ -356,21 +369,10 @@ def despesasResumo():
                             request.form['conta_{}'.format(i)],
                             request.form['id_{}'.format(i)])
                         sqlExec(sql)
-
-    from datetime import datetime
-    from dateutil.relativedelta import relativedelta
-
-    mes = (datetime.now() + relativedelta(months=-1)).month
-    ano = (datetime.now() + relativedelta(months=-1)).year
-
-    if request.method == 'GET':
-        if request.args.get('mes') != None:
-            mes = int(request.args.get('mes'))
-        if request.args.get('ano') != None:
-            ano = int(request.args.get('ano'))
+            return redirect(url_for('despesasResumo', mes=mes, ano=ano))
 
     from database import sqlQuery
-    labels = sqlQuery("SELECT id, conta from Contas ORDER BY RecDes, conta")
+    labels = sqlQuery("SELECT id, conta from Contas ORDER BY conta")
     pessoas = sqlQuery("SELECT id, nome from Pessoas ORDER BY Nome")
     bens = sqlQuery("SELECT id, nome from Bens ORDER BY Nome")
 
@@ -391,7 +393,7 @@ def despesasResumo():
         r"/despesas/resumo?mes={}&ano={}".format(anta6.month, anta6.year),
         "posa6":
         r"/despesas/resumo?mes={}&ano={}".format(posa6.month, posa6.year),
-        "atual": r"/despesas/resumo?mes={}&ano={}".format(mes, ano)
+        "atual": r"/despesas/resumo"
     }
 
     from fUtils import MontaTabelaResumo
@@ -401,7 +403,9 @@ def despesasResumo():
                            pessoas=pessoas,
                            bens=bens,
                            links=links,
-                           tb=MontaTabelaResumo(mes, ano))
+                           tb=MontaTabelaResumo(mes, ano),
+                           ano=ano,
+                           mes=mes)
 
 
 @app.route('/despesas/resumoconta', methods=['GET', 'POST'])
@@ -425,7 +429,7 @@ def despesasResumoconta():
         if request.args.get('conta') != None:
             conta = int(request.args.get('conta'))
 
-    labels = sqlQuery("SELECT id, conta from Contas ORDER BY RecDes, conta")
+    labels = sqlQuery("SELECT id, conta from Contas ORDER BY conta")
 
     tb = sqlQuery(
         "SELECT * from Despesas WHERE id_conta = {} order by datahora".format(

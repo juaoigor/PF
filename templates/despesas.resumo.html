@@ -20,8 +20,10 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-9">
+  <div class="col-10">
     <form  action="{{ links['atual'] }}" method="post">
+      <input type="hidden" name="mes" value="{{ mes }}">
+      <input type="hidden" name="ano" value="{{ ano }}">
       <div class="card">
         <div class="card-header">Detalhe do Mes</div>
         <div class="card-body">

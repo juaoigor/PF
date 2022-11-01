@@ -10,7 +10,7 @@
         <table  class="table table-sm">
           <thead>
             <tr class='alncenter'>
-              {% for l in rel['header'] %}
+              {%- for l in rel['header'] -%}
                 <th>{{l}}</th>
               {% endfor %}
               <th>Med12</th>
@@ -26,18 +26,18 @@
             {% set c1 = namespace(value=0) %}
             {% for l in rel['nome'] %}
             <tr class="rel_{{ rel['lvl'][c1.value] }}">
-              {% if rel['lvl'][c1.value] == '3' %}
+              {%- if rel['lvl'][c1.value] == '3' -%}
                 <td class="rel_{{ rel['lvl'][c1.value] }}"><a href="/despesas/resumoconta?conta={{ rel['contas'][c1.value] }}" style="text-decoration: none; color: inherit;">{{l|safe}}</a></td>
-              {% else %}
+              {%- else -%}
                 <td class="rel_{{ rel['lvl'][c1.value] }}">{{l|safe}}</td>
               {% endif %}
               {% set c2 = namespace(value=0) %}
-              {% for sl in rel['tb'][c1.value] %}
-                {% if rel['lvl'][c1.value] == '3' %}
+              {%- for sl in rel['tb'][c1.value] -%}
+                {%- if rel['lvl'][c1.value] == '3' -%}
                   <td class="alnright rel_{{ rel['lvl'][c1.value] }}"><a href="/despesas/editarcontames?conta={{ rel['contas'][c1.value] }}&mes={{ rel['mes'][c2.value] }}&ano={{ rel['ano'][c2.value] }}" style="text-decoration: none; color: inherit;">{{sl|safe}}</a></td>
-                {% else %}
+                {%- else -%}
                   <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{sl|safe}}</td>
-                {% endif %}
+                {%- endif -%}
               {% set c2.value = c2.value + 1 %}
               {% endfor %}
               <td class="alnright rel_{{ rel['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rel['avg12'][c1.value]|safe }}</td>
@@ -49,7 +49,7 @@
               <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['p'][c1.value]|safe }}%</td>
             </tr>
             {% set c1.value = c1.value + 1 %}
-            {% endfor %}
+            {%- endfor -%}
           </tbody>
         </table>
       </div>
@@ -115,7 +115,7 @@
               series: [
                 {% for k, v in evol_pct[1].items() %}
                 { yAxisIndex: 0, name: '{{k|safe}}', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v %}{{ r * 100 }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
-                {{ ", " if not loop.last else "" }}
+                {{- ", " if not loop.last else "" -}}
                 {% endfor %}
               ]
             };
@@ -123,8 +123,61 @@
             option && myChart.setOption(option);
           </script>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Composicao %</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_pie_1' style='width: 100%;height:500px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_pie_1');
+            var myChart = echarts.init(chartDom);
+            var option;
 
-
+            option = {
+              title: {
+                show: false,
+                text: 'Referer of a Website',
+                subtext: 'Fake Data',
+                left: 'center'
+              },
+              textStyle: { fontSize: 10 },
+              tooltip: {
+                trigger: 'item'
+              },
+              legend: {
+                show: false,
+                orient: 'vertical',
+                left: 'left'
+              },
+              series: [
+                {
+                  type: 'pie',
+                  radius: '60%',
+                  data: [
+                    {%- for k, v in pie.items() -%}
+                        { value: {{ v }}, name: '{{ k|safe }}' }
+                    {{- ", " if not loop.last else "" -}}
+                    {% endfor %}
+                  ],
+                  emphasis: {
+                    itemStyle: {
+                      shadowBlur: 10,
+                      shadowOffsetX: 0,
+                      shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                  }
+                }
+              ]
+            };
+            option && myChart.setOption(option);
+          </script>
+          </div>
         </div>
       </div>
     </div>

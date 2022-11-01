@@ -601,6 +601,10 @@ def geraRelatorio():
             res["p"].append("{:0,.0f}".format(100 * tot / tot_des))
             res["p12"].append("{:0,.0f}".format(100 * tot12 / tot_des12))
 
+    pie = {}
+    pie_r = {}
+
+    tt = 0
     graphs = []
     for k, v in df.iterrows():
         g = {}
@@ -637,4 +641,17 @@ def geraRelatorio():
             g["gper"] = gper
             graphs.append(g)
 
-    return res, contas, graphs, evol_pct
+        else:
+            for c in df:
+                if c not in ["Nome", "Lvl"]:
+                    t = t + v[c]
+
+            if v['Nome'].split(' -> ')[0] == 'Despesas':
+                pie[v['Nome'].replace('Despesas -> ', '')] = -t
+                tt = tt - t
+
+    pie = sorted(pie.items(), key=lambda kv: kv[1], reverse=True)
+    for l in pie:
+        pie_r[l[0]] = round((l[1] / tt) * 100, 1)
+
+    return res, contas, graphs, evol_pct, pie_r

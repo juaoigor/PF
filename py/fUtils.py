@@ -797,4 +797,4 @@ def geraRelatorio():
     for l in pie12:
         pie12_r[l[0]] = round((l[1] / tt12) * 100, 1)
     # Return
-    return res, contas, graphs, evol_pct, pie_r, pie12_r999
+    return res, contas, graphs, evol_pct, pie_r, pie12_r

@@ -2,7 +2,7 @@
 {% block content %}
 <br><br>
 <div class="row">
-  <div class="col-8">
+  <div class="col-6">
     <div class="card">
       <div class="card-header">Contas</div>
       <div class="card-body">
@@ -14,6 +14,7 @@
               <th scope="col">RecDes</th>
               <th scope="col">FixVar</th>
               <th scope="col">Inv</th>
+              <th scope="col">Saldo</th>
               <th scope="col"></th>
             </tr>
           </thead>
@@ -25,6 +26,7 @@
               <td>{{ d['RecDes'] }}</td>
               <td>{{ d['FixVar'] }}</td>
               <td>{{ d['Inv'] }}</td>
+              <td>{{ d['Saldo'] }}</td>
               <td><a href="/config/contas?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
             </tr>
             {% endfor %}
@@ -83,6 +85,21 @@
                 </div>
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="Invest" id="gridRadios6" value="1">
+                  <label class="form-check-label" for="gridRadios4">Sim</label>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="form-group">
+            <div class="row">
+              <legend class="col-form-label col-4 pt-0">Saldo</legend>
+              <div class="col-8">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="Saldo" id="gridRadios5" value="0" checked>
+                  <label class="form-check-label" for="gridRadios3">Nao</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="Saldo" id="gridRadios6" value="1">
                   <label class="form-check-label" for="gridRadios4">Sim</label>
                 </div>
               </div>
@@ -151,6 +168,21 @@
                 </div>
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="Invest" id="gridRadios6" value="1" {{ 'checked' if 1 == rs['Inv'] else '' }}>
+                  <label class="form-check-label" for="gridRadios4">Sim</label>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="form-group">
+            <div class="row">
+              <legend class="col-form-label col-4 pt-0">Saldo</legend>
+              <div class="col-8">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="Saldo" id="gridRadios5" value="0" {{ 'checked' if 0 == rs['Saldo'] else '' }}>
+                  <label class="form-check-label" for="gridRadios3">Nao</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="Saldo" id="gridRadios6" value="1" {{ 'checked' if 1 == rs['Saldo'] else '' }}>
                   <label class="form-check-label" for="gridRadios4">Sim</label>
                 </div>
               </div>

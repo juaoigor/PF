@@ -4,7 +4,8 @@ CREATE TABLE Contas (
   Conta TEXT NOT NULL,     /* Nome da Conta */
   RecDes INTEGER DEFAULT 0, /* 0: RECEITA - 1: DESPESA */
   FixVar INTEGER DEFAULT 0, /* 0: Fixa - 1: Variavel */
-  Inv INTEGER DEFAULT 0 /* 0: Nao - 1: Sim */
+  Inv INTEGER DEFAULT 0, /* 0: Nao - 1: Sim */
+  Saldo INTEGER DEFAULT 0 /* 0: Nao - 1: Sim */
 );
 
 INSERT INTO Contas (Conta,RecDes,FixVar, Inv) VALUES ('Receitas -> Salario -> Fixo', 0, 0, 0);
@@ -41,6 +42,14 @@ CREATE TABLE Despesas (
   id_pessoa INTEGER,
   datahora TEXT,
   texto TEXT,
+  valor DOUBLE
+);
+
+DROP TABLE IF EXISTS Saldos;
+CREATE TABLE Saldos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_conta INTEGER,
+  datahora TEXT,
   valor DOUBLE
 );
 

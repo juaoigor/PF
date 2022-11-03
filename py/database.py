@@ -55,7 +55,7 @@ def DedaConhecidos():
     import sqlite3
     dbs = 'db/database.db'
     db = sqlite3.connect(dbs)
-    ## ALIMENTACAO PESSOAL
+    # ALIMENTACAO PESSOAL
     db.execute(
         'UPDATE Despesas set id_conta = 5 where texto like "%IFOOD%DDU%"')
     db.execute(
@@ -69,7 +69,7 @@ def DedaConhecidos():
         'UPDATE Despesas set id_conta = 9 where texto like "%RASCAL%DDF%"')
     db.execute(
         'UPDATE Despesas set id_conta = 9 where texto like "%SL CAFES DO%"')
-    ## LIVING LAZER
+    # LIVING LAZER
     db.execute(
         'UPDATE Despesas set id_conta = 9 where texto like "%IFOOD%DDF%"')
     db.execute(
@@ -170,7 +170,7 @@ def DedaConhecidos():
         'UPDATE Despesas set id_conta = 12 where texto like "%BRASTEMP%"')
     db.execute(
         'UPDATE Despesas set id_conta = 12 where texto like "%MMARTAN%"')
-    #TRANSPORTE MENSAK
+    # TRANSPORTE MENSAK
     db.execute('UPDATE Despesas set id_conta = 4 where texto like "%UBER%"')
     db.execute(
         'UPDATE Despesas set id_conta = 4 where texto like "%ESTACIONAMENTO%"')
@@ -199,7 +199,7 @@ def DedaConhecidos():
     )
     db.execute(
         'UPDATE Despesas set id_conta = 10 where texto like "%BOOKING%"')
-    #DEBUTO
+    # DEBUTO
     db.execute(
         'UPDATE Despesas set id_conta = 9999 where texto like "%DEBITO%FATURA%CARTAO%"'
     )
@@ -358,6 +358,28 @@ def DedaConhecidos():
 
     import sqlite3
     sql = 'update Despesas SET datahora = "2022-10-30" WHERE id >= 3237'
+    dbs = 'db/database.db'
+    db = sqlite3.connect(dbs)
+    db.execute(sql)
+    db.commit()
+    db.close()
+
+    import sqlite3
+    sql = 'ALTER Table Contas ADD Saldo INTEGER DEFAULT 0'
+    dbs = 'db/database.db'
+    db = sqlite3.connect(dbs)
+    db.execute(sql)
+    db.commit()
+    db.close()
+
+    import sqlite3
+    sql = """
+    CREATE TABLE Saldos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id_conta INTEGER,
+      datahora TEXT,
+      valor DOUBLE
+    );"""
     dbs = 'db/database.db'
     db = sqlite3.connect(dbs)
     db.execute(sql)

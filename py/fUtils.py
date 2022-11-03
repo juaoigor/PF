@@ -1,7 +1,10 @@
-import numpy as np
-from datetime import datetime
 import logging
 import math
+import numpy as np
+import pandas as pd
+
+from database import sqlQuery
+from datetime import datetime
 
 
 def despProcessarTexto(s):
@@ -282,18 +285,146 @@ def is_number_tryexcept(s):
         return False
 
 
-def geraRelatorio():
-    from database import sqlQuery
+def geraRelatorioInvest():
+    r = sqlQuery(
+        "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Despesas t1, Contas t2 where t2.Inv = 1 AND t1.id_conta = t2.id and t2.saldo = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id"
+    )
 
+    df = pd.DataFrame()
+
+    for l in r:
+        df.at[int(l["conta"]), "Nome"] = l["NomeConta"]
+        df.at[int(l["conta"]),
+              "{:02}/{}".format(l["Mes"],
+                                int(l["Ano"]) - 2000)] = l["Valor"]
+    r = sqlQuery(
+        "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Saldos t1, Contas t2 where t2.Inv = 1 AND t1.id_conta = t2.id and t2.saldo = 1 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id"
+    )
+
+    for l in r:
+        df.at[int(l["conta"]), "Nome"] = l["NomeConta"]
+        df.at[int(l["conta"]),
+              "{:02}/{}".format(l["Mes"],
+                                int(l["Ano"]) - 2000)] = l["Valor"]
+    df = df.sort_values("Nome")
+    df = df.fillna(0)
+
+    # Faz a Diff dos Saldos
+    cols = df.columns.tolist()
+    for k, v in df.iterrows():
+        if v["Nome"].split(" -> ")[0] == "Carteira":
+            l = v.copy()
+            i = 0
+            for s in l:
+                if i > 1:
+                    df.at[k, cols[i]] = l.iloc[i] - l.iloc[i - 1]
+                i = i + 1
+    # Adiciona os Totais
+    z = 999
+    for k, v in df.iterrows():
+        nome = v["Nome"]
+        anome = nome.split(" -> ")
+        incluir = "{} -> {}".format(anome[0], anome[1])
+        if incluir not in df["Nome"].unique():
+            z = z + 1
+            df = df.reindex(df.index.values.tolist() + [z])
+            df = df.fillna(0)
+            df.at[z, "Nome"] = incluir
+            for c in df:
+                if c != "Nome":
+                    for x, y in df.iterrows():
+                        atmp = y["Nome"].split(" -> ")
+                        tmp = "{} -> {}".format(atmp[0], atmp[1])
+                        if tmp == incluir:
+                            df.at[z, c] = df.at[z, c] + y[c]
+    z = 1999
+    for i in ["Carteira", "Investimentos"]:
+        z = z + 1
+        df = df.reindex(df.index.values.tolist() + [z])
+        df = df.fillna(0)
+        df.at[z, "Nome"] = i
+        for c in df:
+            if c != "Nome":
+                for x, y in df.iterrows():
+                    atmp = y["Nome"].split(" -> ")
+                    if len(atmp) == 2:
+                        if atmp[0] == i:
+                            df.at[z, c] = df.at[z, c] + y[c]
+    df = df.sort_values("Nome")
+    df["Lvl"] = 0
+    for k, v in df.iterrows():
+        df.at[k, "Lvl"] = int("{}".format(v["Nome"].count("->") + 1))
+    df = df.reindex(df.index.values.tolist() + [3000])
+    df = df.fillna(0)
+    df.at[3000, "Nome"] = "TOTAL"
+
+    for c in df:
+        if c != "Nome" and c != "Lvl":
+            df.at[3000, c] = df.at[2000, c] + df.at[2001, c]
+    res = {}
+    res["header"] = []
+    res["lvl"] = []
+    res["nome"] = []
+    res["tb"] = []
+    res["tot"] = []
+    res["avg"] = []
+    res["tot12"] = []
+    res["avg12"] = []
+    res["mes"] = []
+    res["ano"] = []
+
+    res["header"].append("Nome")
+    i = 0
+    for c in df:
+        if c != "Lvl" and c != "Nome":
+            if (len(df.columns) - i - 2) <= 12:
+                res["header"].append(c)
+                if c.count("/") > 0:
+                    atmp = c.split("/")
+                    res["ano"].append("{:.0f}".format(int(atmp[1]) + 2000))
+                    res["mes"].append("{:.0f}".format(int(atmp[0])))
+            i = i + 1
+    for k, v in df.iterrows():
+        l = []
+        lv = []
+        i = 0
+        tot = 0
+        for c in df:
+            if c == "Nome":
+                res["nome"].append("{}{}".format(
+                    "&nbsp;&nbsp;&nbsp;" * str(df.at[k, c]).count("->"),
+                    str(df.at[k, c]),
+                ))
+            elif c == "Lvl":
+                res["lvl"].append("{:.0f}".format(int(df.at[k, c])))
+            else:
+                tot = tot + float(df.at[k, c])
+                if (len(df.columns) - i - 2) <= 12:
+                    l.append("{:0,.0f}".format(float(df.at[k, c])))
+                lv.append(float(df.at[k, c]))
+                i = i + 1
+        res["tb"].append(l)
+        res["tot"].append("{:0,.0f}".format(tot))
+
+        avg = tot / i
+        res["avg"].append("{:0,.0f}".format(avg))
+
+        avg12 = sum(lv[-12:]) / len(lv[-12:])
+        res["avg12"].append("{:0,.0f}".format(avg12))
+
+        tot12 = sum(lv[-12:])
+        res["tot12"].append("{:0,.0f}".format(tot12))
+    return res
+
+
+def geraRelatorio():
     r = sqlQuery("SELECT * from Contas")
     contas = {}
     for l in r:
         contas[l["Conta"]] = str(l["id"])
     r = sqlQuery(
-        "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Despesas t1, Contas t2 where t1.id_conta = t2.id GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id"
+        "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Despesas t1, Contas t2 where t1.id_conta = t2.id and t2.saldo = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id"
     )
-
-    import pandas as pd
 
     df = pd.DataFrame()
 
@@ -400,7 +531,8 @@ def geraRelatorio():
         else:
             df_acum = df_acum.drop(k)
     df_acum = df_acum.drop("ToSort", axis=1)
-    # df_acum = df_acum.drop(df.columns[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]], axis=1)
+    df_acum = df_acum.drop(df.columns[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]],
+                           axis=1)
 
     for k, v in df_acum.iterrows():
         df_acum.at[k, "Nome"] = v["Nome"].replace("Despesas -> ", "")
@@ -600,11 +732,14 @@ def geraRelatorio():
         elif v["Nome"][:3] == "Des":
             res["p"].append("{:0,.0f}".format(100 * tot / tot_des))
             res["p12"].append("{:0,.0f}".format(100 * tot12 / tot_des12))
-
     pie = {}
     pie_r = {}
 
+    pie12 = {}
+    pie12_r = {}
+
     tt = 0
+    tt12 = 0
     graphs = []
     for k, v in df.iterrows():
         g = {}
@@ -617,6 +752,7 @@ def geraRelatorio():
 
         i = 1
         t = 0
+        t12 = 0
         if v["Lvl"] <= 2:
             g["nome"] = v["Nome"]
             for c in df:
@@ -632,7 +768,6 @@ def geraRelatorio():
                     avg12.append(sum(y[-12:]) / len(y[-12:]))
 
                     i = i + 1
-
             g["x"] = x
             g["y"] = y
             g["tot"] = tot
@@ -640,18 +775,26 @@ def geraRelatorio():
             g["avg12"] = avg12
             g["gper"] = gper
             graphs.append(g)
-
         else:
+            j = 0
             for c in df:
                 if c not in ["Nome", "Lvl"]:
                     t = t + v[c]
-
-            if v['Nome'].split(' -> ')[0] == 'Despesas':
-                pie[v['Nome'].replace('Despesas -> ', '')] = -t
+                    if (len(df.columns) - j) <= 12:
+                        t12 = t12 + v[c]
+                j = j + 1
+            if v["Nome"].split(" -> ")[0] == "Despesas":
+                pie[v["Nome"].replace("Despesas -> ", "")] = -t
+                pie12[v["Nome"].replace("Despesas -> ", "")] = -t12
                 tt = tt - t
-
+                tt12 = tt12 - t12
+    # PIE
     pie = sorted(pie.items(), key=lambda kv: kv[1], reverse=True)
     for l in pie:
         pie_r[l[0]] = round((l[1] / tt) * 100, 1)
-
-    return res, contas, graphs, evol_pct, pie_r
+    # PIE 12M
+    pie12 = sorted(pie12.items(), key=lambda kv: kv[1], reverse=True)
+    for l in pie12:
+        pie12_r[l[0]] = round((l[1] / tt12) * 100, 1)
+    # Return
+    return res, contas, graphs, evol_pct, pie_r, pie12_r999

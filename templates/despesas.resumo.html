@@ -2,7 +2,7 @@
 {% block content %}
 <br>
 <div class="row">
-  <div class="col-3">
+  <div class="col-xl-3">
   </div>
   <div class="col-6">
     <nav aria-label="Page navigation example">
@@ -21,7 +21,7 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-10">
+  <div class="col-xl-12">
     <form  action="{{ links['atual'] }}" method="post">
       <input type="hidden" name="mes" value="{{ mes }}">
       <input type="hidden" name="ano" value="{{ ano }}">
@@ -35,8 +35,9 @@
                 <th>Conta</th>
                 <th>Texto</th>
                 <th>Valor</th>
-                <th>Total</th>
-                <th></th>
+                <th class="d-none d-xl-block">Total</th>
+                <th>Edit</th>
+                <th>Check Conta</th>
               </tr>
             </thead>
             <tbody>
@@ -57,7 +58,7 @@
                 </td>
                 <td>{{ r['texto']}}</td>
                 <td class='alnright'>{{r['valor']}}</td>
-                <td class='alnright'>{{r['total']}}</td>
+                <td class="d-none d-xl-block alnright">{{r['total']}}</td>
               </tr>
               {% else %}
               <tr class="padrao">
@@ -65,8 +66,13 @@
                 <td class="padrao">{{ r['conta']}}</td>
                 <td class="padrao">{{ r['texto']}}</td>
                 <td class="padrao alnright">{{r['valor']}}</td>
-                <td class="padrao alnright">{{r['total']}}</td>
-                <td><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasResumo" class="badge badge-danger">Edit</a></td>
+                <td class="d-none d-xl-block padrao alnright">{{r['total']}}</td>
+                <td class="padrao alncenter"><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasResumo" class="badge badge-danger">Edit</a></td>
+                {%- if r['high_prob'] == 'ok' -%}
+                <td class="padrao alncenter">Ok</td>
+                {% else %}
+                  <td class="padrao alncenter">{{ r['high_prob']}}</td>
+                {%- endif -%}
               </tr>
               {%- endif -%}
               {%- endfor -%}

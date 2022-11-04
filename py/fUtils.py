@@ -3,6 +3,8 @@ import math
 import numpy as np
 import pandas as pd
 
+import string
+
 from database import sqlQuery
 from datetime import datetime
 
@@ -26,6 +28,12 @@ def date2str(d, fmt):
     return d.strftime(fmt)
 
 
+def transfTexto(texto):
+    texto = texto.lower().translate(str.maketrans("", "", string.punctuation))
+    # texto = "".join([i for i in texto if not i.isdigit()])
+    return texto
+
+
 def MontaTabelaResumo(mes, ano):
     # mes = 8
     # ano = 2022
@@ -38,6 +46,16 @@ def MontaTabelaResumo(mes, ano):
     cts[0] = "SemClass"
     cts[9999] = "Ignorar"
 
+    import pickle
+
+    with open("count_vect.pickle", "rb") as handle:
+        count_vect = pickle.load(handle)
+    with open("tf_transformer.pickle", "rb") as handle:
+        tf_transformer = pickle.load(handle)
+    with open("calibrated_svc.pickle", "rb") as handle:
+        calibrated_svc = pickle.load(handle)
+    with open("labels.pickle", "rb") as handle:
+        labels = pickle.load(handle)
     r = sqlQuery(
         "SELECT t1.id, t1.datahora, t1.texto, t1.id_conta, t1.valor FROM Despesas t1 where cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t1.texto"
         .format(ano, mes))
@@ -48,6 +66,20 @@ def MontaTabelaResumo(mes, ano):
         r[i]["conta"] = cts[l["id_conta"]]
         r[i]["total"] = "{:0,.2f}".format(t)
         r[i]["valor"] = "{:0,.2f}".format(l["valor"])
+
+        to_predict = [transfTexto(l["texto"])]
+        p_count = count_vect.transform(to_predict)
+        p_tfidf = tf_transformer.transform(p_count)
+        pbt = pd.DataFrame(calibrated_svc.predict_proba(p_tfidf) * 100,
+                           columns=labels.classes_)
+        high_prob = pbt.idxmax(axis=1)[0]
+        if high_prob == cts[l["id_conta"]]:
+            r[i]["high_prob"] = "ok"
+        else:
+            if l["texto"][:7] == "EDITADO":
+                r[i]["high_prob"] = "ok"
+            else:
+                r[i]["high_prob"] = high_prob
         i = i + 1
     res = {}
     res["detalhe"] = r
@@ -62,9 +94,7 @@ def getProbLabel(nid):
     texto = sqlQuery(
         "SELECT texto from Despesas WHERE id = {} order by id".format(
             nid))[0]["texto"]
-    texto = texto.lower().translate(str.maketrans("", "", string.punctuation))
-    texto = "".join([i for i in texto if not i.isdigit()])
-    to_predict = [texto]
+    to_predict = [transfTexto(texto)]
 
     import pickle
 
@@ -95,16 +125,13 @@ def getProbLabel(nid):
 
 
 def getProbLabelBulk():
-    import string
     from database import sqlQuery
 
     tb = sqlQuery("SELECT id, texto, valor from Despesas WHERE id_conta = 0")
     i = 0
     to_predict = []
     for r in tb:
-        t = tb[i]["texto"]
-        t = t.lower().translate(str.maketrans("", "", string.punctuation))
-        t = "".join([i for i in t if not i.isdigit()])
+        t = transfTexto(tb[i]["texto"])
         to_predict.append(t)
 
         i = i + 1
@@ -162,9 +189,7 @@ def getProbLabelBulkCat():
     i = 0
     to_predict = []
     for r in tb:
-        t = tb[i]["texto"]
-        t = t.lower().translate(str.maketrans("", "", string.punctuation))
-        t = "".join([i for i in t if not i.isdigit()])
+        t = transfTexto(tb[i]["texto"])
         to_predict.append(t)
 
         i = i + 1
@@ -211,8 +236,6 @@ def getProbLabelBulkCat():
 
 
 def LabelTrain():
-    # %reset -f
-    import string
     from database import sqlQuery
 
     r = sqlQuery(
@@ -220,9 +243,7 @@ def LabelTrain():
     )
     i = 0
     for l in r:
-        v = l["texto"].lower().translate(
-            str.maketrans("", "", string.punctuation))
-        r[i]["texto"] = "".join([i for i in v if not i.isdigit()])
+        r[i]["texto"] = transfTexto(l["texto"])
 
         i = i + 1
     import pandas as pd

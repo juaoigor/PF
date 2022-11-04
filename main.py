@@ -567,12 +567,13 @@ def investimentosSaldos():
 def investimentosRelatorios():
     from fUtils import geraRelatorioInvest
 
-    rel = geraRelatorioInvest()
+    rel, rf, rv, prev = geraRelatorioInvest()
 
-    return render_template(
-        "investimentos.relatorios.html",
-        rel=rel,
-    )
+    return render_template("investimentos.relatorios.html",
+                           rel=rel,
+                           rf=rf,
+                           rv=rv,
+                           prev=prev)
 
 
 @app.route("/relatorio", methods=["GET", "POST"])

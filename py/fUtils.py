@@ -414,7 +414,175 @@ def geraRelatorioInvest():
 
         tot12 = sum(lv[-12:])
         res["tot12"].append("{:0,.0f}".format(tot12))
-    return res
+    # Renda Fixa
+    df = df.drop("Lvl", axis=1)
+    rf = {}
+    rf["header"] = res["header"]
+    rf["lvl"] = []
+    rf["nome"] = []
+    rf["tb"] = []
+    rf["tot"] = []
+    rf["avg"] = []
+    rf["tot12"] = []
+    rf["avg12"] = []
+    rf["mes"] = []
+    rf["ano"] = []
+
+    df = df.reindex(df.index.values.tolist() + [4000])
+    df = df.fillna(0)
+    df.at[4000, "Nome"] = "TOTAL RF"
+
+    acct_list = [
+        "Carteira -> Renda Fixa", "Investimentos -> Caixa -> Renda Fixa"
+    ]
+    for acct in acct_list:
+        acct_id = df.index[df["Nome"] == acct].tolist()[0]
+        for c in df:
+            if c != "Nome":
+                df.at[4000, c] = df.at[4000, c] + df.at[acct_id, c]
+    acct_list = [
+        "Carteira -> Renda Fixa",
+        "Investimentos -> Caixa -> Renda Fixa",
+        "TOTAL RF",
+    ]
+    for acct in acct_list:
+        acct_id = df.index[df["Nome"] == acct].tolist()[0]
+        l = []
+        i = -1
+        tot = 0
+        tot12 = 0
+        for c in df:
+            if c == "Nome":
+                rf["nome"].append(df.at[acct_id,
+                                        c].replace("Investimentos -> ", ""))
+                if df.at[acct_id, c] == "TOTAL RF":
+                    rf["lvl"].append(2)
+                else:
+                    rf["lvl"].append(3)
+            elif c != "Lvl":
+                tot = tot + df.at[acct_id, c]
+                if (len(df.columns) - i - 2) <= 12:
+                    tot12 = tot12 + df.at[acct_id, c]
+                    l.append("{:0,.0f}".format(df.at[acct_id, c]))
+                i = i + 1
+        rf["tb"].append(l)
+        rf["avg"].append("{:0,.0f}".format(tot / (i + 1)))
+        rf["avg12"].append("{:0,.0f}".format(tot12 / 12))
+        rf["tot"].append("{:0,.0f}".format(tot))
+        rf["tot12"].append("{:0,.0f}".format(tot12))
+    # Renda Variavel
+    rv = {}
+    rv["header"] = res["header"]
+    rv["lvl"] = []
+    rv["nome"] = []
+    rv["tb"] = []
+    rv["tot"] = []
+    rv["avg"] = []
+    rv["tot12"] = []
+    rv["avg12"] = []
+    rv["mes"] = []
+    rv["ano"] = []
+
+    df = df.reindex(df.index.values.tolist() + [4001])
+    df = df.fillna(0)
+    df.at[4001, "Nome"] = "TOTAL RV"
+
+    acct_list = [
+        "Carteira -> Renda Variavel",
+        "Investimentos -> Caixa -> Renda Variavel",
+    ]
+    for acct in acct_list:
+        acct_id = df.index[df["Nome"] == acct].tolist()[0]
+        for c in df:
+            if c != "Nome":
+                df.at[4001, c] = df.at[4001, c] + df.at[acct_id, c]
+    acct_list = [
+        "Carteira -> Renda Variavel",
+        "Investimentos -> Caixa -> Renda Variavel",
+        "TOTAL RV",
+    ]
+    for acct in acct_list:
+        acct_id = df.index[df["Nome"] == acct].tolist()[0]
+        l = []
+        i = -1
+        tot = 0
+        tot12 = 0
+        for c in df:
+            if c == "Nome":
+                rv["nome"].append(df.at[acct_id,
+                                        c].replace("Investimentos -> ", ""))
+                if df.at[acct_id, c] == "TOTAL RV":
+                    rv["lvl"].append(2)
+                else:
+                    rv["lvl"].append(3)
+            elif c != "Lvl":
+                tot = tot + df.at[acct_id, c]
+                if (len(df.columns) - i - 2) <= 12:
+                    tot12 = tot12 + df.at[acct_id, c]
+                    l.append("{:0,.0f}".format(df.at[acct_id, c]))
+                i = i + 1
+        rv["tb"].append(l)
+        rv["avg"].append("{:0,.0f}".format(tot / (i + 1)))
+        rv["avg12"].append("{:0,.0f}".format(tot12 / 12))
+        rv["tot"].append("{:0,.0f}".format(tot))
+        rv["tot12"].append("{:0,.0f}".format(tot12))
+    # Previdencia
+    prev = {}
+    prev["header"] = res["header"]
+    prev["lvl"] = []
+    prev["nome"] = []
+    prev["tb"] = []
+    prev["tot"] = []
+    prev["avg"] = []
+    prev["tot12"] = []
+    prev["avg12"] = []
+    prev["mes"] = []
+    prev["ano"] = []
+
+    df = df.reindex(df.index.values.tolist() + [4002])
+    df = df.fillna(0)
+    df.at[4002, "Nome"] = "TOTAL Prev"
+
+    acct_list = [
+        "Carteira -> Previdencia",
+        "Investimentos -> Caixa -> Previdencia",
+    ]
+    for acct in acct_list:
+        acct_id = df.index[df["Nome"] == acct].tolist()[0]
+        for c in df:
+            if c != "Nome":
+                df.at[4002, c] = df.at[4002, c] + df.at[acct_id, c]
+    acct_list = [
+        "Carteira -> Previdencia",
+        "Investimentos -> Caixa -> Previdencia",
+        "TOTAL Prev",
+    ]
+    for acct in acct_list:
+        acct_id = df.index[df["Nome"] == acct].tolist()[0]
+        l = []
+        i = -1
+        tot = 0
+        tot12 = 0
+        for c in df:
+            if c == "Nome":
+                prev["nome"].append(df.at[acct_id,
+                                          c].replace("Investimentos -> ", ""))
+                if df.at[acct_id, c] == "TOTAL Prev":
+                    prev["lvl"].append(2)
+                else:
+                    prev["lvl"].append(3)
+            elif c != "Lvl":
+                tot = tot + df.at[acct_id, c]
+                if (len(df.columns) - i - 2) <= 12:
+                    tot12 = tot12 + df.at[acct_id, c]
+                    l.append("{:0,.0f}".format(df.at[acct_id, c]))
+                i = i + 1
+        prev["tb"].append(l)
+        prev["avg"].append("{:0,.0f}".format(tot / (i + 1)))
+        prev["avg12"].append("{:0,.0f}".format(tot12 / 12))
+        prev["tot"].append("{:0,.0f}".format(tot))
+        prev["tot12"].append("{:0,.0f}".format(tot12))
+    return res, rf, rv, prev
 
 
 def geraRelatorio():

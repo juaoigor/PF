@@ -76,7 +76,7 @@ def MontaTabelaResumo(mes, ano):
         if high_prob == cts[l["id_conta"]]:
             r[i]["high_prob"] = "ok"
         else:
-            if l["texto"][:7] == "EDITADO":
+            if l["texto"][-7:] == "EDITADO":
                 r[i]["high_prob"] = "ok"
             else:
                 r[i]["high_prob"] = high_prob
@@ -393,8 +393,13 @@ def geraRelatorioInvest():
     res["avg12"] = []
     res["mes"] = []
     res["ano"] = []
+    res["p"] = []
 
     res["header"].append("Nome")
+
+    tot_carteira = 0
+    tot_invest = 0
+    tot_bens = 0
     i = 0
     for c in df:
         if c != "Lvl" and c != "Nome":
@@ -435,6 +440,25 @@ def geraRelatorioInvest():
 
         tot12 = sum(lv[-12:])
         res["tot12"].append("{:0,.0f}".format(tot12))
+
+        if v["Nome"] == "Carteira":
+            tot_carteira = tot
+            res["p"].append("")
+        elif v["Nome"] == "Investimentos":
+            tot_invest = tot
+            res["p"].append("")
+        elif v["Nome"] == "Carteira -> Bens":
+            tot_bens = tot
+            res["p"].append("")
+        elif v["Nome"][:19] == "Carteira -> Bens ->":
+            res["p"].append("")
+        elif v["Nome"].split(" -> ")[0] == "Carteira":
+            res["p"].append("{:.0f}%".format(tot / (tot_carteira - tot_bens) *
+                                             100))
+        elif v["Nome"].split(" -> ")[0] == "Investimentos":
+            res["p"].append("")
+        else:
+            res["p"].append("")
     # Renda Fixa
     df = df.drop("Lvl", axis=1)
     rf = {}
@@ -603,7 +627,63 @@ def geraRelatorioInvest():
         prev["avg12"].append("{:0,.0f}".format(tot12 / 12))
         prev["tot"].append("{:0,.0f}".format(tot))
         prev["tot12"].append("{:0,.0f}".format(tot12))
-    return res, rf, rv, prev
+    # dolaridencia
+    dolar = {}
+    dolar["header"] = res["header"]
+    dolar["lvl"] = []
+    dolar["nome"] = []
+    dolar["tb"] = []
+    dolar["tot"] = []
+    dolar["avg"] = []
+    dolar["tot12"] = []
+    dolar["avg12"] = []
+    dolar["mes"] = []
+    dolar["ano"] = []
+
+    df = df.reindex(df.index.values.tolist() + [4003])
+    df = df.fillna(0)
+    df.at[4003, "Nome"] = "TOTAL Dolar"
+
+    acct_list = [
+        "Carteira -> Dolar",
+        "Investimentos -> Caixa -> Dolar",
+    ]
+    for acct in acct_list:
+        acct_id = df.index[df["Nome"] == acct].tolist()[0]
+        for c in df:
+            if c != "Nome":
+                df.at[4003, c] = df.at[4003, c] + df.at[acct_id, c]
+    acct_list = [
+        "Carteira -> Dolar",
+        "Investimentos -> Caixa -> Dolar",
+        "TOTAL Dolar",
+    ]
+    for acct in acct_list:
+        acct_id = df.index[df["Nome"] == acct].tolist()[0]
+        l = []
+        i = -1
+        tot = 0
+        tot12 = 0
+        for c in df:
+            if c == "Nome":
+                dolar["nome"].append(df.at[acct_id,
+                                           c].replace("Investimentos -> ", ""))
+                if df.at[acct_id, c] == "TOTAL Dolar":
+                    dolar["lvl"].append(2)
+                else:
+                    dolar["lvl"].append(3)
+            elif c != "Lvl":
+                tot = tot + df.at[acct_id, c]
+                if (len(df.columns) - i - 2) <= 12:
+                    tot12 = tot12 + df.at[acct_id, c]
+                    l.append("{:0,.0f}".format(df.at[acct_id, c]))
+                i = i + 1
+        dolar["tb"].append(l)
+        dolar["avg"].append("{:0,.0f}".format(tot / (i + 1)))
+        dolar["avg12"].append("{:0,.0f}".format(tot12 / 12))
+        dolar["tot"].append("{:0,.0f}".format(tot))
+        dolar["tot12"].append("{:0,.0f}".format(tot12))
+    return res, rf, rv, prev, dolar
 
 
 def geraRelatorio():
@@ -985,5 +1065,22 @@ def geraRelatorio():
     pie12 = sorted(pie12.items(), key=lambda kv: kv[1], reverse=True)
     for l in pie12:
         pie12_r[l[0]] = round((l[1] / tt12) * 100, 1)
+    # Crescimento das despesas
+    for k, v in df.iterrows():
+        if v["Nome"].split(" -> ")[0] == "Despesas":
+            i = 0
+            y = []
+            for c in df:
+                if c not in ["Nome", "Lvl"] and v["Lvl"] == 2:
+                    y.append(v[c])
+                    vh = sum(y)
+                    v1a = vh - sum(y[-12:])
+                    if i >= 48:
+                        if v1a != 0:
+                            g = math.log(vh / v1a)
+                        else:
+                            g = 0
+                        # print("{} {} {}".format(v["Nome"], c, g))
+                    i = i + 1
     # Return
     return res, contas, graphs, evol_pct, pie_r, pie12_r

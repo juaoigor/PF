@@ -128,7 +128,11 @@ def configContas():
         tb = sqlQuery("SELECT * FROM Contas ORDER BY conta")
         return render_template("config.contas.html", modo=modo, tb=tb, rs=rs)
     except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        msg = "".join("!! " + line for line in lines)
         logging.exception("message")
+        return render_template("error.html", msg=msg)
 
 
 @app.route("/config/debug", methods=["GET", "POST"])

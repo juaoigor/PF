@@ -259,7 +259,8 @@ def despesasEditar():
             sqlExec(sql)
             return redirect(url_for(request.form["backTo"]))
         elif "Editar" in request.form:
-            sql = 'UPDATE Despesas set id_conta = {}, texto = "{}", valor = {} WHERE ID = {}'.format(
+            sql = 'UPDATE Despesas set datahora = "{}", id_conta = {}, texto = "{}", valor = {} WHERE ID = {}'.format(
+                request.form["datahora"],
                 request.form["conta"],
                 request.form["texto"],
                 request.form["valor"],
@@ -513,7 +514,7 @@ def despesasResumo():
         links=links,
         tb=MontaTabelaResumo(mes, ano),
         ano=ano,
-        mes=mes,
+        mes=str(mes).zfill(2),
     )
 
 

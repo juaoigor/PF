@@ -74,8 +74,10 @@ def MontaTabelaResumo(mes, ano):
             t = t + l["valor"]
         r[i]["conta"] = cts[l["id_conta"]]
         r[i]["total"] = "{:0,.2f}".format(t)
-        r[i]["valor"] = "{:0,.2f}".format(l["valor"])
-
+        if isfloat(l["valor"]):
+            r[i]["valor"] = "{:0,.2f}".format(l["valor"])
+        else:
+            r[i]["valor"] = -9999
         to_predict = [transfTexto(l["texto"])]
         p_count = count_vect.transform(to_predict)
         p_tfidf = tf_transformer.transform(p_count)

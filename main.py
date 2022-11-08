@@ -259,9 +259,12 @@ def despesasEditar():
             sqlExec(sql)
             return redirect(url_for(request.form["backTo"]))
         elif "Editar" in request.form:
-            sql = 'UPDATE Despesas set id_conta = {}, texto = "{}" WHERE ID = {}'.format(
-                request.form["conta"], request.form["texto"],
-                request.form["id"])
+            sql = 'UPDATE Despesas set id_conta = {}, texto = "{}", valor = {} WHERE ID = {}'.format(
+                request.form["conta"],
+                request.form["texto"],
+                request.form["valor"],
+                request.form["id"],
+            )
             sqlExec(sql)
             return redirect(url_for(request.form["backTo"]))
     from database import sqlQuery

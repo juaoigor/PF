@@ -34,6 +34,14 @@ def transfTexto(texto):
     return texto
 
 
+def isfloat(str):
+    try:
+        float(str)
+    except ValueError:
+        return False
+    return True
+
+
 def MontaTabelaResumo(mes, ano):
     # mes = 8
     # ano = 2022
@@ -62,7 +70,8 @@ def MontaTabelaResumo(mes, ano):
     t = 0
     i = 0
     for l in r:
-        t = t + l["valor"]
+        if isfloat(l["valor"]):
+            t = t + l["valor"]
         r[i]["conta"] = cts[l["id_conta"]]
         r[i]["total"] = "{:0,.2f}".format(t)
         r[i]["valor"] = "{:0,.2f}".format(l["valor"])

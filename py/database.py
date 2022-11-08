@@ -1,387 +1,643 @@
-import sqlite3
+from flask import render_template, request, redirect, url_for, session
+from flask import Flask
+import sys
 
-dbs = 'db/database.db'
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
+sys.path.insert(0, "/home/juaoigor/pf")
+sys.path.insert(0, "/home/juaoigor/pf/py")
+sys.path.insert(0, "/home/runner/PF")
+sys.path.insert(0, "/home/runner/PF/py")
+sys.path.insert(0, r"C:\dev\Projects\Python\Pessoal\py")
 
-def doBackup():
-    import shutil
-    import calendar
-    import time
-    gmt = time.gmtime()
-    ts = calendar.timegm(gmt)
-    shutil.copyfile(dbs, '{}_{}'.format(dbs, ts))
-
-
-def DataBaseReset():
-    with open('sql/setup.sql', 'r') as sql_file:
-        sql_script = sql_file.read()
-
-    db = sqlite3.connect(dbs)
-    cursor = db.cursor()
-    cursor.executescript(sql_script)
-    db.commit()
-    db.close()
+app = Flask(__name__)
+app.secret_key = "financas"
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 
-def sqlQuery(sql):
-    db = sqlite3.connect(dbs)
-    db.row_factory = sqlite3.Row
-    c = db.cursor()
-    c.execute(sql)
-    res = c.fetchall()
-    d = [{k: item[k] for k in item.keys()} for item in res]
-    db.close()
-    return d
+@app.route("/")
+@app.route("/index.html")
+def index():
+    if "loggedin" in session:
+        return render_template("index.html")
+    return redirect(url_for("login"))
 
 
-def sqlExec(sql):
-    db = sqlite3.connect(dbs)
-    db.execute(sql)
-    db.commit()
-    db.close()
-
-
-def InsertValues(table, flds, vals):
-    sql = "INSERT INTO {0} ({1}) VALUES ({2})".format(
-        table, ", ".join(flds), ", ".join(['?'] * len(flds)))
-    db = sqlite3.connect(dbs)
-    db.execute(sql, vals)
-    db.commit()
-    db.close()
-
-
-def DedaConhecidos():
-
-    import sqlite3
-    dbs = 'db/database.db'
-    db = sqlite3.connect(dbs)
-    # ALIMENTACAO PESSOAL
-    db.execute(
-        'UPDATE Despesas set id_conta = 5 where texto like "%IFOOD%DDU%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 5 where texto like "%SODEXO%DDU%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 5 where texto like "%NUTRICAR%DDU%"')
-    db.execute('UPDATE Despesas set id_conta = 5 where texto like "%OLGA RI%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 5 where texto like "%LUGAR 166%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%RASCAL%DDF%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%SL CAFES DO%"')
-    # LIVING LAZER
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%IFOOD%DDF%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%OFNER%DDF%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%OFNER%DDU%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%TEMPERO DAS GERAIS%"'
-    )
-    db.execute('UPDATE Despesas set id_conta = 9 where texto like "%JOAKINS%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%BACIO DI LATTE%DDF%"'
-    )
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%PASTEL%DDF%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%PASTEL%DDU%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%CUCINA%PIZZARIA%"'
-    )
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%RASCAL%DDU%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%OURO CHOPP DDU%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 9 where texto like "%PAGALECRISBEBIDAS%"'
-    )
-    # LIVING MERCADO
-    db.execute(
-        'UPDATE Despesas set id_conta = 11 where texto like "%SAMS%DDF%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 11 where texto like "%SAMS%DDU%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 11 where texto like "%PAO DE ACUCAR%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 11 where texto like "%ST%MARCHE%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 11 where texto like "%CARNES%DAYT%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 11 where texto like "%COMPANHIA BRASILEIRA%"'
-    )
-    db.execute(
-        'UPDATE Despesas set id_conta = 5 where texto like "%NUTRICAR%DDF%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 5 where texto like "%CARREFOUR%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 5 where texto like "%MINUTO PA%"')
-    # LIVING MENSAL
-    db.execute('UPDATE Despesas set id_conta = 7 where texto like "%NETFLIX%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 7 where texto like "%APPLE%BILL%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 7 where texto like "%AMAZON%PRIME%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 7 where texto like "%AMAZON%DIGITAL%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 7 where texto like "%NETSERVICOS%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 7 where texto like "%CLAROMVEL%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 7 where texto like "%ENELSPELETROP%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 7 where texto like "%ANUIDADE DIFERENCIAD%"'
-    )
-    db.execute(
-        'UPDATE Despesas set id_conta = 7 where texto like "%SEGURO CARTAO%"')
-    # FILHOS PRESENTES
-    db.execute('UPDATE Despesas set id_conta = 16 where texto like "%PBKIDS%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 16 where texto like "%RI HAPPY%"')
-    # SAUDE MENSAL
-    db.execute('UPDATE Despesas set id_conta = 15 where texto like "%FARMA%"')
-    db.execute('UPDATE Despesas set id_conta = 15 where texto like "%DROGA%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 15 where texto like "%DROG%PAULO%"')
-    # COMPRAS CASA
-    db.execute(
-        'UPDATE Despesas set id_conta = 12 where texto like "%SODIMAC%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 12 where texto like "%WESTWING%"')
-    db.execute('UPDATE Despesas set id_conta = 12 where texto like "%LEROY%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 12 where texto like "%FAST SHOP%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 12 where texto like "%GALERIA9%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 12 where texto like "%LEO MADEIRAS%"')
-    db.execute('UPDATE Despesas set id_conta = 12 where texto like "%WW NOW%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 12 where texto like "%LA CASA DI M%"')
-    db.execute('UPDATE Despesas set id_conta = 12 where texto like "%ELO7%"')
-    db.execute('UPDATE Despesas set id_conta = 12 where texto like "%MOBLY%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 12 where texto like "%HOME DEC%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 12 where texto like "%RCHLO LOJA%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 12 where texto like "%BRASTEMP%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 12 where texto like "%MMARTAN%"')
-    # TRANSPORTE MENSAK
-    db.execute('UPDATE Despesas set id_conta = 4 where texto like "%UBER%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 4 where texto like "%ESTACIONAMENTO%"')
-    db.execute('UPDATE Despesas set id_conta = 4 where texto like "%ESTAPAR%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 4 where texto like "%AUTO POSTO%"')
-    # LIVING FERIAS
-    db.execute(
-        'UPDATE Despesas set id_conta = 10 where texto like "%GOL%AEREAS%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 10 where texto like "%TRAVEL PARTNER%"'
-    )
-    db.execute(
-        'UPDATE Despesas set id_conta = 10 where texto like "%PATACHOCAS%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 10 where texto like "%WINDSOR%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 10 where texto like "%AEROLINEAS%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 10 where texto like "%AG DE TURISMO%"')
-    db.execute(
-        'UPDATE Despesas set id_conta = 10 where texto like "%BRITISH AIRWAYS%"'
-    )
-    db.execute(
-        'UPDATE Despesas set id_conta = 10 where texto like "%PALACIO TANGARA%"'
-    )
-    db.execute(
-        'UPDATE Despesas set id_conta = 10 where texto like "%BOOKING%"')
-    # DEBUTO
-    db.execute(
-        'UPDATE Despesas set id_conta = 9999 where texto like "%DEBITO%FATURA%CARTAO%"'
-    )
-    db.execute(
-        'UPDATE Despesas set id_conta = 9999 where texto like "%DEB%FATURA%EM%"'
-    )
-
-    db.commit()
-    db.close()
-
-    import sqlite3
-    dbs = 'db/database.db'
-    db = sqlite3.connect(dbs)
-    db.execute(
-        'UPDATE Contas set conta = "Receitas -> Salario -> Fixo" where ID = 1')
-    db.execute(
-        'UPDATE Contas set conta = "Receitas -> Salario -> Variavel" where ID = 2'
-    )
-    db.execute(
-        'UPDATE Contas set conta = "Investimentos -> Renda -> Investimentos" where ID = 3'
-    )
-    db.commit()
-    db.close()
-
-    import sqlite3
-    dbs = 'db/database.db'
-
-    def sqlQuery(sql):
-        db = sqlite3.connect(dbs)
-        db.row_factory = sqlite3.Row
-        c = db.cursor()
-        c.execute(sql)
-        res = c.fetchall()
-        d = [{k: item[k] for k in item.keys()} for item in res]
-        db.close()
-        return d
-
-    def sqlExec(sql):
-        db = sqlite3.connect(dbs)
-        db.execute(sql)
-        db.commit()
-        db.close()
-
-    import datetime
-
-    def isDateVal(s):
-        try:
-            date = datetime.datetime.strptime(s, '%d/%m/%y')
-        except ValueError as err:
-            return False
+@app.route("/login/", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        if (request.form["username"] == "juaoigor"
+                and request.form["password"] == "site"):
+            session["loggedin"] = True
+            return render_template("index.html")
         else:
-            return True
+            return render_template("login.html")
+    else:
+        return render_template("login.html")
 
-    r = sqlQuery("SELECT * FROM Despesas")
-    for l in r:
-        if isDateVal(l['texto'][:8]):
-            dt = datetime.datetime.strptime(l['texto'][:8],
-                                            '%d/%m/%y').strftime("%y-%m-%d")
-            st = '{}{}'.format(dt, l['texto'][8:])
-            sql = 'UPDATE Despesas set texto = "{}" where id = {}'.format(
-                st, l['id'])
+
+@app.route("/config/autoupdate", methods=["GET", "POST"])
+def configAutoupdate():
+    from database import sqlQuery, sqlExec, InsertValues
+
+    modo = "I"
+
+    eid = 0
+    rs = ""
+    if request.method == "GET":
+        if request.args.get("mode") == "edit":
+            modo = "E"
+            eid = request.args.get("id")
+            rs = sqlQuery(
+                "SELECT * FROM autoupdate WHERE id = {}".format(eid))[0]
+        elif request.args.get("exec") == "1":
+            r = sqlQuery("SELECT * FROM AutoUpdate")
+            for l in r:
+                sql = 'UPDATE Despesas set id_conta = {} WHERE texto like "{}" and texto not like "%EDITADO%"'.format(
+                    l["id_conta"], l["texto"])
+                sqlExec(sql)
+    elif request.method == "POST" and "Inserir" in request.form:
+        InsertValues(
+            "autoupdate",
+            ["texto", "id_conta"],
+            [request.form["texto"], request.form["conta"]],
+        )
+    elif request.method == "POST" and "Update" in request.form:
+        sql = "UPDATE autoupdate set texto = '{}', id_conta = {} where id = {}".format(
+            request.form["texto"], request.form["conta"], request.form["id"])
+        sqlExec(sql)
+    elif request.method == "POST" and "Apagar" in request.form:
+        sql = "DELETE FROM autoupdate WHERE id = {}".format(request.form["id"])
+        sqlExec(sql)
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
+
+    tb = sqlQuery(
+        "SELECT t1.id, t1.texto, t1.id_conta, t2.conta FROM autoupdate t1, contas t2 where t1.id_conta = t2.id order by conta, texto"
+    )
+    return render_template("config.autoupdate.html",
+                           labels=labels,
+                           modo=modo,
+                           tb=tb,
+                           rs=rs)
+
+
+@app.route("/config/contas", methods=["GET", "POST"])
+def configContas():
+    from database import sqlQuery, sqlExec, InsertValues
+
+    modo = "I"
+
+    eid = 0
+    rs = ""
+    if request.method == "GET":
+        if request.args.get("mode") == "edit":
+            modo = "E"
+            eid = request.args.get("id")
+            rs = sqlQuery("SELECT * FROM Contas WHERE id = {}".format(eid))[0]
+    elif request.method == "POST" and "Criar" in request.form:
+        if request.form["Criar"] == "Criar":
+            InsertValues(
+                "Contas",
+                ["conta", "recdes", "fixvar", "inv", "saldo"],
+                [
+                    request.form["conta"],
+                    request.form["RecDes"],
+                    request.form["FixVar"],
+                    request.form["Invest"],
+                    request.form["Saldo"],
+                ],
+            )
+    elif request.method == "POST" and "Update" in request.form:
+        sql = "UPDATE Contas set Conta = '{}', RecDes = {}, FixVar = {}, Inv = {}, Saldo = {} where id = {}".format(
+            request.form["conta"],
+            request.form["RecDes"],
+            request.form["FixVar"],
+            request.form["Invest"],
+            request.form["Saldo"],
+            request.form["id"],
+        )
+        sqlExec(sql)
+    from database import sqlQuery
+
+    tb = sqlQuery("SELECT * FROM Contas ORDER BY conta")
+    return render_template("config.contas.html", modo=modo, tb=tb, rs=rs)
+
+
+@app.route("/config/debug", methods=["GET", "POST"])
+def configDebug():
+    info = {}
+
+    import os
+
+    info["FOLDER"] = os.getcwd()
+    return render_template("config.debug.html", info=info)
+
+
+@app.route("/config/setup", methods=["GET", "POST"])
+def configSetup():
+    if request.method == "POST":
+        if request.form["Setup"] == "Setup":
+            from database import DataBaseReset
+
+            DataBaseReset()
+    if request.method == "GET":
+        if request.args.get("train") != None:
+            if request.args.get("train") == "1":
+                from fUtils import LabelTrain
+
+                LabelTrain()
+        if request.args.get("backup") != None:
+            if request.args.get("backup") == "1":
+                from database import doBackup
+
+                doBackup()
+    return render_template("config.setup.html")
+
+
+@app.route("/despesas/classificar", methods=["GET", "POST"])
+def despesasClassificar():
+    sqlFilt = "SELECT * FROM Despesas WHERE id_conta = 0 ORDER BY datahora, abs(valor) desc LIMIT 50"
+    if request.method == "POST" and "Salvar" in request.form:
+        if request.form["Salvar"] == "Salvar":
+            from database import sqlExec
+
+            for i in range(0, 999):
+                if "{}_ID".format(i) in request.form:
+                    if int(request.form["{}_Conta".format(i)]) > 0:
+                        sql = "UPDATE Despesas SET id_conta = {} WHERE id = {}".format(
+                            request.form["{}_Conta".format(i)],
+                            request.form["{}_ID".format(i)],
+                        )
+                        sqlExec(sql)
+            return redirect(url_for("despesasResumo"))
+    elif request.method == "GET":
+        if request.args.get("Filtrar") != None:
+            if request.args.get("Filtrar") == "Filtrar":
+                if request.args.get("texto") != "":
+                    if request.args.get("todos") != None:
+                        sqlFilt = "SELECT * FROM Despesas WHERE texto like '%{}%' ORDER BY datahora, abs(valor) desc LIMIT 1000".format(
+                            request.args.get("texto"))
+                    else:
+                        sqlFilt = "SELECT * FROM Despesas WHERE id_conta = 0 and texto like '%{}%' ORDER BY datahora, abs(valor) desc LIMIT 1000".format(
+                            request.args.get("texto"))
+    from database import sqlQuery
+
+    tb = sqlQuery(sqlFilt)
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY Inv, RecDes, conta"
+    )
+    return render_template("despesas.classificar.html", tb=tb, labels=labels)
+
+
+@app.route("/despesas/classnlp", methods=["GET", "POST"])
+def despesasClassNLP():
+    if request.method == "POST":
+        if request.form["Update"] == "Update":
+            for i in range(0, 999):
+                if "c_{}".format(i) in request.form:
+                    if int(request.form["c_{}".format(i)]) != 0:
+                        sql = "UPDATE Despesas set id_conta = {} WHERE id = {}".format(
+                            request.form["c_{}".format(i)],
+                            request.form["id_{}".format(i)],
+                        )
+                        from database import sqlExec
+
+                        sqlExec(sql)
+    from fUtils import getProbLabelBulk
+
+    tb = getProbLabelBulk()
+
+    return render_template("despesas.classnlp.html", tb=tb)
+
+
+@app.route("/despesas/classnlpcat", methods=["GET", "POST"])
+def despesasClassNLPCat():
+    if request.method == "POST":
+        if request.form["Update"] == "Update":
+            from database import sqlQuery, sqlExec
+
+            sql = 'SELECT id from Contas where Conta = "{}"'.format(
+                request.form["conta"])
+            id_conta = sqlQuery(sql)[0]["id"]
+            for i in range(0, 999):
+                if "check_{}".format(i) in request.form:
+                    sql = "UPDATE Despesas set id_conta = {} WHERE id = {}".format(
+                        id_conta, request.form["id_{}".format(i)])
+                    sqlExec(sql)
+    from fUtils import getProbLabelBulkCat
+
+    tb = getProbLabelBulkCat()
+
+    return render_template("despesas.classnlpcat.html", tb=tb)
+
+
+@app.route("/despesas/editar", methods=["GET", "POST"])
+def despesasEditar():
+    eid = 0
+    backto = ""
+    if request.method == "GET":
+        eid = request.args.get("id")
+        backto = request.args.get("backto")
+    elif request.method == "POST":
+        from database import sqlExec
+
+        if "Apagar" in request.form:
+            sql = "DELETE FROM Despesas WHERE ID = {}".format(
+                request.form["id"])
             sqlExec(sql)
+            return redirect(url_for(request.form["backTo"]))
+        elif "Editar" in request.form:
+            sql = 'UPDATE Despesas set id_conta = {}, texto = "{}" WHERE ID = {}'.format(
+                request.form["conta"], request.form["texto"],
+                request.form["id"])
+            sqlExec(sql)
+            return redirect(url_for(request.form["backTo"]))
+    from database import sqlQuery
 
-    sql = """
-  DROP TABLE IF EXISTS AutoUpdate;
-  CREATE TABLE AutoUpdate (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_conta INTEGER,
-    texto TEXT
-  );
+    sql = 'SELECT * from Despesas where id = "{}"'.format(eid)
+    rs = sqlQuery(sql)[0]
 
-  INSERT INTO AutoUpdate (id_conta, texto) values (5,'%IFOOD%DDU%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (5,'%SODEXO%DDU%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (5,'%NUTRICAR%DDU%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (5,'%OLGA RI%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (5,'%LUGAR 166%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%RASCAL%DDF%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%SL CAFES DO%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%IFOOD%DDF%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%OFNER%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%TEMPERO DAS GERAIS%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%JOAKINS%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%BACIO DI LATTE%DDF%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%PASTEL%DDF%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%PASTEL%DDU%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%CUCINA%PIZZARIA%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%RASCAL%DDU%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%OURO CHOPP DDU%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9,'%PAGALECRISBEBIDAS%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (11,'%SAMS%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (11,'%PAO DE ACUCAR%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (11,'%ST%MARCHE%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (11,'%CARNES%DAYT%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (11,'%COMPANHIA BRASILEIRA%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (5,'%NUTRICAR%DDF%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (5,'%CARREFOUR%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (5,'%MINUTO PA%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (7,'%NETFLIX%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (7,'%APPLE%BILL%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (7,'%AMAZON%PRIME%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (7,'%AMAZON%DIGITAL%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (7,'%NETSERVICOS%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (7,'%CLAROMVEL%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (7,'%ENELSPELETROP%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (7,'%ANUIDADE DIFERENCIAD%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (7,'%SEGURO CARTAO%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (16,'%PBKIDS%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (16,'%RI HAPPY%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (15,'%FARMA%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (15,'%DROGA%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (15,'%DROG%PAULO%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%SODIMAC%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%WESTWING%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%LEROY%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%FAST SHOP%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%GALERIA9%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%LEO MADEIRAS%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%WW NOW%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%LA CASA DI M%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%ELO7%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%MOBLY%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%HOME DEC%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%RCHLO LOJA%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%BRASTEMP%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (12,'%MMARTAN%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (4,'%UBER%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (4,'%ESTACIONAMENTO%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (4,'%ESTAPAR%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (4,'%AUTO POSTO%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (10,'%GOL%AEREAS%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (10,'%TRAVEL PARTNER%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (10,'%PATACHOCAS%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (10,'%WINDSOR%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (10,'%AEROLINEAS%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (10,'%AG DE TURISMO%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (10,'%BRITISH AIRWAYS%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (10,'%PALACIO TANGARA%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (10,'%BOOKING%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9999,'%DEBITO%FATURA%CARTAO%');
-  INSERT INTO AutoUpdate (id_conta, texto) values (9999,'%DEB%FATURA%EM%');
-  """
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
 
-    db = sqlite3.connect(dbs)
-    cursor = db.cursor()
-    cursor.executescript(sql)
-    db.commit()
-    db.close()
+    return render_template("despesas.editar.html",
+                           rs=rs,
+                           backto=backto,
+                           labels=labels)
 
-    import sqlite3
-    sql = 'update Despesas SET datahora = DATE(datahora, "-1 year") WHERE DATE(datahora) >= DATE("2022-12-01")'
-    dbs = 'db/database.db'
-    db = sqlite3.connect(dbs)
-    db.execute(sql)
-    db.commit()
-    db.close()
 
-    import sqlite3
-    sql = 'update Despesas SET datahora = "2022-10-30" WHERE id >= 3237'
-    dbs = 'db/database.db'
-    db = sqlite3.connect(dbs)
-    db.execute(sql)
-    db.commit()
-    db.close()
+@app.route("/despesas/editarcontames", methods=["GET", "POST"])
+def despesasEditarContaMes():
+    mes = 0
+    ano = 0
+    conta = 0
+    if request.method == "GET":
+        mes = int(request.args.get("mes"))
+        ano = int(request.args.get("ano"))
+        conta = int(request.args.get("conta"))
+    elif request.method == "POST":
+        if request.form["Update"] == "Update":
+            from database import sqlExec
 
-    import sqlite3
-    sql = 'ALTER Table Contas ADD Saldo INTEGER DEFAULT 0'
-    dbs = 'db/database.db'
-    db = sqlite3.connect(dbs)
-    db.execute(sql)
-    db.commit()
-    db.close()
+            for i in range(0, 999):
+                if "id_{}".format(i) in request.form:
+                    sql = 'UPDATE Despesas set id_conta = {}, texto = "{}" where id = {}'.format(
+                        request.form["conta_{}".format(i)],
+                        request.form["texto_{}".format(i)],
+                        request.form["id_{}".format(i)],
+                    )
+                    sqlExec(sql)
+            return redirect(url_for("relatorio"))
+    from database import sqlQuery
 
-    import sqlite3
-    sql = """
-    CREATE TABLE Saldos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      id_conta INTEGER,
-      datahora TEXT,
-      valor DOUBLE
-    );"""
-    dbs = 'db/database.db'
-    db = sqlite3.connect(dbs)
-    db.execute(sql)
-    db.commit()
-    db.close()
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
+
+    r = sqlQuery(
+        "SELECT t1.id, t1.datahora, t1.texto, t1.id_conta, t1.valor FROM Despesas t1 where cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} and t1.id_conta = {} order by t1.datahora, t1.texto"
+        .format(ano, mes, conta))
+    return render_template("despesas.editarcontames.html",
+                           tb=r,
+                           labels=labels,
+                           id_conta=conta)
+
+
+@app.route("/despesas/ignorados", methods=["GET", "POST"])
+def despesasIgnorados():
+    from database import sqlQuery
+
+    r = sqlQuery(
+        "SELECT * FROM Despesas t1 where t1.id_conta = 9999 order by t1.datahora"
+    )
+    return render_template("despesas.ignorados.html", tb=r)
+
+
+@app.route("/despesas/importar", methods=["GET", "POST"])
+def despesasImportar():
+    if request.method == "POST" and "Processar" in request.form:
+        if request.form["Processar"] == "Processar":
+            from fUtils import despProcessarTexto
+
+            r = despProcessarTexto(request.form["texto"])
+            return render_template("despesas.importar.html", tb=r)
+    if request.method == "POST" and "Inserir" in request.form:
+        if request.form["Inserir"] == "Inserir":
+            from database import InsertValues, sqlExec, sqlQuery
+            from fUtils import str2date, date2str
+
+            for i in range(0, 999):
+                if "{}_Data".format(i) in request.form:
+                    InsertValues(
+                        "Despesas",
+                        [
+                            "id_conta",
+                            "id_cartao",
+                            "id_bem",
+                            "id_pessoa",
+                            "datahora",
+                            "texto",
+                            "valor",
+                        ],
+                        [
+                            0,
+                            1,
+                            1,
+                            1,
+                            date2str(
+                                str2date(request.form["{}_Data".format(i)],
+                                         "%d/%m/%Y"),
+                                "%Y-%m-%d",
+                            ),
+                            request.form["{}_Texto".format(i)],
+                            request.form["{}_Valor".format(i)],
+                        ],
+                    )
+            r = sqlQuery("SELECT * FROM AutoUpdate")
+            for l in r:
+                sql = 'UPDATE Despesas set id_conta = {} WHERE id_conta = 0 and texto like "{}" and texto not like "%EDITADO%"'.format(
+                    l["id_conta"], l["texto"])
+                sqlExec(sql)
+            return redirect(url_for("despesasResumo"))
+    else:
+        return render_template("despesas.importar.html")
+
+
+@app.route("/despesas/nlp", methods=["GET", "POST"])
+def despesasNLP():
+    from database import sqlQuery
+
+    nid = 0
+    if request.method == "GET":
+        if request.args.get("id") != None:
+            nid = int(request.args.get("id"))
+    if nid == 0:
+        nid = sqlQuery(
+            "SELECT id from Despesas WHERE id_conta = 0 order by id")[0]["id"]
+    linfo = sqlQuery("SELECT * from Despesas WHERE id = {}".format(nid))[0]
+    lprox = sqlQuery(
+        "SELECT id from Despesas WHERE id_conta = 0 and id > {} order by id".
+        format(nid))[0]
+    from fUtils import getProbLabel
+
+    tb = getProbLabel(nid)
+    return render_template("despesas.nlp.html",
+                           tb=tb,
+                           linfo=linfo,
+                           lprox=lprox)
+
+
+@app.route("/despesas/resumo", methods=["GET", "POST"])
+def despesasResumo():
+    mes = (datetime.now() + relativedelta(months=-1)).month
+    ano = (datetime.now() + relativedelta(months=-1)).year
+
+    if request.method == "GET":
+        if request.args.get("mes") is not None:
+            mes = int(request.args.get("mes"))
+        if request.args.get("ano") is not None:
+            ano = int(request.args.get("ano"))
+    if request.method == "POST" and "Update" in request.form:
+        if request.form["Update"] == "Update":
+            mes = int(request.form["mes"])
+            ano = int(request.form["ano"])
+            from database import sqlExec
+
+            for i in range(0, 999):
+                if "id_{}".format(i) in request.form:
+                    if int(request.form["conta_{}".format(i)]) != 0:
+                        sql = "UPDATE Despesas set id_conta = {} WHERE id = {}".format(
+                            request.form["conta_{}".format(i)],
+                            request.form["id_{}".format(i)],
+                        )
+                        sqlExec(sql)
+            return redirect(url_for("despesasResumo", mes=mes, ano=ano))
+    if request.method == "POST" and "Transfer" in request.form:
+        if request.form["Transfer"] == "Transfer":
+            mes = int(request.form["mes"])
+            ano = int(request.form["ano"])
+            from database import InsertValues
+
+            InsertValues(
+                "Despesas",
+                [
+                    "id_conta",
+                    "id_cartao",
+                    "id_bem",
+                    "id_pessoa",
+                    "datahora",
+                    "texto",
+                    "valor",
+                ],
+                [
+                    request.form["contaOrigem"],
+                    1,
+                    1,
+                    1,
+                    request.form["data"],
+                    "(TRANSFER) {}".format(request.form["texto"]),
+                    "-{}".format(request.form["valor"]),
+                ],
+            )
+            InsertValues(
+                "Despesas",
+                [
+                    "id_conta",
+                    "id_cartao",
+                    "id_bem",
+                    "id_pessoa",
+                    "datahora",
+                    "texto",
+                    "valor",
+                ],
+                [
+                    request.form["contaDestino"],
+                    1,
+                    1,
+                    1,
+                    request.form["data"],
+                    "(TRANSFER) {}".format(request.form["texto"]),
+                    "{}".format(request.form["valor"]),
+                ],
+            )
+            return redirect(url_for("despesasResumo", mes=mes, ano=ano))
+        print(request.form)
+    from database import sqlQuery
+
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
+    pessoas = sqlQuery("SELECT id, nome from Pessoas ORDER BY Nome")
+    bens = sqlQuery("SELECT id, nome from Bens ORDER BY Nome")
+
+    ant = datetime(int(ano), int(mes), 1) + relativedelta(months=-1)
+    anta = datetime(int(ano), int(mes), 1) + relativedelta(months=-12)
+    anta6 = datetime(int(ano), int(mes), 1) + relativedelta(months=-6)
+    pos = datetime(int(ano), int(mes), 1) + relativedelta(months=1)
+    posa = datetime(int(ano), int(mes), 1) + relativedelta(months=12)
+    posa6 = datetime(int(ano), int(mes), 1) + relativedelta(months=6)
+    links = {
+        "ant": r"/despesas/resumo?mes={}&ano={}".format(ant.month, ant.year),
+        "pos": r"/despesas/resumo?mes={}&ano={}".format(pos.month, pos.year),
+        "anta":
+        r"/despesas/resumo?mes={}&ano={}".format(anta.month, anta.year),
+        "posa":
+        r"/despesas/resumo?mes={}&ano={}".format(posa.month, posa.year),
+        "anta6":
+        r"/despesas/resumo?mes={}&ano={}".format(anta6.month, anta6.year),
+        "posa6":
+        r"/despesas/resumo?mes={}&ano={}".format(posa6.month, posa6.year),
+        "atual": r"/despesas/resumo",
+    }
+
+    from fUtils import MontaTabelaResumo
+
+    return render_template(
+        "despesas.resumo.html",
+        labels=labels,
+        pessoas=pessoas,
+        bens=bens,
+        links=links,
+        tb=MontaTabelaResumo(mes, ano),
+        ano=ano,
+        mes=mes,
+    )
+
+
+@app.route("/despesas/resumoconta", methods=["GET", "POST"])
+def despesasResumoconta():
+    from database import sqlQuery, sqlExec
+
+    if request.method == "POST" and "Salvar" in request.form:
+        if request.form["Salvar"] == "Salvar":
+            for i in range(0, 999):
+                if "{}_ID".format(i) in request.form:
+                    if int(request.form["{}_Conta".format(i)]) > 0:
+                        sql = 'UPDATE Despesas SET id_conta = {}, texto = "{}" WHERE id = {}'.format(
+                            request.form["{}_Conta".format(i)],
+                            request.form["{}_texto".format(i)],
+                            request.form["{}_ID".format(i)],
+                        )
+                        sqlExec(sql)
+            return redirect(url_for("relatorio"))
+    conta = 0
+    if request.method == "GET":
+        if request.args.get("conta") is not None:
+            conta = int(request.args.get("conta"))
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
+    tb = sqlQuery(
+        "SELECT * from Despesas WHERE id_conta = {} order by datahora".format(
+            conta))
+    return render_template("despesas.resumoconta.html", tb=tb, labels=labels)
+
+
+@app.route("/investimentos/saldos", methods=["GET", "POST"])
+def investimentosSaldos():
+    from database import sqlQuery, InsertValues, sqlExec
+
+    mes = (datetime.now() + relativedelta(months=-1)).month
+    ano = (datetime.now() + relativedelta(months=-1)).year
+
+    if request.method == "GET":
+        if request.args.get("mes") is not None:
+            mes = int(request.args.get("mes"))
+        if request.args.get("ano") is not None:
+            ano = int(request.args.get("ano"))
+    if request.method == "POST" and "Update" in request.form:
+        if request.form["Update"] == "Update":
+            mes = int(request.form["mes"])
+            ano = int(request.form["ano"])
+            for i in range(0, 999):
+                if "{}_ID_CONTA".format(i) in request.form:
+                    if int(request.form["{}_ID_CONTA".format(i)]) > 0:
+                        if str(request.form["{}_ID_SALDO".format(i)]) == "":
+                            InsertValues(
+                                "Saldos",
+                                ["id_conta", "datahora", "valor"],
+                                [
+                                    request.form["{}_ID_CONTA".format(i)],
+                                    request.form["{}_DATA".format(i)],
+                                    request.form["{}_VALOR".format(i)],
+                                ],
+                            )
+                        else:
+                            sql = "UPDATE Saldos SET Valor = {} WHERE id = {}".format(
+                                request.form["{}_VALOR".format(i)],
+                                request.form["{}_ID_SALDO".format(i)],
+                            )
+                            sqlExec(sql)
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 1 ORDER BY conta")
+
+    ant = datetime(int(ano), int(mes), 1) + relativedelta(months=-1)
+    anta = datetime(int(ano), int(mes), 1) + relativedelta(months=-12)
+    anta6 = datetime(int(ano), int(mes), 1) + relativedelta(months=-6)
+    pos = datetime(int(ano), int(mes), 1) + relativedelta(months=1)
+    posa = datetime(int(ano), int(mes), 1) + relativedelta(months=12)
+    posa6 = datetime(int(ano), int(mes), 1) + relativedelta(months=6)
+    links = {
+        "ant":
+        r"/investimentos/saldos?mes={}&ano={}".format(ant.month, ant.year),
+        "pos":
+        r"/investimentos/saldos?mes={}&ano={}".format(pos.month, pos.year),
+        "anta":
+        r"/investimentos/saldos?mes={}&ano={}".format(anta.month, anta.year),
+        "posa":
+        r"/investimentos/saldos?mes={}&ano={}".format(posa.month, posa.year),
+        "anta6":
+        r"/investimentos/saldos?mes={}&ano={}".format(anta6.month, anta6.year),
+        "posa6":
+        r"/investimentos/saldos?mes={}&ano={}".format(posa6.month, posa6.year),
+        "atual":
+        r"/investimentos/saldos",
+    }
+
+    r = sqlQuery(
+        "SELECT t1.id, t1.datahora, t1.id_conta, t1.valor FROM Saldos t1, Contas t2 WHERE t1.id_conta = t2.ID AND t2.Saldo = 1 and cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t2.conta"
+        .format(ano, mes))
+    vals = {}
+    ids = {}
+    for l in r:
+        vals[int(l["id_conta"])] = l["valor"]
+        ids[int(l["id_conta"])] = l["id"]
+    return render_template(
+        "investimentos.saldos.html",
+        vals=vals,
+        ids=ids,
+        labels=labels,
+        links=links,
+        ano=ano,
+        mes=str(mes).zfill(2),
+    )
+
+
+@app.route("/investimentos/relatorios", methods=["GET", "POST"])
+def investimentosRelatorios():
+    from JP_Invest import geraRelatorio
+
+    rel, blocos = geraRelatorio()
+
+    return render_template("investimentos.relatorios.html",
+                           rel=rel,
+                           blocos=blocos)
+
+
+@app.route("/relatorio", methods=["GET", "POST"])
+def relatorio():
+    from fUtils import geraRelatorio
+
+    rel, contas, graph, evol_pct, pie, pie12 = geraRelatorio()
+
+    return render_template(
+        "relatorio.html",
+        rel=rel,
+        contas=contas,
+        graph=graph,
+        evol_pct=evol_pct,
+        pie=pie,
+        pie12=pie12,
+    )
+
+
+app.run(host="0.0.0.0", port=81)

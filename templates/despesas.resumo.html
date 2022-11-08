@@ -2,7 +2,7 @@
 {% block content %}
 <br>
 <div class="row">
-  <div class="col-xl-3">
+  <div class="col-xl-2">
   </div>
   <div class="col-6">
     <nav aria-label="Page navigation example">
@@ -17,9 +17,70 @@
       </ul>
     </nav>
   </div>
-  <div class="col-3">
+  <div class="col-4">
+    <div id="accordion">
+      <div class="card">
+        <div class="card-header" id="headingOne">
+          <h5 class="mb-0">
+            <button class="btn btn-link btn-sm collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+              Transfer
+            </button>
+          </h5>
+        </div>
+        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+          <div class="card-body">
+            <form  action="{{ links['atual'] }}" method="post">
+              <input type="hidden" name="mes" value="{{ mes }}">
+              <input type="hidden" name="ano" value="{{ ano }}">
+              <div class="form-group row">
+                <label for="idTData" class="col-4 col-form-label">Data</label>
+                <div class="col-8"><input type="text" class="form-control form-control-sm" id="idTData" name="data" value="{{ ano }}-{{ mes }}-01" autocomplete="off"></div>
+              </div>
+              <div class="form-group row">
+                <label for="idTexto" class="col-4 col-form-label">Texto</label>
+                <div class="col-8"><input type="text" class="form-control form-control-sm" id="idTexto" name="texto" value="" autocomplete="off"></div>
+              </div>
+              <div class="form-group row">
+                <label for="selConta" class="col-4 col-form-label">Conta Origem</label>
+                <div class="col-8">
+                  <select class="form-control form-control-sm" id="selContaOrigem" name="contaOrigem">
+                    <option value="0">Vazio</option>
+                    {% for d in labels %}
+                      <option value="{{ d['id'] }}">{{ d['Conta'] }}</option>
+                    {% endfor %}
+                    <option value="9999">Ignorar</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="selConta" class="col-4 col-form-label">Conta Destino</label>
+                <div class="col-8">
+                  <select class="form-control form-control-sm" id="selContaDestino" name="contaDestino">
+                    <option value="0">Vazio</option>
+                    {% for d in labels %}
+                      <option value="{{ d['id'] }}">{{ d['Conta'] }}</option>
+                    {% endfor %}
+                    <option value="9999">Ignorar</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="idValor" class="col-4 col-form-label">Valor</label>
+                <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="valor" value="" autocomplete="off"></div>
+              </div>
+              <div class="form-group row">
+                <div class="col-10">
+                  <button type="submit" class="btn btn-primary btn-sm" name="Transfer" value="Transfer">Transfer</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+<br>
 <div class="row">
   <div class="col-xl-12">
     <form  action="{{ links['atual'] }}" method="post">
@@ -86,4 +147,9 @@
     </form>
   </div>
 </div>
+<br>
+
+
+
+
 {% endblock %}

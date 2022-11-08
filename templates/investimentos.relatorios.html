@@ -44,16 +44,17 @@
   </div>
 </div>
 
+{%- for bloco in blocos -%}
 <br>
 <div class="row">
   <div class="col-12">
     <div class="card">
-      <div class="card-header">Renda Fixa</div>
+      <div class="card-header">{{ bloco['titulo'] }}</div>
       <div class="card-body">
         <table  class="table table-sm">
           <thead>
             <tr class='alncenter'>
-              {%- for l in rf['header'] -%}
+              {%- for l in bloco['header'] -%}
                 <th>{{l}}</th>
               {% endfor %}
               <th>Med12</th>
@@ -64,18 +65,18 @@
           </thead>
           <tbody>
             {% set c1 = namespace(value=0) %}
-            {% for l in rf['nome'] %}
-            <tr class="rel_{{ rf['lvl'][c1.value] }}">
-              <td class="rel_{{ rf['lvl'][c1.value] }}">{{l|safe}}</td>
+            {% for l in bloco['nome'] %}
+            <tr class="rel_{{ bloco['lvl'][c1.value] }}">
+              <td class="rel_{{ bloco['lvl'][c1.value] }}">{{l|safe}}</td>
               {% set c2 = namespace(value=0) %}
-              {%- for sl in rf['tb'][c1.value] -%}
-                <td class="alnright rel_{{ rf['lvl'][c1.value] }}">{{sl|safe}}</td>
+              {%- for sl in bloco['tb'][c1.value] -%}
+                <td class="alnright rel_{{ bloco['lvl'][c1.value] }}">{{sl|safe}}</td>
               {% set c2.value = c2.value + 1 %}
               {% endfor %}
-              <td class="alnright rel_{{ rf['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rel['avg12'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ rf['lvl'][c1.value] }}">{{ rf['avg'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ rf['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rf['tot12'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ rf['lvl'][c1.value] }}">{{ rf['tot'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ bloco['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rel['avg12'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ bloco['lvl'][c1.value] }}">{{ bloco['avg'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ bloco['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ bloco['tot12'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ bloco['lvl'][c1.value] }}">{{ bloco['tot'][c1.value]|safe }}</td>
             </tr>
             {% set c1.value = c1.value + 1 %}
             {%- endfor -%}
@@ -85,131 +86,6 @@
     </div>
   </div>
 </div>
-
-<br>
-<div class="row">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header">Renda Variavel</div>
-      <div class="card-body">
-        <table  class="table table-sm">
-          <thead>
-            <tr class='alncenter'>
-              {%- for l in rv['header'] -%}
-                <th>{{l}}</th>
-              {% endfor %}
-              <th>Med12</th>
-              <th>Med</th>
-              <th>Tot12</th>
-              <th>Tot</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% set c1 = namespace(value=0) %}
-            {% for l in rv['nome'] %}
-            <tr class="rel_{{ rv['lvl'][c1.value] }}">
-              <td class="rel_{{ rv['lvl'][c1.value] }}">{{l|safe}}</td>
-              {% set c2 = namespace(value=0) %}
-              {%- for sl in rv['tb'][c1.value] -%}
-                <td class="alnright rel_{{ rv['lvl'][c1.value] }}">{{sl|safe}}</td>
-              {% set c2.value = c2.value + 1 %}
-              {% endfor %}
-              <td class="alnright rel_{{ rv['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rv['avg12'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ rv['lvl'][c1.value] }}">{{ rv['avg'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ rv['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rv['tot12'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ rv['lvl'][c1.value] }}">{{ rv['tot'][c1.value]|safe }}</td>
-            </tr>
-            {% set c1.value = c1.value + 1 %}
-            {%- endfor -%}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<br>
-<div class="row">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header">Dolar</div>
-      <div class="card-body">
-        <table  class="table table-sm">
-          <thead>
-            <tr class='alncenter'>
-              {%- for l in dolar['header'] -%}
-                <th>{{l}}</th>
-              {% endfor %}
-              <th>Med12</th>
-              <th>Med</th>
-              <th>Tot12</th>
-              <th>Tot</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% set c1 = namespace(value=0) %}
-            {% for l in dolar['nome'] %}
-            <tr class="rel_{{ dolar['lvl'][c1.value] }}">
-              <td class="rel_{{ dolar['lvl'][c1.value] }}">{{l|safe}}</td>
-              {% set c2 = namespace(value=0) %}
-              {%- for sl in dolar['tb'][c1.value] -%}
-                <td class="alnright rel_{{ dolar['lvl'][c1.value] }}">{{sl|safe}}</td>
-              {% set c2.value = c2.value + 1 %}
-              {% endfor %}
-              <td class="alnright rel_{{ dolar['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ dolar['avg12'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ dolar['lvl'][c1.value] }}">{{ dolar['avg'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ dolar['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ dolar['tot12'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ dolar['lvl'][c1.value] }}">{{ dolar['tot'][c1.value]|safe }}</td>
-            </tr>
-            {% set c1.value = c1.value + 1 %}
-            {%- endfor -%}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<br>
-<div class="row">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header">Previdencia</div>
-      <div class="card-body">
-        <table  class="table table-sm">
-          <thead>
-            <tr class='alncenter'>
-              {%- for l in prev['header'] -%}
-                <th>{{l}}</th>
-              {% endfor %}
-              <th>Med12</th>
-              <th>Med</th>
-              <th>Tot12</th>
-              <th>Tot</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% set c1 = namespace(value=0) %}
-            {% for l in prev['nome'] %}
-            <tr class="rel_{{ prev['lvl'][c1.value] }}">
-              <td class="rel_{{ prev['lvl'][c1.value] }}">{{l|safe}}</td>
-              {% set c2 = namespace(value=0) %}
-              {%- for sl in prev['tb'][c1.value] -%}
-                <td class="alnright rel_{{ prev['lvl'][c1.value] }}">{{sl|safe}}</td>
-              {% set c2.value = c2.value + 1 %}
-              {% endfor %}
-              <td class="alnright rel_{{ prev['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ prev['avg12'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ prev['lvl'][c1.value] }}">{{ prev['avg'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ prev['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ prev['tot12'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ prev['lvl'][c1.value] }}">{{ prev['tot'][c1.value]|safe }}</td>
-            </tr>
-            {% set c1.value = c1.value + 1 %}
-            {%- endfor -%}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
+{% endfor %}
 
 {% endblock %}

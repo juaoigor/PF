@@ -13,7 +13,6 @@ sys.path.insert(0, "/home/runner/PF")
 sys.path.insert(0, "/home/runner/PF/py")
 sys.path.insert(0, r"C:\dev\Projects\Python\Pessoal\py")
 
-
 app = Flask(__name__)
 app.secret_key = "financas"
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -30,10 +29,8 @@ def index():
 @app.route("/login/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        if (
-            request.form["username"] == "juaoigor"
-            and request.form["password"] == "site"
-        ):
+        if (request.form["username"] == "juaoigor"
+                and request.form["password"] == "site"):
             session["loggedin"] = True
             return render_template("index.html")
         else:
@@ -54,13 +51,13 @@ def configAutoupdate():
         if request.args.get("mode") == "edit":
             modo = "E"
             eid = request.args.get("id")
-            rs = sqlQuery("SELECT * FROM autoupdate WHERE id = {}".format(eid))[0]
+            rs = sqlQuery(
+                "SELECT * FROM autoupdate WHERE id = {}".format(eid))[0]
         elif request.args.get("exec") == "1":
             r = sqlQuery("SELECT * FROM AutoUpdate")
             for l in r:
                 sql = 'UPDATE Despesas set id_conta = {} WHERE texto like "{}" and texto not like "%EDITADO%"'.format(
-                    l["id_conta"], l["texto"]
-                )
+                    l["id_conta"], l["texto"])
                 sqlExec(sql)
     elif request.method == "POST" and "Inserir" in request.form:
         InsertValues(
@@ -70,20 +67,22 @@ def configAutoupdate():
         )
     elif request.method == "POST" and "Update" in request.form:
         sql = "UPDATE autoupdate set texto = '{}', id_conta = {} where id = {}".format(
-            request.form["texto"], request.form["conta"], request.form["id"]
-        )
+            request.form["texto"], request.form["conta"], request.form["id"])
         sqlExec(sql)
     elif request.method == "POST" and "Apagar" in request.form:
         sql = "DELETE FROM autoupdate WHERE id = {}".format(request.form["id"])
         sqlExec(sql)
-    labels = sqlQuery("SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
 
     tb = sqlQuery(
         "SELECT t1.id, t1.texto, t1.id_conta, t2.conta FROM autoupdate t1, contas t2 where t1.id_conta = t2.id order by conta, texto"
     )
-    return render_template(
-        "config.autoupdate.html", labels=labels, modo=modo, tb=tb, rs=rs
-    )
+    return render_template("config.autoupdate.html",
+                           labels=labels,
+                           modo=modo,
+                           tb=tb,
+                           rs=rs)
 
 
 @app.route("/config/contas", methods=["GET", "POST"])
@@ -99,7 +98,8 @@ def configContas():
             if request.args.get("mode") == "edit":
                 modo = "E"
                 eid = request.args.get("id")
-                rs = sqlQuery("SELECT * FROM Contas WHERE id = {}".format(eid))[0]
+                rs = sqlQuery(
+                    "SELECT * FROM Contas WHERE id = {}".format(eid))[0]
         elif request.method == "POST" and "Criar" in request.form:
             if request.form["Criar"] == "Criar":
                 InsertValues(
@@ -184,12 +184,10 @@ def despesasClassificar():
                 if request.args.get("texto") != "":
                     if request.args.get("todos") != None:
                         sqlFilt = "SELECT * FROM Despesas WHERE texto like '%{}%' ORDER BY datahora, abs(valor) desc LIMIT 1000".format(
-                            request.args.get("texto")
-                        )
+                            request.args.get("texto"))
                     else:
                         sqlFilt = "SELECT * FROM Despesas WHERE id_conta = 0 and texto like '%{}%' ORDER BY datahora, abs(valor) desc LIMIT 1000".format(
-                            request.args.get("texto")
-                        )
+                            request.args.get("texto"))
     from database import sqlQuery
 
     tb = sqlQuery(sqlFilt)
@@ -227,14 +225,12 @@ def despesasClassNLPCat():
             from database import sqlQuery, sqlExec
 
             sql = 'SELECT id from Contas where Conta = "{}"'.format(
-                request.form["conta"]
-            )
+                request.form["conta"])
             id_conta = sqlQuery(sql)[0]["id"]
             for i in range(0, 999):
                 if "check_{}".format(i) in request.form:
                     sql = "UPDATE Despesas set id_conta = {} WHERE id = {}".format(
-                        id_conta, request.form["id_{}".format(i)]
-                    )
+                        id_conta, request.form["id_{}".format(i)])
                     sqlExec(sql)
     from fUtils import getProbLabelBulkCat
 
@@ -254,13 +250,14 @@ def despesasEditar():
         from database import sqlExec
 
         if "Apagar" in request.form:
-            sql = "DELETE FROM Despesas WHERE ID = {}".format(request.form["id"])
+            sql = "DELETE FROM Despesas WHERE ID = {}".format(
+                request.form["id"])
             sqlExec(sql)
             return redirect(url_for(request.form["backTo"]))
         elif "Editar" in request.form:
             sql = 'UPDATE Despesas set id_conta = {}, texto = "{}" WHERE ID = {}'.format(
-                request.form["conta"], request.form["texto"], request.form["id"]
-            )
+                request.form["conta"], request.form["texto"],
+                request.form["id"])
             sqlExec(sql)
             return redirect(url_for(request.form["backTo"]))
     from database import sqlQuery
@@ -268,9 +265,13 @@ def despesasEditar():
     sql = 'SELECT * from Despesas where id = "{}"'.format(eid)
     rs = sqlQuery(sql)[0]
 
-    labels = sqlQuery("SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
 
-    return render_template("despesas.editar.html", rs=rs, backto=backto, labels=labels)
+    return render_template("despesas.editar.html",
+                           rs=rs,
+                           backto=backto,
+                           labels=labels)
 
 
 @app.route("/despesas/editarcontames", methods=["GET", "POST"])
@@ -297,16 +298,16 @@ def despesasEditarContaMes():
             return redirect(url_for("relatorio"))
     from database import sqlQuery
 
-    labels = sqlQuery("SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
 
     r = sqlQuery(
-        "SELECT t1.id, t1.datahora, t1.texto, t1.id_conta, t1.valor FROM Despesas t1 where cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} and t1.id_conta = {} order by t1.datahora, t1.texto".format(
-            ano, mes, conta
-        )
-    )
-    return render_template(
-        "despesas.editarcontames.html", tb=r, labels=labels, id_conta=conta
-    )
+        "SELECT t1.id, t1.datahora, t1.texto, t1.id_conta, t1.valor FROM Despesas t1 where cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} and t1.id_conta = {} order by t1.datahora, t1.texto"
+        .format(ano, mes, conta))
+    return render_template("despesas.editarcontames.html",
+                           tb=r,
+                           labels=labels,
+                           id_conta=conta)
 
 
 @app.route("/despesas/ignorados", methods=["GET", "POST"])
@@ -351,7 +352,8 @@ def despesasImportar():
                             1,
                             1,
                             date2str(
-                                str2date(request.form["{}_Data".format(i)], "%d/%m/%Y"),
+                                str2date(request.form["{}_Data".format(i)],
+                                         "%d/%m/%Y"),
                                 "%Y-%m-%d",
                             ),
                             request.form["{}_Texto".format(i)],
@@ -361,8 +363,7 @@ def despesasImportar():
             r = sqlQuery("SELECT * FROM AutoUpdate")
             for l in r:
                 sql = 'UPDATE Despesas set id_conta = {} WHERE id_conta = 0 and texto like "{}" and texto not like "%EDITADO%"'.format(
-                    l["id_conta"], l["texto"]
-                )
+                    l["id_conta"], l["texto"])
                 sqlExec(sql)
             return redirect(url_for("despesasResumo"))
     else:
@@ -378,17 +379,19 @@ def despesasNLP():
         if request.args.get("id") != None:
             nid = int(request.args.get("id"))
     if nid == 0:
-        nid = sqlQuery("SELECT id from Despesas WHERE id_conta = 0 order by id")[0][
-            "id"
-        ]
+        nid = sqlQuery(
+            "SELECT id from Despesas WHERE id_conta = 0 order by id")[0]["id"]
     linfo = sqlQuery("SELECT * from Despesas WHERE id = {}".format(nid))[0]
     lprox = sqlQuery(
-        "SELECT id from Despesas WHERE id_conta = 0 and id > {} order by id".format(nid)
-    )[0]
+        "SELECT id from Despesas WHERE id_conta = 0 and id > {} order by id".
+        format(nid))[0]
     from fUtils import getProbLabel
 
     tb = getProbLabel(nid)
-    return render_template("despesas.nlp.html", tb=tb, linfo=linfo, lprox=lprox)
+    return render_template("despesas.nlp.html",
+                           tb=tb,
+                           linfo=linfo,
+                           lprox=lprox)
 
 
 @app.route("/despesas/resumo", methods=["GET", "POST"])
@@ -468,7 +471,8 @@ def despesasResumo():
         print(request.form)
     from database import sqlQuery
 
-    labels = sqlQuery("SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
     pessoas = sqlQuery("SELECT id, nome from Pessoas ORDER BY Nome")
     bens = sqlQuery("SELECT id, nome from Bens ORDER BY Nome")
 
@@ -481,10 +485,14 @@ def despesasResumo():
     links = {
         "ant": r"/despesas/resumo?mes={}&ano={}".format(ant.month, ant.year),
         "pos": r"/despesas/resumo?mes={}&ano={}".format(pos.month, pos.year),
-        "anta": r"/despesas/resumo?mes={}&ano={}".format(anta.month, anta.year),
-        "posa": r"/despesas/resumo?mes={}&ano={}".format(posa.month, posa.year),
-        "anta6": r"/despesas/resumo?mes={}&ano={}".format(anta6.month, anta6.year),
-        "posa6": r"/despesas/resumo?mes={}&ano={}".format(posa6.month, posa6.year),
+        "anta":
+        r"/despesas/resumo?mes={}&ano={}".format(anta.month, anta.year),
+        "posa":
+        r"/despesas/resumo?mes={}&ano={}".format(posa.month, posa.year),
+        "anta6":
+        r"/despesas/resumo?mes={}&ano={}".format(anta6.month, anta6.year),
+        "posa6":
+        r"/despesas/resumo?mes={}&ano={}".format(posa6.month, posa6.year),
         "atual": r"/despesas/resumo",
     }
 
@@ -522,10 +530,11 @@ def despesasResumoconta():
     if request.method == "GET":
         if request.args.get("conta") is not None:
             conta = int(request.args.get("conta"))
-    labels = sqlQuery("SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
     tb = sqlQuery(
-        "SELECT * from Despesas WHERE id_conta = {} order by datahora".format(conta)
-    )
+        "SELECT * from Despesas WHERE id_conta = {} order by datahora".format(
+            conta))
     return render_template("despesas.resumoconta.html", tb=tb, labels=labels)
 
 
@@ -564,7 +573,8 @@ def investimentosSaldos():
                                 request.form["{}_ID_SALDO".format(i)],
                             )
                             sqlExec(sql)
-    labels = sqlQuery("SELECT id, conta from Contas WHERE Saldo = 1 ORDER BY conta")
+    labels = sqlQuery(
+        "SELECT id, conta from Contas WHERE Saldo = 1 ORDER BY conta")
 
     ant = datetime(int(ano), int(mes), 1) + relativedelta(months=-1)
     anta = datetime(int(ano), int(mes), 1) + relativedelta(months=-12)
@@ -573,20 +583,25 @@ def investimentosSaldos():
     posa = datetime(int(ano), int(mes), 1) + relativedelta(months=12)
     posa6 = datetime(int(ano), int(mes), 1) + relativedelta(months=6)
     links = {
-        "ant": r"/investimentos/saldos?mes={}&ano={}".format(ant.month, ant.year),
-        "pos": r"/investimentos/saldos?mes={}&ano={}".format(pos.month, pos.year),
-        "anta": r"/investimentos/saldos?mes={}&ano={}".format(anta.month, anta.year),
-        "posa": r"/investimentos/saldos?mes={}&ano={}".format(posa.month, posa.year),
-        "anta6": r"/investimentos/saldos?mes={}&ano={}".format(anta6.month, anta6.year),
-        "posa6": r"/investimentos/saldos?mes={}&ano={}".format(posa6.month, posa6.year),
-        "atual": r"/investimentos/saldos",
+        "ant":
+        r"/investimentos/saldos?mes={}&ano={}".format(ant.month, ant.year),
+        "pos":
+        r"/investimentos/saldos?mes={}&ano={}".format(pos.month, pos.year),
+        "anta":
+        r"/investimentos/saldos?mes={}&ano={}".format(anta.month, anta.year),
+        "posa":
+        r"/investimentos/saldos?mes={}&ano={}".format(posa.month, posa.year),
+        "anta6":
+        r"/investimentos/saldos?mes={}&ano={}".format(anta6.month, anta6.year),
+        "posa6":
+        r"/investimentos/saldos?mes={}&ano={}".format(posa6.month, posa6.year),
+        "atual":
+        r"/investimentos/saldos",
     }
 
     r = sqlQuery(
-        "SELECT t1.id, t1.datahora, t1.id_conta, t1.valor FROM Saldos t1, Contas t2 WHERE t1.id_conta = t2.ID AND t2.Saldo = 1 and cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t2.conta".format(
-            ano, mes
-        )
-    )
+        "SELECT t1.id, t1.datahora, t1.id_conta, t1.valor FROM Saldos t1, Contas t2 WHERE t1.id_conta = t2.ID AND t2.Saldo = 1 and cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t2.conta"
+        .format(ano, mes))
     vals = {}
     ids = {}
     for l in r:
@@ -609,7 +624,9 @@ def investimentosRelatorios():
 
     rel, blocos = geraRelatorio()
 
-    return render_template("investimentos.relatorios.html", rel=rel, blocos=blocos)
+    return render_template("investimentos.relatorios.html",
+                           rel=rel,
+                           blocos=blocos)
 
 
 @app.route("/relatorio", methods=["GET", "POST"])

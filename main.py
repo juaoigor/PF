@@ -619,93 +619,114 @@ def despesasResumoconta():
 
 @app.route("/investimentos/saldos", methods=["GET", "POST"])
 def investimentosSaldos():
-    from database import sqlQuery, InsertValues, sqlExec
+    try:
+        from database import sqlQuery, InsertValues, sqlExec
 
-    mes = (datetime.now() + relativedelta(months=-1)).month
-    ano = (datetime.now() + relativedelta(months=-1)).year
+        mes = (datetime.now() + relativedelta(months=-1)).month
+        ano = (datetime.now() + relativedelta(months=-1)).year
 
-    if request.method == "GET":
-        if request.args.get("mes") is not None:
-            mes = int(request.args.get("mes"))
-        if request.args.get("ano") is not None:
-            ano = int(request.args.get("ano"))
-    if request.method == "POST" and "Update" in request.form:
-        if request.form["Update"] == "Update":
-            mes = int(request.form["mes"])
-            ano = int(request.form["ano"])
-            for i in range(0, 999):
-                if "{}_ID_CONTA".format(i) in request.form:
-                    if int(request.form["{}_ID_CONTA".format(i)]) > 0:
-                        if str(request.form["{}_ID_SALDO".format(i)]) == "":
-                            InsertValues(
-                                "Saldos",
-                                ["id_conta", "datahora", "valor"],
-                                [
-                                    request.form["{}_ID_CONTA".format(i)],
-                                    request.form["{}_DATA".format(i)],
-                                    request.form["{}_VALOR".format(i)],
-                                ],
-                            )
-                        else:
-                            sql = "UPDATE Saldos SET Valor = {} WHERE id = {}".format(
-                                request.form["{}_VALOR".format(i)],
-                                request.form["{}_ID_SALDO".format(i)],
-                            )
-                            sqlExec(sql)
-    labels = sqlQuery(
-        "SELECT id, conta from Contas WHERE Saldo = 1 ORDER BY conta")
+        if request.method == "GET":
+            if request.args.get("mes") is not None:
+                mes = int(request.args.get("mes"))
+            if request.args.get("ano") is not None:
+                ano = int(request.args.get("ano"))
+        if request.method == "POST" and "Update" in request.form:
+            if request.form["Update"] == "Update":
+                mes = int(request.form["mes"])
+                ano = int(request.form["ano"])
+                for i in range(0, 999):
+                    if "{}_ID_CONTA".format(i) in request.form:
+                        if int(request.form["{}_ID_CONTA".format(i)]) > 0:
+                            if str(request.form["{}_VALOR".format(i)]) != "":
+                                if str(request.form["{}_ID_SALDO".format(
+                                        i)]) == "":
+                                    InsertValues(
+                                        "Saldos",
+                                        ["id_conta", "datahora", "valor"],
+                                        [
+                                            request.form["{}_ID_CONTA".format(
+                                                i)],
+                                            request.form["{}_DATA".format(i)],
+                                            str(request.form["{}_VALOR".format(
+                                                i)]).replace(",", ""),
+                                        ],
+                                    )
+                                else:
+                                    sql = "UPDATE Saldos SET Valor = {} WHERE id = {}".format(
+                                        str(request.form["{}_VALOR".format(
+                                            i)]).replace(",", ""),
+                                        request.form["{}_ID_SALDO".format(i)],
+                                    )
+                                    sqlExec(sql)
+        labels = sqlQuery(
+            "SELECT id, conta from Contas WHERE Saldo = 1 ORDER BY conta")
 
-    ant = datetime(int(ano), int(mes), 1) + relativedelta(months=-1)
-    anta = datetime(int(ano), int(mes), 1) + relativedelta(months=-12)
-    anta6 = datetime(int(ano), int(mes), 1) + relativedelta(months=-6)
-    pos = datetime(int(ano), int(mes), 1) + relativedelta(months=1)
-    posa = datetime(int(ano), int(mes), 1) + relativedelta(months=12)
-    posa6 = datetime(int(ano), int(mes), 1) + relativedelta(months=6)
-    links = {
-        "ant":
-        r"/investimentos/saldos?mes={}&ano={}".format(ant.month, ant.year),
-        "pos":
-        r"/investimentos/saldos?mes={}&ano={}".format(pos.month, pos.year),
-        "anta":
-        r"/investimentos/saldos?mes={}&ano={}".format(anta.month, anta.year),
-        "posa":
-        r"/investimentos/saldos?mes={}&ano={}".format(posa.month, posa.year),
-        "anta6":
-        r"/investimentos/saldos?mes={}&ano={}".format(anta6.month, anta6.year),
-        "posa6":
-        r"/investimentos/saldos?mes={}&ano={}".format(posa6.month, posa6.year),
-        "atual":
-        r"/investimentos/saldos",
-    }
+        ant = datetime(int(ano), int(mes), 1) + relativedelta(months=-1)
+        anta = datetime(int(ano), int(mes), 1) + relativedelta(months=-12)
+        anta6 = datetime(int(ano), int(mes), 1) + relativedelta(months=-6)
+        pos = datetime(int(ano), int(mes), 1) + relativedelta(months=1)
+        posa = datetime(int(ano), int(mes), 1) + relativedelta(months=12)
+        posa6 = datetime(int(ano), int(mes), 1) + relativedelta(months=6)
+        links = {
+            "ant":
+            r"/investimentos/saldos?mes={}&ano={}".format(ant.month, ant.year),
+            "pos":
+            r"/investimentos/saldos?mes={}&ano={}".format(pos.month, pos.year),
+            "anta":
+            r"/investimentos/saldos?mes={}&ano={}".format(
+                anta.month, anta.year),
+            "posa":
+            r"/investimentos/saldos?mes={}&ano={}".format(
+                posa.month, posa.year),
+            "anta6":
+            r"/investimentos/saldos?mes={}&ano={}".format(
+                anta6.month, anta6.year),
+            "posa6":
+            r"/investimentos/saldos?mes={}&ano={}".format(
+                posa6.month, posa6.year),
+            "atual":
+            r"/investimentos/saldos",
+        }
 
-    r = sqlQuery(
-        "SELECT t1.id, t1.datahora, t1.id_conta, t1.valor FROM Saldos t1, Contas t2 WHERE t1.id_conta = t2.ID AND t2.Saldo = 1 and cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t2.conta"
-        .format(ano, mes))
-    vals = {}
-    ids = {}
-    for l in r:
-        vals[int(l["id_conta"])] = "{:0,.2f}".format(l["valor"])
-        ids[int(l["id_conta"])] = l["id"]
-    return render_template(
-        "investimentos.saldos.html",
-        vals=vals,
-        ids=ids,
-        labels=labels,
-        links=links,
-        ano=ano,
-        mes=str(mes).zfill(2),
-    )
+        r = sqlQuery(
+            "SELECT t1.id, t1.datahora, t1.id_conta, t1.valor FROM Saldos t1, Contas t2 WHERE t1.id_conta = t2.ID AND t2.Saldo = 1 and cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t2.conta"
+            .format(ano, mes))
+        vals = {}
+        ids = {}
+        for l in r:
+            vals[int(l["id_conta"])] = "{:0,.2f}".format(l["valor"])
+            ids[int(l["id_conta"])] = l["id"]
+        return render_template(
+            "investimentos.saldos.html",
+            vals=vals,
+            ids=ids,
+            labels=labels,
+            links=links,
+            ano=ano,
+            mes=str(mes).zfill(2),
+        )
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        msg = "".join("\r\n<br>!! " + line for line in lines)
+        logging.exception("message")
+        return render_template("error.html", msg=msg)
 
 
 @app.route("/investimentos/relatorios", methods=["GET", "POST"])
 def investimentosRelatorios():
-    from JP_Invest import geraRelatorio
-
-    rel, blocos = geraRelatorio()
-
-    return render_template("investimentos.relatorios.html",
-                           rel=rel,
-                           blocos=blocos)
+    try:
+        from JP_Invest import geraRelatorio
+        rel, blocos = geraRelatorio()
+        return render_template("investimentos.relatorios.html",
+                               rel=rel,
+                               blocos=blocos)
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        msg = "".join("\r\n<br>!! " + line for line in lines)
+        logging.exception("message")
+        return render_template("error.html", msg=msg)
 
 
 @app.route("/relatorio", methods=["GET", "POST"])

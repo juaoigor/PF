@@ -42,9 +42,9 @@
               <tr class="padrao">
                 <input type="hidden" name="{{ loop.index }}_ID_CONTA" value="{{ l['id'] }}">
                 <input type="hidden" name="{{ loop.index }}_ID_SALDO" value="{{ ids[l['id']] }}">
-                <td class="padrao"><input type="text" class="form-control form-control-sm padrao" name="{{ loop.index }}_DATA" value="{{ ano }}-{{ mes }}-01" size="1" readonly></td>
+                <td class="padrao"><input type="text" class="form-control form-control-sm padrao " name="{{ loop.index }}_DATA" value="{{ ano }}-{{ mes }}-01" size="1" readonly></td>
                 <td class="padrao"><input type="text" class="form-control form-control-sm padrao" name="{{ loop.index }}_CONTA" value="{{ l['Conta'] }}" size="15" readonly></td>
-                <td class="padrao"><input type="text" class="form-control form-control-sm padrao" name="{{ loop.index }}_VALOR" value="{{ vals[l['id']] }}" size="2" autocomplete="off"></td>
+                <td class="padrao"><input type="text" class="form-control form-control-sm padrao direita" name="{{ loop.index }}_VALOR" value="{{ vals[l['id']] }}" size="2" autocomplete="off"></td>
               </tr>
               {% endfor %}
             </tbody>

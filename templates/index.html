@@ -41,6 +41,7 @@
   input.padrao {width: 90%; height:25px}
   select.padrao {width: 90%; height:25px}
 
+  input.direita { text-align: right; }
 
   .form-control-sm { font-size: .7rem; line-height:1;}
   .dropdown-item { font-size: .9rem; line-height:1;}
@@ -62,6 +63,7 @@
           <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Despesas</a>
           <div class="dropdown-menu" aria-labelledby="dropdown01">
             <a class="dropdown-item" href="/despesas/classificar">Classificar</a>
+            <a class="dropdown-item" href="/despesas/crescimento">Crescimento</a>
             <a class="dropdown-item" href="/despesas/ignorados">Ignorados</a>
             <a class="dropdown-item" href="/despesas/importar">Importar</a>
             <a class="dropdown-item" href="/despesas/nlp">NLP</a>
@@ -80,18 +82,21 @@
           <div class="dropdown-menu" aria-labelledby="dropdown01">
             <a class="dropdown-item" href="/config/autoupdate">Auto Update</a>
             <a class="dropdown-item" href="/config/contas">Contas</a>
+            <a class="dropdown-item" href="/config/datas">Datas</a>
             <a class="dropdown-item" href="/config/geral">Geral</a>
             <a class="dropdown-item" href="/config/debug">Debug</a>
             <a class="dropdown-item" href="/config/setup">Setup</a>
             <a class="dropdown-item" href="/config/taxas">Taxas</a>
+            <a class="dropdown-item" href="/config/transfers">Transfers</a>
           </div>
         </li>
       </ul>
     </div>
   </nav>
 
-  <br><br><br>
+  <br><br>
   <div class="container-fluid conden">
+  <br><br>
     {% block content %} {% endblock %}
   </div>
   <br><br><br>

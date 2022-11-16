@@ -97,6 +97,7 @@ def geraRelatorio():
     res["mes"] = []
     res["ano"] = []
     res["p"] = []
+    res["pg"] = []
 
     res["header"].append("Nome")
 
@@ -159,7 +160,7 @@ def geraRelatorio():
         elif v["Nome"] == "Carteira -> Outros":
             tot_outros = tot
             res["p"].append("")
-        elif v["Nome"][:19] == "Carteira -> Outros ->":
+        elif v["Nome"][:21] == "Carteira -> Outros ->":
             res["p"].append("")
         elif v["Nome"].split(" -> ")[0] == "Carteira":
             res["p"].append("{:.0f}%".format(
@@ -168,6 +169,10 @@ def geraRelatorio():
             res["p"].append("")
         else:
             res["p"].append("")
+        if v["Nome"].split(" -> ")[0] == "Carteira":
+            res["pg"].append("{:0,.0f}%".format((tot / tot_carteira) * 100))
+        elif v["Nome"].split(" -> ")[0] == "Investimentos":
+            res["pg"].append("{:0,.0f}%".format((tot / tot_invest) * 100))
     ##########
     # Blocos
     ##########

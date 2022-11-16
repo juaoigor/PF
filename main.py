@@ -130,7 +130,7 @@ def configContas():
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
-        msg = "".join("!! " + line for line in lines)
+        msg = "".join("\r\n!! " + line for line in lines)
         logging.exception("message")
         return render_template("error.html", msg=msg)
 
@@ -164,6 +164,67 @@ def configSetup():
 
                 doBackup()
     return render_template("config.setup.html")
+
+
+@app.route("/config/transfers", methods=["GET", "POST"])
+def configTransfers():
+    try:
+        from database import sqlQuery, sqlExec, InsertValues
+
+        modo = "I"
+
+        eid = 0
+        rs = ""
+        if request.method == "GET":
+            if request.args.get("mode") == "edit":
+                modo = "E"
+                eid = request.args.get("id")
+                rs = sqlQuery(
+                    "SELECT * FROM Transfers WHERE id = {}".format(eid))[0]
+        elif request.method == "POST" and "Criar" in request.form:
+            print(request.form)
+            if request.form["Criar"] == "Criar":
+                InsertValues(
+                    "Transfers",
+                    ["id_conta_de", "id_conta_para", "dia", "texto"],
+                    [
+                        request.form["conta_de"],
+                        request.form["conta_para"],
+                        request.form["dia"],
+                        request.form["texto"],
+                    ],
+                )
+        elif request.method == "POST" and "Update" in request.form:
+            sql = "UPDATE Transfers set id_conta_de = '{}', id_conta_para = {}, dia = {}, texto = '{}' where id = {}".format(
+                request.form["conta_de"],
+                request.form["conta_para"],
+                request.form["dia"],
+                request.form["texto"],
+                request.form["id"],
+            )
+            sqlExec(sql)
+        from database import sqlQuery
+
+        labels = sqlQuery(
+            "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
+        contas = {}
+        for l in labels:
+            contas[l["id"]] = l["Conta"]
+        tb = sqlQuery("SELECT * FROM Transfers ORDER BY texto")
+        return render_template(
+            "config.transfers.html",
+            modo=modo,
+            tb=tb,
+            contas=contas,
+            labels=labels,
+            rs=rs,
+        )
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        msg = "".join("\r\n<br>!! " + line for line in lines)
+        logging.exception("message")
+        return render_template("error.html", msg=msg)
 
 
 @app.route("/despesas/classificar", methods=["GET", "POST"])
@@ -404,6 +465,8 @@ def despesasNLP():
 
 @app.route("/despesas/resumo", methods=["GET", "POST"])
 def despesasResumo():
+    from database import sqlQuery, sqlExec, InsertValues
+
     mes = (datetime.now() + relativedelta(months=-1)).month
     ano = (datetime.now() + relativedelta(months=-1)).year
 
@@ -416,7 +479,6 @@ def despesasResumo():
         if request.form["Update"] == "Update":
             mes = int(request.form["mes"])
             ano = int(request.form["ano"])
-            from database import sqlExec
 
             for i in range(0, 999):
                 if "id_{}".format(i) in request.form:
@@ -431,7 +493,6 @@ def despesasResumo():
         if request.form["Transfer"] == "Transfer":
             mes = int(request.form["mes"])
             ano = int(request.form["ano"])
-            from database import InsertValues
 
             InsertValues(
                 "Despesas",
@@ -440,6 +501,7 @@ def despesasResumo():
                     "id_cartao",
                     "id_bem",
                     "id_pessoa",
+                    "id_transfer",
                     "datahora",
                     "texto",
                     "valor",
@@ -449,9 +511,10 @@ def despesasResumo():
                     1,
                     1,
                     1,
+                    request.form["id_transfer"],
                     request.form["data"],
                     "(TRANSFER) {}".format(request.form["texto"]),
-                    "-{}".format(request.form["valor"]),
+                    "{}".format(float(request.form["valor"]) * -1),
                 ],
             )
             InsertValues(
@@ -461,6 +524,7 @@ def despesasResumo():
                     "id_cartao",
                     "id_bem",
                     "id_pessoa",
+                    "id_transfer",
                     "datahora",
                     "texto",
                     "valor",
@@ -470,19 +534,24 @@ def despesasResumo():
                     1,
                     1,
                     1,
+                    request.form["id_transfer"],
                     request.form["data"],
                     "(TRANSFER) {}".format(request.form["texto"]),
-                    "{}".format(request.form["valor"]),
+                    "{}".format(float(request.form["valor"])),
                 ],
             )
             return redirect(url_for("despesasResumo", mes=mes, ano=ano))
-        print(request.form)
-    from database import sqlQuery
-
     labels = sqlQuery(
         "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
     pessoas = sqlQuery("SELECT id, nome from Pessoas ORDER BY Nome")
     bens = sqlQuery("SELECT id, nome from Bens ORDER BY Nome")
+
+    contas = {}
+    for l in labels:
+        contas[l["id"]] = l["Conta"]
+    transfers = sqlQuery(
+        "SELECT * from Transfers t1 WHERE  0 = (SELECT Count(*) FROM Despesas t2 WHERE t1.id = t2.id_transfer AND cast(strftime('%Y', t2.datahora) as integer) = {} and cast(strftime('%m', t2.datahora) as integer) = {}) ORDER BY t1.texto"
+        .format(ano, mes))
 
     ant = datetime(int(ano), int(mes), 1) + relativedelta(months=-1)
     anta = datetime(int(ano), int(mes), 1) + relativedelta(months=-12)
@@ -512,6 +581,8 @@ def despesasResumo():
         pessoas=pessoas,
         bens=bens,
         links=links,
+        transfers=transfers,
+        contas=contas,
         tb=MontaTabelaResumo(mes, ano),
         ano=ano,
         mes=str(mes).zfill(2),
@@ -613,7 +684,7 @@ def investimentosSaldos():
     vals = {}
     ids = {}
     for l in r:
-        vals[int(l["id_conta"])] = l["valor"]
+        vals[int(l["id_conta"])] = "{:0,.2f}".format(l["valor"])
         ids[int(l["id_conta"])] = l["id"]
     return render_template(
         "investimentos.saldos.html",

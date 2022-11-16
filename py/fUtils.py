@@ -65,8 +65,9 @@ def MontaTabelaResumo(mes, ano):
     with open("labels.pickle", "rb") as handle:
         labels = pickle.load(handle)
     r = sqlQuery(
-        "SELECT t1.id, t1.datahora, t1.texto, t1.id_conta, t1.valor FROM Despesas t1 where cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t1.texto"
+        "SELECT t1.id, t1.datahora, t1.texto, t1.id_conta, t1.id_transfer, t1.valor FROM Despesas t1 where cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t1.texto"
         .format(ano, mes))
+
     t = 0
     i = 0
     for l in r:
@@ -88,6 +89,8 @@ def MontaTabelaResumo(mes, ano):
             r[i]["high_prob"] = "ok"
         else:
             if l["texto"][-7:] == "EDITADO":
+                r[i]["high_prob"] = "ok"
+            elif l["texto"][:10] == "(TRANSFER)":
                 r[i]["high_prob"] = "ok"
             else:
                 r[i]["high_prob"] = high_prob
@@ -554,6 +557,8 @@ def geraRelatorio():
     res["davg"] = []
     res["p"] = []
     res["p12"] = []
+    res["g"] = []
+    res["gm"] = []
 
     res["header"].append("Nome")
     i = 0
@@ -612,6 +617,14 @@ def geraRelatorio():
         tot12 = sum(lv[-12:])
         res["tot12"].append("{:0,.0f}".format(tot12))
 
+        if (tot - tot12) == 0:
+            res["g"].append("{:0,.0f}".format(0))
+            res["gm"].append("{:0,.0f}".format(0))
+        else:
+            res["g"].append("{:0,.0f}".format(
+                (((tot) / (tot - tot12)) - 1) * 100))
+            res["gm"].append("{:0,.0f}".format(
+                (((tot) / (tot - sum(lv[-1:]))) - 1) * 100))
         if lv[-1] > avg12:
             res["tb"][-1][-1] = ('<span style="color: green;">' +
                                  res["tb"][-1][-1] + "</span>")

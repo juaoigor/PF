@@ -31,12 +31,14 @@
               <th>Data</th>
               <th>Texto</th>
               <th>Valor</th>
+              <th>Existe</th>
             </tr>
             {% for r in tb %}
             <tr>
-              <td><input type="text" class="form-control form-control-sm" name="{{ r['ID']}}_Data" value="{{ r['Data']}}"></td>
-              <td><input type="text" class="form-control form-control-sm" name="{{ r['ID']}}_Texto" value="{{ r['Texto']}}"></td>
-              <td><input type="text" class="form-control form-control-sm" name="{{ r['ID']}}_Valor" value="{{ r['Valor']}}"></td>
+              <td><input type="text" class="form-control form-control-sm" size="10" name="{{ r['ID']}}_Data" value="{{ r['Data']}}"></td>
+              <td><input type="text" class="form-control form-control-sm" size="80" name="{{ r['ID']}}_Texto" value="{{ r['Texto']}}"></td>
+              <td><input type="text" class="form-control form-control-sm" size="10" name="{{ r['ID']}}_Valor" value="{{ r['Valor']}}"></td>
+              <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input class="form-check-input" type="checkbox" name="{{ r['ID']}}_Inserir" id="flexCheckDefault" {{ 'checked' if r['N'] == 0 else '' }} ><label class="form-check-label" for="flexCheckDefault">Inserir</label></td>
             </tr>
             {% endfor %}
           </table>

@@ -16,7 +16,22 @@ def despProcessarTexto(s):
     for l in s.split("$"):
         a = l.split("#")
         if len(a) == 3:
-            r.append({"Data": a[0], "Texto": a[1], "Valor": a[2], "ID": i})
+            sql = "SELECT COUNT(*) as N FROM Despesas WHERE Datahora = '{}' AND texto = '{}' and valor = {}".format(
+                date2str(
+                    str2date(a[0].replace('\r', '').replace('\n', ''),
+                             "%d/%m/%Y"),
+                    "%Y-%m-%d",
+                ), a[1], a[2])
+            n = sqlQuery(sql)
+            print(sql)
+            print(n)
+            r.append({
+                "Data": a[0],
+                "Texto": a[1],
+                "Valor": a[2],
+                "ID": i,
+                "N": n[0]['N']
+            })
             i = i + 1
     return r
 

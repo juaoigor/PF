@@ -432,52 +432,57 @@ def despesasIgnorados():
 
 @app.route("/despesas/importar", methods=["GET", "POST"])
 def despesasImportar():
-    if request.method == "POST" and "Processar" in request.form:
-        if request.form["Processar"] == "Processar":
-            from fUtils import despProcessarTexto
+    try:
+        if request.method == "POST" and "Processar" in request.form:
+            if request.form["Processar"] == "Processar":
+                from fUtils import despProcessarTexto
 
-            r = despProcessarTexto(request.form["texto"])
-            return render_template("despesas.importar.html", tb=r)
-    if request.method == "POST" and "Inserir" in request.form:
-        if request.form["Inserir"] == "Inserir":
-            from database import InsertValues, sqlExec, sqlQuery
-            from fUtils import str2date, date2str
-
-            for i in range(0, 999):
-                if "{}_Data".format(i) in request.form:
-                    InsertValues(
-                        "Despesas",
-                        [
-                            "id_conta",
-                            "id_cartao",
-                            "id_bem",
-                            "id_pessoa",
-                            "datahora",
-                            "texto",
-                            "valor",
-                        ],
-                        [
-                            0,
-                            1,
-                            1,
-                            1,
-                            date2str(
-                                str2date(request.form["{}_Data".format(i)],
-                                         "%d/%m/%Y"),
-                                "%Y-%m-%d",
-                            ),
-                            request.form["{}_Texto".format(i)],
-                            request.form["{}_Valor".format(i)],
-                        ],
-                    )
-            r = sqlQuery("SELECT * FROM AutoUpdate")
-            for l in r:
-                sql = 'UPDATE Despesas set id_conta = {} WHERE id_conta = 0 and texto like "{}" and texto not like "%EDITADO%"'.format(
-                    l["id_conta"], l["texto"])
-                sqlExec(sql)
-            return redirect(url_for("despesasResumo"))
-    else:
-        return render_template("despesas.importar.html")
+                r = despProcessarTexto(request.form["texto"])
+                return render_template("despesas.importar.html", tb=r)
+        if request.method == "POST" and "Inserir" in request.form:
+            if request.form["Inserir"] == "Inserir":
+                from database import InsertValues, sqlExec, sqlQuery
+                from fUtils import str2date, date2str
+                for i in range(0, 999):
+                    if "{}_Data".format(i) in request.form:
+                        if "{}_Inserir".format(i) in request.form:
+                            if request.form["{}_Inserir".format(i)] == 'on':
+                                InsertValues(
+                                    "Despesas",
+                                    [
+                                        "id_conta", "id_cartao", "id_bem",
+                                        "id_pessoa", "datahora", "texto",
+                                        "valor"
+                                    ],
+                                    [
+                                        0,
+                                        1,
+                                        1,
+                                        1,
+                                        date2str(
+                                            str2date(
+                                                request.form["{}_Data".format(
+                                                    i)], "%d/%m/%Y"),
+                                            "%Y-%m-%d",
+                                        ),
+                                        request.form["{}_Texto".format(i)],
+                                        request.form["{}_Valor".format(i)],
+                                    ],
+                                )
+                r = sqlQuery("SELECT * FROM AutoUpdate")
+                for l in r:
+                    sql = 'UPDATE Despesas set id_conta = {} WHERE id_conta = 0 and texto like "{}" and texto not like "%EDITADO%"'.format(
+                        l["id_conta"], l["texto"])
+                    sqlExec(sql)
+                return redirect(url_for("despesasResumo"))
+        else:
+            return render_template("despesas.importar.html")
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        msg = "".join("\r\n<br>!! " + line for line in lines)
+        logging.exception("message")
+        return render_template("error.html", msg=msg)
 
 
 @app.route("/despesas/nlp", methods=["GET", "POST"])

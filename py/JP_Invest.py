@@ -11,20 +11,9 @@ from datetime import datetime
 
 def geraRelatorio():
     r = sqlQuery(
-        "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Despesas t1, Contas t2 where t2.Inv = 1 AND t1.id_conta = t2.id and t2.saldo = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id"
-    )
-
-    df = pd.DataFrame()
-
-    for l in r:
-        df.at[int(l["conta"]), "Nome"] = l["NomeConta"]
-        df.at[int(l["conta"]),
-              "{:02}/{}".format(l["Mes"],
-                                int(l["Ano"]) - 2000)] = l["Valor"]
-    r = sqlQuery(
         "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Saldos t1, Contas t2 where t2.Inv = 1 AND t1.id_conta = t2.id and t2.saldo = 1 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id"
     )
-
+    df = pd.DataFrame()
     for l in r:
         df.at[int(l["conta"]), "Nome"] = l["NomeConta"]
         df.at[int(l["conta"]),
@@ -32,6 +21,14 @@ def geraRelatorio():
                                 int(l["Ano"]) - 2000)] = l["Valor"]
     df = df.sort_values("Nome")
     df = df.fillna(0)
+
+    toDel = []
+    for c in df:
+        if df[c].sum() == 0:
+            toDel.append(c)
+
+    for td in toDel:
+        df = df.drop(td, axis=1)
 
     # Faz a Diff dos Saldos
     cols = df.columns.tolist()

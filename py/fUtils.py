@@ -6,7 +6,8 @@ import pandas as pd
 import string
 
 from database import sqlQuery
-from datetime import datetime
+from datetime import date, datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 
 def despProcessarTexto(s):
@@ -320,411 +321,48 @@ def is_number_tryexcept(s):
         return False
 
 
-def geraRelatorio():
-    r = sqlQuery("SELECT * from Contas")
-    contas = {}
-    for l in r:
-        contas[l["Conta"]] = str(l["id"])
-    r = sqlQuery(
-        "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Despesas t1, Contas t2 where t1.id_conta = t2.id and t2.saldo = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id"
-    )
+def cpiFactors():
+    fact = {}
+    rs = sqlQuery(
+        "SELECT * from Taxas WHERE indice = 'IPCA' ORDER BY datahora DESC")
+    data_ultima = date(int(rs[0]['datahora'][0:4]), int(
+        rs[0]['datahora'][5:7]), 15) + relativedelta(months=1)
+    rs.insert(
+        0, {
+            'id': 0,
+            'datahora': data_ultima.strftime('%Y-%m-%d'),
+            'indice': 'IPCA',
+            'valor': rs[0]['valor'] * (rs[0]['valor'] / rs[1]['valor'])
+        })
 
-    df = pd.DataFrame()
+    for i in range(0, len(rs) - 2):
+        dt1 = datetime.strptime(rs[i]['datahora'], '%Y-%m-%d')
+        dt2 = datetime.strptime(rs[i + 1]['datahora'], '%Y-%m-%d')
+        nd = (dt1 - dt2).days
+        for j in range(0, nd):
+            ipca = rs[i]['valor'] + j * (rs[i + 1]['valor'] -
+                                         rs[i]['valor']) / nd
+            dt = dt1 - relativedelta(days=j)
+            fact[dt.strftime('%Y-%m-%d')] = {'IPCA': ipca}
 
-    for l in r:
-        df.at[int(l["conta"]), "Nome"] = l["NomeConta"]
-        df.at[int(l["conta"]),
-              "{:02}/{}".format(l["Mes"],
-                                int(l["Ano"]) - 2000)] = l["Valor"]
-    df = df.sort_values("Nome")
-    df = df.fillna(0)
-
-    # Distribui as contas passadas
-    acct_zero = "Despesas -> Zero -> Zero"
-    acct_dist = [
-        "Despesas -> Compras -> Casa",
-        "Despesas -> Filhos -> Presentes",
-        "Despesas -> Lazer -> Ferias",
-        "Despesas -> Lazer -> Mensal",
-        "Despesas -> Living -> Mercado",
-        "Despesas -> Living -> Alimentacao",
-        "Despesas -> Compras -> Pessoais",
-        "Despesas -> Saude -> Mensal",
-        "Despesas -> Living -> Transporte",
-    ]
-
-    acct_zero_id = df.index[df["Nome"] == acct_zero].tolist()[0]
-    acct_dist_tot = {}
-    s = 0
-    for a in acct_dist:
-        x = 0
-        acct_id = df.index[df["Nome"] == a].tolist()[0]
-        for c in df:
-            if c != "Nome":
-                x = x + df.at[acct_id, c]
-        acct_dist_tot[a] = x
-        s = s + x
-    for a in acct_dist:
-        acct_id = df.index[df["Nome"] == a].tolist()[0]
-        for c in df:
-            if c != "Nome":
-                df.at[acct_id,
-                      c] = df.at[acct_id, c] + df.at[acct_zero_id, c] * (
-                          acct_dist_tot[a] / s)
-    df = df.drop(acct_zero_id)
-
-    # Segue
-    z = 999
-    for k, v in df.iterrows():
-        nome = v["Nome"]
-        anome = nome.split(" -> ")
-        incluir = "{} -> {}".format(anome[0], anome[1])
-        if incluir not in df["Nome"].unique():
-            z = z + 1
-            df = df.reindex(df.index.values.tolist() + [z])
-            df = df.fillna(0)
-            df.at[z, "Nome"] = incluir
-            for c in df:
-                if c != "Nome":
-                    for x, y in df.iterrows():
-                        atmp = y["Nome"].split(" -> ")
-                        tmp = "{} -> {}".format(atmp[0], atmp[1])
-                        if tmp == incluir:
-                            df.at[z, c] = df.at[z, c] + y[c]
-    z = 1999
-    for i in ["Receitas", "Despesas", "Investimentos"]:
-        z = z + 1
-        df = df.reindex(df.index.values.tolist() + [z])
-        df = df.fillna(0)
-        df.at[z, "Nome"] = i
-        for c in df:
-            if c != "Nome":
-                for x, y in df.iterrows():
-                    atmp = y["Nome"].split(" -> ")
-                    if len(atmp) == 2:
-                        if atmp[0] == i:
-                            df.at[z, c] = df.at[z, c] + y[c]
-    df = df.sort_values("Nome")
-    df["Lvl"] = 0
-    df["ToSort"] = 0
-
-    for k, v in df.iterrows():
-        df.at[k, "Lvl"] = int("{}".format(v["Nome"].count("->") + 1))
-        if v["Nome"][:2] == "De":
-            df.at[k, "ToSort"] = 2
-        elif v["Nome"][:2] == "Re":
-            df.at[k, "ToSort"] = 1
-        elif v["Nome"][:2] == "In":
-            df.at[k, "ToSort"] = 4
-    # Evolucao do %
-    df_acum = pd.DataFrame().reindex_like(df)
-    df_acum["Nome"] = df_acum["Nome"].astype(str)
-    for k, v in df.iterrows():
-        tot = 0
-        for c in df:
-            if c != "Nome" and c != "Lvl":
-                tot = tot + v[c]
-                df_acum.at[k, c] = tot
-            else:
-                df_acum.at[k, "Nome"] = v["Nome"]
-                df_acum.at[k, "Lvl"] = v["Lvl"]
-    for k, v in df_acum.iterrows():
-        if v["Nome"][:2] == "De":
-            pass
-        else:
-            df_acum = df_acum.drop(k)
-    df_acum = df_acum.drop("ToSort", axis=1)
-    df_acum = df_acum.drop(df.columns[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]],
-                           axis=1)
-
-    for k, v in df_acum.iterrows():
-        df_acum.at[k, "Nome"] = v["Nome"].replace("Despesas -> ", "")
-    evol_lbs = []
-    evol_pct_l3 = {}
-    evol_pct_l2 = {}
-
-    evol_lbs = []
-    for c in df_acum:
-        if c != "Nome" and c != "Lvl":
-            evol_lbs.append(c)
-    for k, v in df_acum.iterrows():
-        for c in df_acum:
-            if c != "Nome" and c != "Lvl":
-                if v["Lvl"] == 3:
-                    if v["Nome"] not in evol_pct_l3:
-                        evol_pct_l3[v["Nome"]] = []
-                    evol_pct_l3[v["Nome"]].append(
-                        df_acum.at[k, c] / df_acum.query("Lvl == 2")[c].sum())
-                elif v["Lvl"] == 2:
-                    if v["Nome"] not in evol_pct_l2:
-                        evol_pct_l2[v["Nome"]] = []
-                    evol_pct_l2[v["Nome"]].append(
-                        df_acum.at[k, c] / df_acum.query("Lvl == 1")[c].sum())
-    df_acum = df_acum.drop("Lvl", axis=1)
-
-    evol_pct = [evol_lbs, evol_pct_l2, evol_pct_l3]
-
-    df = df.reindex(df.index.values.tolist() + [4000])
-    df = df.fillna(0)
-    df.at[4000, "Nome"] = "Sem Classificacao"
-    df.at[4000, "ToSort"] = 2.1
-    df.at[4000, "Lvl"] = 1
-
-    r = sqlQuery(
-        "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, sum(t1.valor) as Valor FROM Despesas t1 where t1.id_conta = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer) ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer)"
-    )
-    for l in r:
-        df.at[4000, "{:02}/{}".format(l["Mes"],
-                                      int(l["Ano"]) - 2000)] = l["Valor"]
-    df = df.reindex(df.index.values.tolist() + [3000])
-    df = df.fillna(0)
-    df.at[3000, "Nome"] = "TOTAL Ex Inv"
-    df.at[3000, "ToSort"] = 3
-
-    df = df.reindex(df.index.values.tolist() + [3001])
-    df = df.fillna(0)
-    df.at[3001, "Nome"] = "TOTAL"
-    df.at[3001, "ToSort"] = 5
-
-    df = df.reindex(df.index.values.tolist() + [3010])
-    df = df.fillna(0)
-    df.at[3010, "Nome"] = "TOTAL LIMPO"
-    df.at[3010, "ToSort"] = 7
-    df.at[3010, "Lvl"] = 2
-
-    df = df.reindex(df.index.values.tolist() + [3011])
-    df = df.fillna(0)
-    df.at[3011, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;1. (+) Salario Fixo"
-    df.at[3011, "ToSort"] = 6
-    df.at[3011, "Lvl"] = 3
-
-    df = df.reindex(df.index.values.tolist() + [3012])
-    df = df.fillna(0)
-    df.at[3012, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;2. (+) Filhos Educacao"
-    df.at[3012, "ToSort"] = 6
-    df.at[3012, "Lvl"] = 3
-
-    df = df.reindex(df.index.values.tolist() + [3013])
-    df = df.fillna(0)
-    df.at[3013, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;3. (+) Ferias"
-    df.at[3013, "ToSort"] = 6
-    df.at[3013, "Lvl"] = 3
-
-    df = df.reindex(df.index.values.tolist() + [3014])
-    df = df.fillna(0)
-    df.at[3014, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;4. (-) Total Despesas"
-    df.at[3014, "ToSort"] = 6
-    df.at[3014, "Lvl"] = 3
-
-    id_fixo = df.index[df["Nome"] == "Receitas -> Salario -> Fixo"].tolist()[0]
-    id_ferias = df.index[df["Nome"] ==
-                         "Despesas -> Lazer -> Ferias"].tolist()[0]
-    id_educacao = df.index[df["Nome"] ==
-                           "Despesas -> Filhos -> Educacao"].tolist()[0]
-    # id_aquisicoes = df.index[df['Nome'] == 'Despesas -> Aquisicao'].tolist()[0]
-    # id_manutencao = df.index[df['Nome'] == 'Despesas -> Manutencao'].tolist()[0]
-
-    for c in df:
-        if c != "Nome" and c != "Lvl" and c != "ToSort":
-            df.at[3000, c] = df.at[2000, c] + df.at[2001, c] + df.at[4000, c]
-            df.at[3001, c] = (df.at[2000, c] + df.at[2001, c] +
-                              df.at[2002, c] + df.at[4000, c])
-
-            df.at[3011, c] = df.at[id_fixo, c]
-            df.at[3012, c] = -df.at[id_educacao, c]
-            df.at[3013, c] = -df.at[id_ferias, c]
-            df.at[3014, c] = df.at[2001, c] + df.at[4000, c]
-
-            df.at[3010, c] = (df.at[3011, c] + df.at[3012, c] +
-                              df.at[3013, c] + df.at[3014, c])
-    df = df.sort_values(["ToSort", "Nome"])
-    df = df.drop("ToSort", axis=1)
-    lvl = df.pop("Lvl")
-    df.insert(0, "Lvl", lvl)
-
-    res = {}
-    res["header"] = []
-    res["lvl"] = []
-    res["contas"] = []
-    res["nome"] = []
-    res["tb"] = []
-    res["tot"] = []
-    res["tot12"] = []
-    res["avg"] = []
-    res["avg12"] = []
-    res["mes"] = []
-    res["ano"] = []
-    res["davg"] = []
-    res["p"] = []
-    res["p12"] = []
-    res["g"] = []
-    res["gm"] = []
-
-    res["header"].append("Nome")
     i = 0
-    for c in df:
-        if c != "Lvl" and c != "Nome":
-            if (len(df.columns) - i - 2) <= 12:
-                res["header"].append(c)
-                if c.count("/") > 0:
-                    atmp = c.split("/")
-                    res["ano"].append("{:.0f}".format(int(atmp[1]) + 2000))
-                    res["mes"].append("{:.0f}".format(int(atmp[0])))
-            i = i + 1
-    tot_rec = 0
-    tot_des = 0
-    tot_rec12 = 0
-    tot_des12 = 0
-    for k, v in df.iterrows():
-        l = []
-        lv = []
-        i = 0
-        tot = 0
-        for c in df:
-            if c == "Nome":
-                res["nome"].append("{}{}".format(
-                    "&nbsp;&nbsp;&nbsp;" * str(df.at[k, c]).count("->"),
-                    str(df.at[k, c]),
-                ))
-                if str(df.at[k, c]) in contas:
-                    res["contas"].append(contas[str(df.at[k, c])])
-                else:
-                    res["contas"].append(0)
-            elif c == "Lvl":
-                res["lvl"].append("{:.0f}".format(int(df.at[k, c])))
-            else:
-                tot = tot + df.at[k, c]
-                if (len(df.columns) - i - 2) <= 12:
-                    l.append("{:0,.0f}".format(float(df.at[k, c])))
-                lv.append(float(df.at[k, c]))
-                i = i + 1
-        res["tb"].append(l)
-
-        res["tot"].append("{:0,.0f}".format(tot))
-
-        if res["nome"][-1] == "Receitas":
-            tot_rec = tot
-            tot_rec12 = sum(lv[-12:])
-        elif res["nome"][-1] == "Despesas":
-            tot_des = tot
-            tot_des12 = sum(lv[-12:])
-        avg = tot / i
-        res["avg"].append("{:0,.0f}".format(avg))
-
-        avg12 = sum(lv[-12:]) / len(lv[-12:])
-        res["avg12"].append("{:0,.0f}".format(avg12))
-
-        tot12 = sum(lv[-12:])
-        res["tot12"].append("{:0,.0f}".format(tot12))
-
-        if (tot - tot12) == 0:
-            res["g"].append("{:0,.0f}".format(0))
-            res["gm"].append("{:0,.0f}".format(0))
+    fk = ""
+    for k in sorted(fact):
+        if i == 0:
+            fk = k
+            fact[k]['fator'] = 1
         else:
-            res["g"].append("{:0,.0f}".format(
-                (((tot) / (tot - tot12)) - 1) * 100))
-            res["gm"].append("{:0,.0f}".format(
-                (((tot) / (tot - sum(lv[-1:]))) - 1) * 100))
-        if lv[-1] > avg12:
-            res["tb"][-1][-1] = ('<span style="color: green;">' +
-                                 res["tb"][-1][-1] + "</span>")
-        elif lv[-1] < avg12:
-            res["tb"][-1][-1] = ('<span style="color: red;">' +
-                                 res["tb"][-1][-1] + "</span>")
-        if avg12 > avg:
-            res["avg12"][-1] = ('<span style="color: green;">' +
-                                res["avg12"][-1] + "</span>")
-        elif avg12 < avg:
-            res["avg12"][-1] = ('<span style="color: red;">' +
-                                res["avg12"][-1] + "</span>")
-        res["davg"].append("{:0,.0f}".format(avg12 - avg))
+            fact[k]['fator'] = fact[k]['IPCA'] / fact[fk]['IPCA']
+        i = i + 1
 
-        if v["Nome"][:3] == "Rec":
-            res["p"].append("{:0,.0f}".format(100 * tot / tot_rec))
-            res["p12"].append("{:0,.0f}".format(100 * tot12 / tot_rec12))
-        elif v["Nome"][:3] == "Des":
-            res["p"].append("{:0,.0f}".format(100 * tot / tot_des))
-            res["p12"].append("{:0,.0f}".format(100 * tot12 / tot_des12))
-    pie = {}
-    pie_r = {}
-
-    pie12 = {}
-    pie12_r = {}
-
-    tt = 0
-    tt12 = 0
-    graphs = []
-    for k, v in df.iterrows():
-        g = {}
-        x = []
-        y = []
-        tot = []
-        avg = []
-        avg12 = []
-        gper = []
-
-        i = 1
-        t = 0
-        t12 = 0
-        if v["Lvl"] <= 2:
-            g["nome"] = v["Nome"]
-            for c in df:
-                if c not in ["Nome", "Lvl"]:
-                    x.append(c)
-                    y.append(v[c])
-
-                    t = t + v[c]
-                    tot.append(t)
-
-                    avg.append(t / i)
-
-                    avg12.append(sum(y[-12:]) / len(y[-12:]))
-
-                    i = i + 1
-            g["x"] = x
-            g["y"] = y
-            g["tot"] = tot
-            g["avg"] = avg
-            g["avg12"] = avg12
-            g["gper"] = gper
-            graphs.append(g)
+    i = 0
+    fk = ""
+    for k in sorted(fact, reverse=True):
+        if i == 0:
+            fk = k
+            fact[k]['fator_inv'] = 1
         else:
-            j = 0
-            for c in df:
-                if c not in ["Nome", "Lvl"]:
-                    t = t + v[c]
-                    if (len(df.columns) - j) <= 12:
-                        t12 = t12 + v[c]
-                j = j + 1
-            if v["Nome"].split(" -> ")[0] == "Despesas":
-                pie[v["Nome"].replace("Despesas -> ", "")] = -t
-                pie12[v["Nome"].replace("Despesas -> ", "")] = -t12
-                tt = tt - t
-                tt12 = tt12 - t12
-    # PIE
-    pie = sorted(pie.items(), key=lambda kv: kv[1], reverse=True)
-    for l in pie:
-        pie_r[l[0]] = round((l[1] / tt) * 100, 1)
-    # PIE 12M
-    pie12 = sorted(pie12.items(), key=lambda kv: kv[1], reverse=True)
-    for l in pie12:
-        pie12_r[l[0]] = round((l[1] / tt12) * 100, 1)
-    # Crescimento das despesas
-    for k, v in df.iterrows():
-        if v["Nome"].split(" -> ")[0] == "Despesas":
-            i = 0
-            y = []
-            for c in df:
-                if c not in ["Nome", "Lvl"] and v["Lvl"] == 2:
-                    y.append(v[c])
-                    vh = sum(y)
-                    v1a = vh - sum(y[-12:])
-                    if i >= 48:
-                        if v1a != 0:
-                            g = math.log(vh / v1a)
-                        else:
-                            g = 0
-                        # print("{} {} {}".format(v["Nome"], c, g))
-                    i = i + 1
-    # Return
-    return res, contas, graphs, evol_pct, pie_r, pie12_r
+            fact[k]['fator_inv'] = fact[fk]['IPCA'] / fact[k]['IPCA']
+        i = i + 1
+
+    return fact

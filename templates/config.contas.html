@@ -2,7 +2,7 @@
 {% block content %}
 <br><br>
 <div class="row">
-  <div class="col-6">
+  <div class="col-8">
     <div class="card">
       <div class="card-header">Contas</div>
       <div class="card-body">
@@ -13,8 +13,9 @@
               <th scope="col">Conta</th>
               <th scope="col">RecDes</th>
               <th scope="col">FixVar</th>
-              <th scope="col">Inv</th>
+              <th scope="col">Invest</th>
               <th scope="col">Saldo</th>
+              <th scope="col">Antigas</th>
               <th scope="col"></th>
             </tr>
           </thead>
@@ -23,10 +24,47 @@
             <tr>
               <td>{{ d['id'] }}</td>
               <td>{{ d['Conta'] }}</td>
-              <td>{{ d['RecDes'] }}</td>
-              <td>{{ d['FixVar'] }}</td>
-              <td>{{ d['Inv'] }}</td>
-              <td>{{ d['Saldo'] }}</td>
+
+              {% if d['RecDes'] == 0 %}
+                <td>Receita</td>
+              {% elif d['RecDes'] == 1 %}
+                <td>Despesa</td>
+              {% else %}
+                <td>{{ d['RecDes'] }}</td>
+              {% endif %}
+
+              {% if d['FixVar'] == 0 %}
+                <td>Fixa</td>
+              {% elif d['FixVar'] == 1 %}
+                <td>Variavel</td>
+              {% else %}
+                <td>{{ d['FixVar'] }}</td>
+              {% endif %}
+
+              {% if d['Inv'] == 0 %}
+                <td>Nao</td>
+              {% elif d['Inv'] == 1 %}
+                <td>Sim</td>
+              {% else %}
+                <td>{{ d['Inv'] }}</td>
+              {% endif %}
+
+              {% if d['Saldo'] == 0 %}
+                <td>Nao</td>
+              {% elif d['Saldo'] == 1 %}
+                <td>Sim</td>
+              {% else %}
+                <td>{{ d['Saldo'] }}</td>
+              {% endif %}
+
+              {% if d['Antigas'] == 0 %}
+                <td>Nao</td>
+              {% elif d['Antigas'] == 1 %}
+                <td>Sim</td>
+              {% else %}
+                <td>{{ d['Antigas'] }}</td>
+              {% endif %}
+
               <td><a href="/config/contas?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
             </tr>
             {% endfor %}
@@ -101,6 +139,21 @@
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="Saldo" id="gridRadios6" value="1">
                   <label class="form-check-label" for="gridRadios4">Sim</label>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="form-group">
+            <div class="row">
+              <legend class="col-form-label col-4 pt-0">Antigas</legend>
+              <div class="col-8">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="Antigas" id="gridRadios6" value="0" checked>
+                  <label class="form-check-label" for="gridRadios7">Nao</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="Antigas" id="gridRadios8" value="1">
+                  <label class="form-check-label" for="gridRadios9">Sim</label>
                 </div>
               </div>
             </div>
@@ -183,6 +236,21 @@
                 </div>
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="Saldo" id="gridRadios6" value="1" {{ 'checked' if 1 == rs['Saldo'] else '' }}>
+                  <label class="form-check-label" for="gridRadios4">Sim</label>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="form-group">
+            <div class="row">
+              <legend class="col-form-label col-4 pt-0">Antigas</legend>
+              <div class="col-8">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="Antigas" id="gridRadios7" value="0" {{ 'checked' if 0 == rs['Antigas'] else '' }}>
+                  <label class="form-check-label" for="gridRadios3">Nao</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="Antigas" id="gridRadios8" value="1" {{ 'checked' if 1 == rs['Antigas'] else '' }}>
                   <label class="form-check-label" for="gridRadios4">Sim</label>
                 </div>
               </div>

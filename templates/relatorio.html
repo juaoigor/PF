@@ -20,8 +20,6 @@
               <th>%</th>
               <th>Tot</th>
               <th>%</th>
-              <th style="border-left: 2px solid #dee2e6;">gm%</th>
-              <th>ga%</th>
             </tr>
           </thead>
           <tbody>
@@ -49,8 +47,6 @@
               <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['p12'][c1.value]|safe }}%</td>
               <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['tot'][c1.value]|safe }}</td>
               <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['p'][c1.value]|safe }}%</td>
-              <td class="alnright rel_{{ rel['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rel['gm'][c1.value]|safe }}%</td>
-              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['g'][c1.value]|safe }}%</td>
             </tr>
             {% set c1.value = c1.value + 1 %}
             {%- endfor -%}

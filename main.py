@@ -104,24 +104,19 @@ def configContas():
             if request.form["Criar"] == "Criar":
                 InsertValues(
                     "Contas",
-                    ["conta", "recdes", "fixvar", "inv", "saldo"],
+                    ["conta", "recdes", "fixvar", "inv", "saldo", "Antigas"],
                     [
-                        request.form["conta"],
-                        request.form["RecDes"],
-                        request.form["FixVar"],
-                        request.form["Invest"],
-                        request.form["Saldo"],
+                        request.form["conta"], request.form["RecDes"],
+                        request.form["FixVar"], request.form["Invest"],
+                        request.form["Saldo"], request.form["Antigas"]
                     ],
                 )
         elif request.method == "POST" and "Update" in request.form:
-            sql = "UPDATE Contas set Conta = '{}', RecDes = {}, FixVar = {}, Inv = {}, Saldo = {} where id = {}".format(
-                request.form["conta"],
-                request.form["RecDes"],
-                request.form["FixVar"],
-                request.form["Invest"],
-                request.form["Saldo"],
-                request.form["id"],
-            )
+            sql = "UPDATE Contas set Conta = '{}', RecDes = {}, FixVar = {}, Inv = {}, Saldo = {}, Antigas = {} where id = {}".format(
+                request.form["conta"], request.form["RecDes"],
+                request.form["FixVar"], request.form["Invest"],
+                request.form["Saldo"], request.form["Antigas"],
+                request.form["id"])
             sqlExec(sql)
         from database import sqlQuery
 
@@ -166,13 +161,48 @@ def configSetup():
     return render_template("config.setup.html")
 
 
+@app.route("/config/taxas", methods=["GET", "POST"])
+def configTaxas():
+    try:
+        from database import sqlQuery, sqlExec, InsertValues
+        modo = "I"
+        eid = 0
+        rs = ""
+        if request.method == "POST":
+            print(request.form)
+
+        if request.method == "GET":
+            if request.args.get("mode") == "edit":
+                modo = "E"
+                eid = request.args.get("id")
+                rs = sqlQuery(
+                    "SELECT * FROM Taxas WHERE id = {}".format(eid))[0]
+        elif request.method == "POST" and "Criar" in request.form:
+            if request.form["Criar"] == "Criar":
+                InsertValues("Taxas", ["datahora", "indice", "valor"], [
+                    request.form["data"], request.form["indice"],
+                    request.form["valor"]
+                ])
+        elif request.method == "POST" and "Update" in request.form:
+            sql = "UPDATE Taxas set datahora = '{}', indice = '{}', valor = {} where id = {}".format(
+                request.form["data"], request.form["indice"],
+                request.form["valor"], request.form["id"])
+            sqlExec(sql)
+        tb = sqlQuery("SELECT * FROM Taxas ORDER BY datahora, indice")
+        return render_template("config.taxas.html", modo=modo, tb=tb, rs=rs)
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        msg = "".join("\r\n<br>!! " + line for line in lines)
+        logging.exception("message")
+        return render_template("error.html", msg=msg)
+
+
 @app.route("/config/transfers", methods=["GET", "POST"])
 def configTransfers():
     try:
         from database import sqlQuery, sqlExec, InsertValues
-
         modo = "I"
-
         eid = 0
         rs = ""
         if request.method == "GET":
@@ -182,43 +212,32 @@ def configTransfers():
                 rs = sqlQuery(
                     "SELECT * FROM Transfers WHERE id = {}".format(eid))[0]
         elif request.method == "POST" and "Criar" in request.form:
-            print(request.form)
             if request.form["Criar"] == "Criar":
-                InsertValues(
-                    "Transfers",
-                    ["id_conta_de", "id_conta_para", "dia", "texto"],
-                    [
-                        request.form["conta_de"],
-                        request.form["conta_para"],
-                        request.form["dia"],
-                        request.form["texto"],
-                    ],
-                )
+                InsertValues("Transfers",
+                             ["id_conta_de", "id_conta_para", "dia", "texto"],
+                             [
+                                 request.form["conta_de"],
+                                 request.form["conta_para"],
+                                 request.form["dia"],
+                                 request.form["texto"],
+                             ])
         elif request.method == "POST" and "Update" in request.form:
             sql = "UPDATE Transfers set id_conta_de = '{}', id_conta_para = {}, dia = {}, texto = '{}' where id = {}".format(
-                request.form["conta_de"],
-                request.form["conta_para"],
-                request.form["dia"],
-                request.form["texto"],
-                request.form["id"],
-            )
+                request.form["conta_de"], request.form["conta_para"],
+                request.form["dia"], request.form["texto"], request.form["id"])
             sqlExec(sql)
-        from database import sqlQuery
-
         labels = sqlQuery(
             "SELECT id, conta from Contas WHERE Saldo = 0 ORDER BY conta")
         contas = {}
         for l in labels:
             contas[l["id"]] = l["Conta"]
         tb = sqlQuery("SELECT * FROM Transfers ORDER BY texto")
-        return render_template(
-            "config.transfers.html",
-            modo=modo,
-            tb=tb,
-            contas=contas,
-            labels=labels,
-            rs=rs,
-        )
+        return render_template("config.transfers.html",
+                               modo=modo,
+                               tb=tb,
+                               contas=contas,
+                               labels=labels,
+                               rs=rs)
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
@@ -302,6 +321,28 @@ def despesasClassNLPCat():
     tb = getProbLabelBulkCat()
 
     return render_template("despesas.classnlpcat.html", tb=tb)
+
+
+@app.route("/despesas/crescimento", methods=["GET", "POST"])
+def despesasCrescimento():
+    try:
+        conta = 'Despesas'
+        if request.method == "POST":
+            conta = request.form["conta"]
+
+        from JP_Despesas import geraRelatorioCrescimento
+        res, contas = geraRelatorioCrescimento(conta)
+
+        return render_template("despesas.crescimento.html",
+                               res=res,
+                               contas=contas,
+                               conta=conta)
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        msg = "".join("\r\n<br>!! " + line for line in lines)
+        logging.exception("message")
+        return render_template("error.html", msg=msg)
 
 
 @app.route("/despesas/editar", methods=["GET", "POST"])
@@ -731,19 +772,23 @@ def investimentosRelatorios():
 
 @app.route("/relatorio", methods=["GET", "POST"])
 def relatorio():
-    from fUtils import geraRelatorio
+    try:
+        from JP_Despesas import geraRelatorio
 
-    rel, contas, graph, evol_pct, pie, pie12 = geraRelatorio()
-
-    return render_template(
-        "relatorio.html",
-        rel=rel,
-        contas=contas,
-        graph=graph,
-        evol_pct=evol_pct,
-        pie=pie,
-        pie12=pie12,
-    )
+        rel, contas, graph, evol_pct, pie, pie12 = geraRelatorio()
+        return render_template("relatorio.html",
+                               rel=rel,
+                               contas=contas,
+                               graph=graph,
+                               evol_pct=evol_pct,
+                               pie=pie,
+                               pie12=pie12)
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        msg = "".join("\r\n<br>!! " + line for line in lines)
+        logging.exception("message")
+        return render_template("error.html", msg=msg)
 
 
 #app.run(host="0.0.0.0", port=81)

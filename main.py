@@ -734,8 +734,14 @@ def investimentosSaldos():
             .format(ano, mes))
         vals = {}
         ids = {}
+
+        from fUtils import isfloat
         for l in r:
-            vals[int(l["id_conta"])] = "{:0,.2f}".format(l["valor"])
+            if isfloat(l["valor"]):
+                vals[int(l["id_conta"])] = "{:0,.2f}".format(l["valor"])
+            else:
+                vals[int(l["id_conta"])] = l["valor"]
+
             ids[int(l["id_conta"])] = l["id"]
         return render_template(
             "investimentos.saldos.html",

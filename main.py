@@ -783,8 +783,8 @@ def investimentosRelatorios():
         return render_template("error.html", msg=msg)
 
 
-@app.route("/relatorio", methods=["GET", "POST"])
-def relatorio():
+@app.route("/despesas/relatorio", methods=["GET", "POST"])
+def despesasRelatorio():
     try:
         from JP_Despesas import geraRelatorio
 

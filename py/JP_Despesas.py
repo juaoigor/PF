@@ -125,6 +125,9 @@ def geraTabela(contas, cpiAdj):
 
 
 def geraRelatorio():
+    udate = date(datetime.now().year,
+                 datetime.now().month, 1) - timedelta(days=1)
+
     contas = getContas()
 
     df = geraTabela(contas, False)
@@ -183,8 +186,8 @@ def geraRelatorio():
     df.at[4000, "Lvl"] = 1
 
     r = sqlQuery(
-        "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, sum(t1.valor) as Valor FROM Despesas t1 where t1.id_conta = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer) ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer)"
-    )
+        "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, sum(t1.valor) as Valor FROM Despesas t1 where t1.datahora <= date('{}') and t1.id_conta = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer) ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer)"
+        .format(udate.strftime('%Y-%m-%d')))
     for l in r:
         df.at[4000, "{:02}/{}".format(l["Mes"],
                                       int(l["Ano"]) - 2000)] = l["Valor"]

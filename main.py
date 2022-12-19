@@ -13,6 +13,8 @@ sys.path.insert(0, "/home/runner/PF")
 sys.path.insert(0, "/home/runner/PF/py")
 sys.path.insert(0, r"C:\dev\Projects\Python\Pessoal\py")
 
+from database import sqlQuery, sqlExec, InsertValues
+
 app = Flask(__name__)
 app.secret_key = "financas"
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -794,6 +796,87 @@ def relatorio():
                                evol_pct=evol_pct,
                                pie=pie,
                                pie12=pie12)
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        msg = "".join("\r\n<br>!! " + line for line in lines)
+        logging.exception("message")
+        return render_template("error.html", msg=msg)
+
+
+@app.route("/pbook/tags", methods=["GET", "POST"])
+def pbookTags():
+    try:
+        from database import sqlQuery, sqlExec, InsertValues
+        modo = "I"
+        eid = 0
+        rs = ""
+        if request.method == "GET":
+            if request.args.get("mode") == "edit":
+                modo = "E"
+                eid = request.args.get("id")
+                rs = sqlQuery(
+                    "SELECT * FROM PBTags WHERE id = {}".format(eid))[0]
+        elif request.method == "POST" and "Criar" in request.form:
+            if request.form["Criar"] == "Criar":
+                InsertValues("PBTags", ["Texto"], [request.form["Tag"]])
+        elif request.method == "POST" and "Update" in request.form:
+            sql = "UPDATE PBTags set texto = '{}' where id = {}".format(
+                request.form["Tag"], request.form["id"])
+            sqlExec(sql)
+        tb = sqlQuery("SELECT * FROM PBTags ORDER BY Texto")
+        return render_template("pbook.tags.html", modo=modo, tb=tb, rs=rs)
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        msg = "".join("\r\n<br>!! " + line for line in lines)
+        logging.exception("message")
+        return render_template("error.html", msg=msg)
+
+
+@app.route("/pbook/posts", methods=["GET", "POST"])
+def pbookPosts():
+    try:
+        modo = "I"
+        eid = 0
+        rs = ""
+        if request.method == "GET":
+            if request.args.get("mode") == "edit":
+                modo = "E"
+                eid = request.args.get("id")
+                rs = sqlQuery(
+                    "SELECT * FROM PBPosts WHERE id = {}".format(eid))[0]
+        elif request.method == "POST" and "Criar" in request.form:
+            if request.form["Criar"] == "Criar":
+                InsertValues("PBPosts", ["datahora", "Texto"], [
+                    datetime.now().strftime('%Y-%m-%d'), request.form["Texto"]
+                ])
+        elif request.method == "POST" and "Update" in request.form:
+            sql = "UPDATE PBPosts set texto = '{}' where id = {}".format(
+                request.form["Texto"], request.form["id"])
+            sqlExec(sql)
+        tb = sqlQuery("SELECT * FROM PBPosts ORDER BY Texto")
+        return render_template("pbook.posts.html", modo=modo, tb=tb, rs=rs)
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        msg = "".join("\r\n<br>!! " + line for line in lines)
+        logging.exception("message")
+        return render_template("error.html", msg=msg)
+
+
+@app.route("/pbook/timeline", methods=["GET", "POST"])
+def pbookTimeline():
+    try:
+        if request.method == "POST" and "action" in request.form:
+            if request.form["action"] == "ADD_TAG":
+                InsertValues("PBPostsTags", ["id_post", "id_tag"],
+                             [request.form["id"], request.form["tag"]])
+
+        from JP_PBook import getPosts
+        tb = getPosts()
+
+        return render_template("pbook.timeline.html", tb=tb)
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         lines = traceback.format_exception(exc_type, exc_value, exc_traceback)

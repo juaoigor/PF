@@ -1,0 +1,45 @@
+{% extends 'index.html' %}
+{% block content %}
+<br><br>
+
+{% for d in tb['Posts'] %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <p>{{ d['texto'] }}<p>
+      </div>
+      <div class="card-footer">
+        <div class="row">
+          <div class="col-8">
+            {% if d['id'] in tb['Rel'] %}
+              {% for tag in tb['Rel'][d['id']] %}
+                <span class="badge text-bg-warning">{{ tb['tbTags'][tag] }}</span>
+              {% endfor %}
+            {% endif %}
+          </div>
+          <div class="col-3">
+            <form class="form-group row" action="/pbook/timeline" method="post">
+               <input type="hidden" name="id" value="{{ d['id'] }}">
+               <input type="hidden" name="action" value="ADD_TAG">
+              <div class="col">
+                <select class="form-select form-select-sm" name="tag">
+                  {% for t in tb['Tags'] %}
+                    <option value="{{ t['id'] }}">{{ t['Texto'] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col">
+                <button type="submit" class="btn btn-primary btn-sm">Add</button>
+              </div>
+            </form>
+          </div>
+          <div class="col-1"><p><small>{{ d['datahora'] }}</small></p></div></div>
+        </div>
+    </div>
+  </div>
+</div>
+<br>
+{% endfor %}
+
+{% endblock %}

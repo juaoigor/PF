@@ -48,3 +48,20 @@ def InsertValues(table, flds, vals):
     db.execute(sql, vals)
     db.commit()
     db.close()
+
+
+# sql = """
+# CREATE TABLE PBPostsTags (
+#   id INTEGER PRIMARY KEY AUTOINCREMENT,
+#   id_post INTEGER,
+#   id_tag INTEGER
+# );
+# """
+
+# import sqlite3
+
+# dbs = "db/database.db"
+# db = sqlite3.connect(dbs)
+# db.execute(sql)
+# db.commit()
+# db.close()

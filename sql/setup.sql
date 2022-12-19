@@ -5,13 +5,9 @@ CREATE TABLE Contas (
   RecDes INTEGER DEFAULT 0, /* 0: RECEITA - 1: DESPESA */
   FixVar INTEGER DEFAULT 0, /* 0: Fixa - 1: Variavel */
   Inv INTEGER DEFAULT 0, /* 0: Nao - 1: Sim */
-  Saldo INTEGER DEFAULT 0 /* 0: Nao - 1: Sim */
+  Saldo INTEGER DEFAULT 0, /* 0: Nao - 1: Sim */
+  Antigas INTEGER DEFAULT 0 /* 0: Nao - 1: Sim */
 );
-
-INSERT INTO Contas (Conta,RecDes,FixVar, Inv) VALUES ('Receitas -> Salario -> Fixo', 0, 0, 0);
-INSERT INTO Contas (Conta,RecDes,FixVar, Inv) VALUES ('Receitas -> Salario -> Variavel', 0, 1, 0);
-INSERT INTO Contas (Conta,RecDes,FixVar, Inv) VALUES ('Investimentos -> Renda -> Investimentos', 0, 0, 1);
-
 
 DROP TABLE IF EXISTS Pessoas;
 CREATE TABLE Pessoas (
@@ -70,4 +66,43 @@ CREATE TABLE Transfers (
   texto TEXT
 );
 
+DROP TABLE IF EXISTS Taxas;
+CREATE TABLE Taxas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  datahora TEXT,
+  indice TEXT,
+  valor DOUBLE
+);
 
+DROP TABLE IF EXISTS Textos;
+CREATE TABLE Textos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  texto_de TEXT,
+  texto_para TEXT
+);
+
+DROP TABLE IF EXISTS Riscos;
+CREATE TABLE Riscos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  Risco TEXT
+);
+
+DROP TABLE IF EXISTS PBTags;
+CREATE TABLE PBTags (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  Texto TEXT
+);
+
+DROP TABLE IF EXISTS PBPosts;
+CREATE TABLE PBPosts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  datahora TEXT,
+  Texto TEXT
+);
+
+DROP TABLE IF EXISTS PBPostsTags;
+CREATE TABLE PBPostsTags (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_post INTEGER,
+  id_tag INTEGER
+);

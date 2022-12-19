@@ -20,16 +20,8 @@ def getContas():
 
 
 def geraTabela(contas, cpiAdj):
-
-    a = 0
-    b = 1
-    c = 1
-    if datetime.now().month == 12:
-        a = 1
-        b = 0
-        c = 2
-    udate = date(datetime.now().year + a,
-                 datetime.now().month + b, 1) - timedelta(days=c)
+    udate = date(datetime.now().year,
+                 datetime.now().month, 1) - timedelta(days=1)
 
     r = sqlQuery(
         "SELECT datahora, cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Despesas t1, Contas t2 where t1.datahora <= date('{}') and t1.id_conta = t2.id and t2.saldo = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id"

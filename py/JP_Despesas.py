@@ -440,8 +440,8 @@ def geraRelatorio(il):
 
 def geraRelatorioCrescimento(conta):
     contas = getContas()
-    df = geraTabela(contas, False)
-    df_infl = geraTabela(contas, True)
+    df = geraTabela(contas, False, False)
+    df_infl = geraTabela(contas, True, False)
 
     id_conta = df.index[df["Nome"] == conta].tolist()[0]
     id_parent = df.index[df["Nome"] == conta.split(" -> ")[0]].tolist()[0]

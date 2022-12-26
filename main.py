@@ -922,8 +922,8 @@ def uploader():
             ''.join((random.choice('qazwsxedcrfvtgbyhnujmikolp123456789')
                      for i in range(48))),
             fname.split(".")[1])
-        fs = "{}\{}".format(
-            os.path.join(os.path.abspath(os.getcwd()), "upload"), fn)
+        fs = os.path.join(os.path.join(os.path.abspath(os.getcwd()), "upload"),
+                          fn)
         f.save(fs)
         ret = {}
         ret['success'] = 1

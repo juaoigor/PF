@@ -1,45 +1,88 @@
 {% extends 'index.html' %}
 {% block content %}
 <br><br>
-
 {% for d in tb['Posts'] %}
 <div class="row">
   <div class="col-12">
     <div class="card">
       <div class="card-body">
-        <p>{{ d['texto'] }}<p>
+        <div class="row">
+          <div class="col-12">
+            <div id="editorJS_{{ d['id']}}"></div>
+            <script>
+              const editor_{{ d['id']}} = new EditorJS({
+                holderId: "editorJS_{{ d['id']}}",
+                readOnly: true,
+                data: {{ d['texto']|safe }},
+                tools:{
+                  header: { class: Header, inlineToolbar: true },
+                  image: {
+                    class: ImageTool,
+                      config: {
+                      endpoints: { byFile: '/uploader', byUrl: '/uploader' }
+                    }
+                  },
+                  list: {
+                    class: List,
+                    inlineToolbar: true,
+                    config: { defaultStyle: 'unordered' }
+                  },
+                  table: {
+                    class: Table,
+                    inlineToolbar: true,
+                    config: { rows: 2, cols: 3, },
+                  },
+                  quote: {
+                    class: Quote,
+                    inlineToolbar: true,
+                    config: { quotePlaceholder: 'Enter a quote', captionPlaceholder: 'Quote\'s author', }
+                  },
+                  delimiter: { class: Delimiter },
+                  code: { class: CodeTool },
+                  Marker: { class: Marker }
+                }
+              });
+            </script>
+          </div>
+        </div>
       </div>
       <div class="card-footer">
         <div class="row">
-          <div class="col-8">
+          <div class="col-12">
             {% if d['id'] in tb['Rel'] %}
               {% for tag in tb['Rel'][d['id']] %}
-                <span class="badge text-bg-warning">{{ tb['tbTags'][tag] }}</span>
+                <a href="/pbook/timeline?filter={{ filt }},{{ tb['tbTags'][tag] }}" class="badge badge-warning">{{ tb['tbTags'][tag] }}</a>
               {% endfor %}
             {% endif %}
           </div>
-          <div class="col-3">
-            <form class="form-group row" action="/pbook/timeline" method="post">
-               <input type="hidden" name="id" value="{{ d['id'] }}">
-               <input type="hidden" name="action" value="ADD_TAG">
+        </div>
+        <div class="row">
+          <div class="col-8"></div>
+          <div class="col">
+            <form class="form-group row" action="/pbook/timeline" method="post"> <input type="hidden" name="id" value="{{ d['id'] }}"> <input type="hidden" name="action" value="ADD_TAG">
               <div class="col">
                 <select class="form-select form-select-sm" name="tag">
                   {% for t in tb['Tags'] %}
-                    <option value="{{ t['id'] }}">{{ t['Texto'] }}</option>
+                    {% if t['id'] not in tb['Rel'][d['id']] %}
+                      <option value="{{ t['id'] }}">{{ t['Texto'] }}</option>
+                     {% endif %}
                   {% endfor %}
                 </select>
               </div>
-              <div class="col">
-                <button type="submit" class="btn btn-primary btn-sm">Add</button>
-              </div>
+              <div class="col"> <button type="submit" class="btn btn-primary btn-sm">Add</button> </div>
             </form>
           </div>
-          <div class="col-1"><p><small>{{ d['datahora'] }}</small></p></div></div>
         </div>
+        <div class="row">
+          <div class="col-10"></div>
+          <div class="col">
+            <p><small>{{ d['datahora'] }}</small></p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 <br>
 {% endfor %}
-
 {% endblock %}

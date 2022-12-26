@@ -339,14 +339,8 @@ def cpiFactors():
     rs = sqlQuery(
         "SELECT * from Taxas WHERE indice = 'IPCA' ORDER BY datahora DESC")
     data_ultima = date(int(rs[0]['datahora'][0:4]), int(
-        rs[0]['datahora'][5:7]), 15) + relativedelta(months=1)
-    rs.insert(
-        0, {
-            'id': 0,
-            'datahora': data_ultima.strftime('%Y-%m-%d'),
-            'indice': 'IPCA',
-            'valor': rs[0]['valor'] * (rs[0]['valor'] / rs[1]['valor'])
-        })
+        rs[0]['datahora'][5:7]), 15) + relativedelta(months=0)
+    # rs.insert(0, {'id': 0, 'datahora': data_ultima.strftime('%Y-%m-%d'), 'indice': 'IPCA', 'valor': rs[0]['valor'] * (rs[0]['valor']/rs[1]['valor'])})
 
     for i in range(0, len(rs) - 2):
         dt1 = datetime.strptime(rs[i]['datahora'], '%Y-%m-%d')
@@ -357,6 +351,16 @@ def cpiFactors():
                                          rs[i]['valor']) / nd
             dt = dt1 - relativedelta(days=j)
             fact[dt.strftime('%Y-%m-%d')] = {'IPCA': ipca}
+
+    for i in range(1, 100):
+        dt = data_ultima + relativedelta(days=i)
+        dt2 = dt - relativedelta(days=1)
+        dt1 = date(dt2.year - 1, dt2.month, dt2.day)
+        dt0 = dt1 + relativedelta(days=1)
+        f = fact[dt2.strftime('%Y-%m-%d')]['IPCA'] / fact[dt1.strftime(
+            '%Y-%m-%d')]['IPCA']
+        ipca = fact[dt0.strftime('%Y-%m-%d')]['IPCA'] * f
+        fact[dt.strftime('%Y-%m-%d')] = {'IPCA': ipca}
 
     i = 0
     fk = ""

@@ -9,11 +9,17 @@ from database import sqlQuery
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 
 
-def geraRelatorio():
-    udate = date(datetime.now().year,
-                 datetime.now().month, 1) - timedelta(days=1)
+def geraRelatorio(il):
+    if il:
+        dd = datetime.now() + relativedelta(months=1)
+        udate = date(dd.year, dd.month, 1) - timedelta(days=1)
+    else:
+        udate = date(datetime.now().year,
+                     datetime.now().month, 1) - timedelta(days=1)
+
     r = sqlQuery(
         "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Despesas t1, Contas t2 where t1.datahora <= date('{}') and t2.Inv = 1 AND t1.id_conta = t2.id and t2.saldo = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id"
         .format(udate.strftime('%Y-%m-%d')))

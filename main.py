@@ -1,8 +1,11 @@
-from flask import render_template, request, redirect, url_for, session
+from flask import render_template, request, redirect, url_for, session, jsonify, send_from_directory
 from flask import Flask
 import sys
 import traceback
 import logging
+import random
+import os
+import json
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -18,6 +21,8 @@ from database import sqlQuery, sqlExec, InsertValues
 app = Flask(__name__)
 app.secret_key = "financas"
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config["UPLOAD_FOLDER"] = os.path.join(os.path.abspath(os.getcwd()),
+                                           "upload")
 
 
 @app.route("/")
@@ -770,8 +775,13 @@ def investimentosSaldos():
 @app.route("/investimentos/relatorios", methods=["GET", "POST"])
 def investimentosRelatorios():
     try:
+        il = False
+        if request.method == "GET":
+            if request.args.get("last") == "on":
+                il = True
+
         from JP_Invest import geraRelatorio
-        rel, blocos = geraRelatorio()
+        rel, blocos = geraRelatorio(il)
         return render_template("investimentos.relatorios.html",
                                rel=rel,
                                blocos=blocos)
@@ -788,7 +798,12 @@ def despesasRelatorio():
     try:
         from JP_Despesas import geraRelatorio
 
-        rel, contas, graph, evol_pct, pie, pie12 = geraRelatorio()
+        il = False
+        if request.method == "GET":
+            if request.args.get("last") == "on":
+                il = True
+
+        rel, contas, graph, evol_pct, pie, pie12 = geraRelatorio(il)
         return render_template("relatorio.html",
                                rel=rel,
                                contas=contas,
@@ -855,6 +870,13 @@ def pbookPosts():
             sql = "UPDATE PBPosts set texto = '{}' where id = {}".format(
                 request.form["Texto"], request.form["id"])
             sqlExec(sql)
+        elif request.method == "POST" and "Delete" in request.form:
+            sql = "DELETE FROM PBPostsTags WHERE id_post = {}".format(
+                request.form["id"])
+            sqlExec(sql)
+            sql = "DELETE FROM PBPosts WHERE id = {}".format(
+                request.form["id"])
+            sqlExec(sql)
         tb = sqlQuery("SELECT * FROM PBPosts ORDER BY Texto")
         return render_template("pbook.posts.html", modo=modo, tb=tb, rs=rs)
     except:
@@ -873,16 +895,49 @@ def pbookTimeline():
                 InsertValues("PBPostsTags", ["id_post", "id_tag"],
                              [request.form["id"], request.form["tag"]])
 
-        from JP_PBook import getPosts
-        tb = getPosts()
+        filt = ""
+        if request.method == "GET" and "filter" in request.args:
+            filt = request.args.get('filter')
 
-        return render_template("pbook.timeline.html", tb=tb)
+        from JP_PBook import getPosts
+        tb = getPosts(filt)
+
+        return render_template("pbook.timeline.html", tb=tb, filt=filt)
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
         msg = "".join("\r\n<br>!! " + line for line in lines)
         logging.exception("message")
         return render_template("error.html", msg=msg)
+
+
+@app.route("/uploader", methods=["GET", "POST"])
+def uploader():
+    if request.method == 'POST':
+        d = dict(request.files)
+        f = d['image']
+        fname = f.filename
+
+        fn = "{}.{}".format(
+            ''.join((random.choice('qazwsxedcrfvtgbyhnujmikolp123456789')
+                     for i in range(48))),
+            fname.split(".")[1])
+        fs = "{}\{}".format(
+            os.path.join(os.path.abspath(os.getcwd()), "upload"), fn)
+        f.save(fs)
+        ret = {}
+        ret['success'] = 1
+        ret['file'] = {"url": "/upload/{}".format(fn)}
+    else:
+        ret = {}
+        ret['success'] = 0
+
+    return json.dumps(ret)
+
+
+@app.route('/upload/<path:filename>')
+def download(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
 #app.run(host="0.0.0.0", port=81)

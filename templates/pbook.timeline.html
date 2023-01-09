@@ -1,6 +1,21 @@
 {% extends 'index.html' %}
 {% block content %}
 <br><br>
+<style>
+    .ce-block__content,
+    .ce-toolbar__content {
+        max-width: unset;
+    }
+</style>
+
+<div class="row">
+  <div class="col-12">
+    {% for tag in tb['avail_tags'] %}
+      <a href="/pbook/timeline?filter={{ filt }},{{ tb['tbTags'][tag] }}" class="badge badge-warning">{{ tb['tbTags'][tag] }}</a>
+    {% endfor %}
+  </div>
+</div>
+
 {% for d in tb['Posts'] %}
 <div class="row">
   <div class="col-12">

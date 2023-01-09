@@ -24,7 +24,7 @@ def getPosts(filt):
     afilt = filt.split(",")
     sfilt = set(list(filter(None, afilt)))
     afilt = list(sfilt)
-    print(afilt)
+    # print(afilt)
 
     tb = sqlQuery("SELECT * FROM PBPosts ORDER BY datahora desc")
     res = []
@@ -47,4 +47,19 @@ def getPosts(filt):
             if incl:
                 res.append(r)
 
-    return {'Posts': res, 'Tags': tags, 'Rel': rel, 'tbTags': tbTags}
+    avail_tags = []
+    for l in res:
+        lid = l['id']
+        if lid in rel:
+            for l1 in rel[lid]:
+                if l1 not in avail_tags:
+                    if tbTags[l1] not in afilt:
+                        avail_tags.append(l1)
+
+    return {
+        'Posts': res,
+        'Tags': tags,
+        'Rel': rel,
+        'tbTags': tbTags,
+        'avail_tags': avail_tags
+    }

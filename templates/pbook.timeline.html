@@ -15,10 +15,11 @@
     {% endfor %}
   </div>
 </div>
+<br><br><br>
 
-{% for d in tb['Posts'] %}
 <div class="row">
-  <div class="col-12">
+{% for d in tb['Posts'] %}
+  <div class="col-6">
     <div class="card">
       <div class="card-body">
         <div class="row">
@@ -96,7 +97,9 @@
       </div>
     </div>
   </div>
-</div>
-<br>
+{{ loop.cycle(''|safe, '</div><br><div class="row">'|safe) }}
+
 {% endfor %}
+</div>
+
 {% endblock %}

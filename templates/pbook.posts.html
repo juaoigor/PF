@@ -20,7 +20,7 @@
           <thead>
             <tr>
               <th scope="col">ID</th>
-              <th scope="col">Texto</th>
+              <!-- <th scope="col">Texto</th> -->
               <th scope="col"></th>
             </tr>
           </thead>
@@ -28,7 +28,7 @@
             {% for d in tb %}
             <tr>
               <td>{{ d['id'] }}</td>
-              <td>{{ d['Texto'] }}</td>
+              <!-- <td>{{ d['Texto'] }}</td> -->
               <td><a href="/pbook/posts?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
             </tr>
             {% endfor %}

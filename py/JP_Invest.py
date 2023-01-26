@@ -101,19 +101,87 @@ def geraRelatorio(il):
     df = df.fillna(0)
     df.at[3000, "Nome"] = "TOTAL"
 
-    df = df.reindex(df.index.values.tolist() + [3001])
-    df = df.fillna(0)
-    df.at[3001, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;TOTAL Ex Bens"
-    df.at[3001, "Lvl"] = 2
-
-    k = df.index[df["Nome"] == "Carteira -> Bens"].tolist()[0]
-    l = df.index[df["Nome"] == "Investimentos -> Bens"].tolist()[0]
-
     for c in df:
         if c != "Nome" and c != "Lvl":
             df.at[3000, c] = df.at[2000, c] + df.at[2001, c]
 
-            df.at[3001, c] = df.at[3000, c] - (df.at[k, c] + df.at[l, c])
+    i = 3001
+    df = df.reindex(df.index.values.tolist() + [i])
+    df = df.fillna(0)
+    df.at[i, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;Bens"
+    df.at[i, "Lvl"] = 3
+    k = df.index[df["Nome"] == "Carteira -> Bens"].tolist()[0]
+    l = df.index[df["Nome"] == "Investimentos -> Bens"].tolist()[0]
+    for c in df:
+        if c != "Nome" and c != "Lvl":
+            df.at[i, c] = (df.at[k, c] + df.at[l, c])
+
+    i = 3002
+    df = df.reindex(df.index.values.tolist() + [i])
+    df = df.fillna(0)
+    df.at[i, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;Previdencia"
+    df.at[i, "Lvl"] = 3
+    k = df.index[df["Nome"] == "Carteira -> Previdencia"].tolist()[0]
+    l = df.index[df["Nome"] ==
+                 "Investimentos -> Caixa -> Previdencia"].tolist()[0]
+    for c in df:
+        if c != "Nome" and c != "Lvl":
+            df.at[i, c] = (df.at[k, c] + df.at[l, c])
+
+    i = 3003
+    df = df.reindex(df.index.values.tolist() + [i])
+    df = df.fillna(0)
+    df.at[i, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;Dolar"
+    df.at[i, "Lvl"] = 3
+    k = df.index[df["Nome"] == "Carteira -> Dolar"].tolist()[0]
+    l = df.index[df["Nome"] == "Investimentos -> Caixa -> Dolar"].tolist()[0]
+    for c in df:
+        if c != "Nome" and c != "Lvl":
+            df.at[i, c] = (df.at[k, c] + df.at[l, c])
+
+    i = 3004
+    df = df.reindex(df.index.values.tolist() + [i])
+    df = df.fillna(0)
+    df.at[i, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;Renda Fixa"
+    df.at[i, "Lvl"] = 3
+    k = df.index[df["Nome"] == "Carteira -> Renda Fixa"].tolist()[0]
+    l = df.index[df["Nome"] ==
+                 "Investimentos -> Caixa -> Renda Fixa"].tolist()[0]
+    for c in df:
+        if c != "Nome" and c != "Lvl":
+            df.at[i, c] = (df.at[k, c] + df.at[l, c])
+
+    i = 3005
+    df = df.reindex(df.index.values.tolist() + [i])
+    df = df.fillna(0)
+    df.at[i, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;Renda Variavel"
+    df.at[i, "Lvl"] = 3
+    k = df.index[df["Nome"] == "Carteira -> Renda Variavel"].tolist()[0]
+    l = df.index[df["Nome"] ==
+                 "Investimentos -> Caixa -> Renda Variavel"].tolist()[0]
+    for c in df:
+        if c != "Nome" and c != "Lvl":
+            df.at[i, c] = (df.at[k, c] + df.at[l, c])
+
+    i = 3006
+    df = df.reindex(df.index.values.tolist() + [i])
+    df = df.fillna(0)
+    df.at[i, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;Outros"
+    df.at[i, "Lvl"] = 3
+    k = df.index[df["Nome"] == "Carteira -> Outros"].tolist()[0]
+    l = df.index[df["Nome"] == "Investimentos -> Caixa -> Outros"].tolist()[0]
+    for c in df:
+        if c != "Nome" and c != "Lvl":
+            df.at[i, c] = (df.at[k, c] + df.at[l, c])
+
+    i = 3007
+    df = df.reindex(df.index.values.tolist() + [i])
+    df = df.fillna(0)
+    df.at[i, "Nome"] = "&nbsp;Total Ex Bens/Outros"
+    df.at[i, "Lvl"] = 2
+    for c in df:
+        if c != "Nome" and c != "Lvl":
+            df.at[i, c] = df.at[3000, c] - df.at[3001, c] - df.at[3006, c]
 
     res = {}
     res["header"] = []

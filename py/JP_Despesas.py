@@ -158,7 +158,8 @@ def geraRelatorio(il):
         else:
             df_acum = df_acum.drop(k)
     df_acum = df_acum.drop("ToSort", axis=1)
-    # df_acum = df_acum.drop(df.columns[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]], axis=1)
+    df_acum = df_acum.drop(df.columns[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]],
+                           axis=1)
 
     for k, v in df_acum.iterrows():
         df_acum.at[k, "Nome"] = v["Nome"].replace("Despesas -> ", "")

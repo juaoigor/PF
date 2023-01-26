@@ -112,7 +112,7 @@
                 }
               },
               yAxis: [{
-                type: 'value', position: 'left', alignTicks: true,
+                type: 'value', position: 'left', alignTicks: true, min: 0, max: 100,
                 splitLine: { show: true },
                 axisLabel: {
                   fontSize: 10,
@@ -121,7 +121,7 @@
               }],
               series: [
                 {% for k, v in evol_pct[1].items() %}
-                { yAxisIndex: 0, name: '{{k|safe}}', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v %}{{ r * 100 }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+                { yAxisIndex: 0, name: '{{k|safe}}', type: 'line', stack: 'Total',  areaStyle: {}, symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v %}{{ r * 100 }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
                 {{- ", " if not loop.last else "" -}}
                 {% endfor %}
               ]

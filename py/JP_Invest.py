@@ -13,6 +13,7 @@ from dateutil.relativedelta import relativedelta
 
 
 def geraRelatorio(il):
+    # il = False
     if il:
         dd = datetime.now() + relativedelta(months=1)
         udate = date(dd.year, dd.month, 1) - timedelta(days=1)
@@ -100,9 +101,20 @@ def geraRelatorio(il):
     df = df.fillna(0)
     df.at[3000, "Nome"] = "TOTAL"
 
+    df = df.reindex(df.index.values.tolist() + [3001])
+    df = df.fillna(0)
+    df.at[3001, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;TOTAL Ex Bens"
+    df.at[3001, "Lvl"] = 2
+
+    k = df.index[df["Nome"] == "Carteira -> Bens"].tolist()[0]
+    l = df.index[df["Nome"] == "Investimentos -> Bens"].tolist()[0]
+
     for c in df:
         if c != "Nome" and c != "Lvl":
             df.at[3000, c] = df.at[2000, c] + df.at[2001, c]
+
+            df.at[3001, c] = df.at[3000, c] - (df.at[k, c] + df.at[l, c])
+
     res = {}
     res["header"] = []
     res["lvl"] = []
@@ -191,17 +203,14 @@ def geraRelatorio(il):
             res["pg"].append("{:0,.0f}%".format((tot / tot_carteira) * 100))
         elif v["Nome"].split(" -> ")[0] == "Investimentos":
             res["pg"].append("{:0,.0f}%".format((tot / tot_invest) * 100))
+
     ##########
     # Blocos
     ##########
     df = df.drop("Lvl", axis=1)
     blocos = []
-    for b in [
-        ["Renda Fixa", 4000],
-        ["Renda Variavel", 4001],
-        ["Previdencia", 4002],
-        ["Dolar", 4003],
-    ]:
+    for b in [["Renda Fixa", 4000], ["Renda Variavel", 4001],
+              ["Previdencia", 4002], ["Dolar", 4003]]:
 
         bloco = {}
         bloco["header"] = res["header"]
@@ -263,7 +272,7 @@ def geraRelatorio(il):
             bloco["tot"].append("{:0,.0f}".format(tot))
             bloco["tot12"].append("{:0,.0f}".format(tot12))
         # Rentabilidade
-        bloco["nome"].append("Rentabilidade a.a.%")
+        bloco["nome"].append("Rent aa% (P&L / Sld Avg)")
         bloco["lvl"].append(1)
         l = []
         cx = []
@@ -297,4 +306,104 @@ def geraRelatorio(il):
     ##########
     ##########
     ##########
-    return res, blocos
+
+    ##########
+    # Participacao Invest
+    ##########
+    df = df.drop(df.columns[[
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
+        39, 40, 41, 42, 43, 44, 45, 46, 47, 48
+    ]],
+                 axis=1)
+    cts = []
+    for l in ['Dolar', 'Previdencia', 'Renda Fixa', 'Renda Variavel']:
+        cts.append([
+            l, df.index[df["Nome"] == "Carteira -> {}".format(l)].tolist()[0]
+        ])
+
+    lbs = []
+
+    part_invest = {}
+    part_invest_acum = {}
+    for b in cts:
+        part_invest[b[0]] = []
+        part_invest_acum[b[0]] = 0
+
+    part_invest_acum['TOTAL'] = 0
+
+    for c in df:
+        if c != 'Nome':
+            lbs.append(c)
+
+            for b in cts:
+                part_invest_acum[b[0]] = part_invest_acum[b[0]] + df.at[b[1],
+                                                                        c]
+                part_invest_acum['TOTAL'] = part_invest_acum['TOTAL'] + df.at[
+                    b[1], c]
+
+            for b in cts:
+                if part_invest_acum['TOTAL'] == 0:
+                    part_invest[b[0]].append("{:0,.2f}".format(0))
+                else:
+                    part_invest[b[0]].append(
+                        "{:0,.2f}".format(100 * part_invest_acum[b[0]] /
+                                          part_invest_acum['TOTAL']))
+
+    ##########
+    # Participacao Bens
+    ##########
+    cts = []
+    for l in [
+            'Dolar', 'Previdencia', 'Renda Fixa', 'Renda Variavel', 'Bens',
+            'Outros'
+    ]:
+        cts.append([
+            l, df.index[df["Nome"] == "Carteira -> {}".format(l)].tolist()[0]
+        ])
+
+    lbs = []
+
+    part_invest_bens = {}
+    part_invest_acum = {}
+    for b in cts:
+        part_invest_bens[b[0]] = []
+        part_invest_acum[b[0]] = 0
+
+    part_invest_acum['TOTAL'] = 0
+
+    for c in df:
+        if c != 'Nome':
+            lbs.append(c)
+
+            for b in cts:
+                part_invest_acum[b[0]] = part_invest_acum[b[0]] + df.at[b[1],
+                                                                        c]
+                part_invest_acum['TOTAL'] = part_invest_acum['TOTAL'] + df.at[
+                    b[1], c]
+
+            for b in cts:
+                if part_invest_acum['TOTAL'] == 0:
+                    part_invest_bens[b[0]].append("{:0,.2f}".format(0))
+                else:
+                    part_invest_bens[b[0]].append(
+                        "{:0,.2f}".format(100 * part_invest_acum[b[0]] /
+                                          part_invest_acum['TOTAL']))
+
+    #
+    dt = date(udate.year, 3, 1)
+    if udate.month >= 3:
+        dt = dt + relativedelta(years=1)
+    r = relativedelta(dt, udate)
+    ms = r.years * 12 + r.months
+
+    idx = df.index[df["Nome"] == "Carteira -> Renda Fixa -> CDB"].tolist()[0]
+    sidx = 0
+    for c in df:
+        if c != 'Nome':
+            sidx = sidx + df.at[idx, c]
+
+    mintokeep = 100000
+    mensal = "{:0,.2f}".format((sidx - mintokeep) / ms)
+
+    return res, blocos, [lbs, part_invest], [lbs, part_invest_bens], mensal

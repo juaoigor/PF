@@ -352,6 +352,30 @@ def despesasCrescimento():
         return render_template("error.html", msg=msg)
 
 
+@app.route("/despesas/duplicados", methods=["GET", "POST"])
+def despesasDuplicados():
+    try:
+        if request.method == "GET":
+            if request.args.get("modo") != None:
+                nid = int(request.args.get("id"))
+                nmodo = request.args.get("modo")
+                if nmodo == 'remover':
+                    sql = "DELETE FROM Despesas WHERE id = {}".format(nid)
+                    sqlExec(sql)
+        from JP_Despesas import getDuplicates
+        tb_dt, tb_sdt = getDuplicates()
+
+        return render_template("despesas.duplicados.html",
+                               tb_dt=tb_dt,
+                               tb_sdt=tb_sdt)
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        msg = "".join("\r\n<br>!! " + line for line in lines)
+        logging.exception("message")
+        return render_template("error.html", msg=msg)
+
+
 @app.route("/despesas/editar", methods=["GET", "POST"])
 def despesasEditar():
     eid = 0

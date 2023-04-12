@@ -22,8 +22,6 @@
               <th>Med</th>
               <th>Tot12</th>
               <th>Tot</th>
-              <th>%</th>
-              <th>%</th>
             </tr>
           </thead>
           <tbody>
@@ -40,8 +38,6 @@
               <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['avg'][c1.value]|safe }}</td>
               <td class="alnright rel_{{ rel['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rel['tot12'][c1.value]|safe }}</td>
               <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['tot'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['p'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['pg'][c1.value]|safe }}</td>
             </tr>
             {% set c1.value = c1.value + 1 %}
             {%- endfor -%}
@@ -88,7 +84,7 @@
       <div class="card-body">
         <div class="row">
           <div class="col-12">
-          <div id='chart_evol_1' style='width: 100%;height:500px;'></div>
+          <div id='chart_evol_1' style='width: 100%;height:400px;'></div>
           <script type='text/javascript'>
             var chartDom = document.getElementById('chart_evol_1');
             var myChart = echarts.init(chartDom);
@@ -110,7 +106,7 @@
                 }
               },
               yAxis: [{
-                type: 'value', position: 'left', alignTicks: true, min: 0, max: 100,
+                type: 'value', position: 'left', alignTicks: true, min: 0,
                 splitLine: { show: true },
                 axisLabel: {
                   fontSize: 10,
@@ -119,7 +115,7 @@
               }],
               series: [
                 {% for k, v in part_invest[1].items() %}
-                { yAxisIndex: 0, name: '{{k|safe}}', type: 'line', stack: 'Total',  areaStyle: {}, symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+                { yAxisIndex: 0, name: '{{k|safe}}', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
                 {{- ", " if not loop.last else "" -}}
                 {% endfor %}
               ]
@@ -138,7 +134,7 @@
       <div class="card-body">
         <div class="row">
           <div class="col-12">
-          <div id='chart_evol_2' style='width: 100%;height:500px;'></div>
+          <div id='chart_evol_2' style='width: 100%;height:400px;'></div>
           <script type='text/javascript'>
             var chartDom = document.getElementById('chart_evol_2');
             var myChart = echarts.init(chartDom);
@@ -160,7 +156,7 @@
                 }
               },
               yAxis: [{
-                type: 'value', position: 'left', alignTicks: true, min: 0, max: 100,
+                type: 'value', position: 'left', alignTicks: true, min: 0,
                 splitLine: { show: true },
                 axisLabel: {
                   fontSize: 10,
@@ -169,7 +165,7 @@
               }],
               series: [
                 {% for k, v in part_invest_bens[1].items() %}
-                { yAxisIndex: 0, name: '{{k|safe}}', type: 'line', stack: 'Total',  areaStyle: {}, symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+                { yAxisIndex: 0, name: '{{k|safe}}', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
                 {{- ", " if not loop.last else "" -}}
                 {% endfor %}
               ]
@@ -197,10 +193,6 @@
               {%- for l in bloco['header'] -%}
                 <th>{{l}}</th>
               {% endfor %}
-              <th>Med12</th>
-              <th>Med</th>
-              <th>Tot12</th>
-              <th>Tot</th>
             </tr>
           </thead>
           <tbody>
@@ -213,10 +205,6 @@
                 <td class="alnright rel_{{ bloco['lvl'][c1.value] }}">{{sl|safe}}</td>
               {% set c2.value = c2.value + 1 %}
               {% endfor %}
-              <td class="alnright rel_{{ bloco['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rel['avg12'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ bloco['lvl'][c1.value] }}">{{ bloco['avg'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ bloco['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ bloco['tot12'][c1.value]|safe }}</td>
-              <td class="alnright rel_{{ bloco['lvl'][c1.value] }}">{{ bloco['tot'][c1.value]|safe }}</td>
             </tr>
             {% set c1.value = c1.value + 1 %}
             {%- endfor -%}

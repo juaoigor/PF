@@ -43,7 +43,8 @@ def sqlExec(sql):
 
 def InsertValues(table, flds, vals):
     sql = "INSERT INTO {0} ({1}) VALUES ({2})".format(
-        table, ", ".join(flds), ", ".join(["?"] * len(flds)))
+        table, ", ".join(flds), ", ".join(["?"] * len(flds))
+    )
     db = sqlite3.connect(dbs)
     db.execute(sql, vals)
     db.commit()

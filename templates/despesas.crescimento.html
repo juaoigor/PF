@@ -6,20 +6,17 @@
   <div class="col-3">
   </div>
   <div class="col-6">
-
     <form  action="/despesas/crescimento" method="post">
       <div class="form-check form-check-inline">
         <label class="form-check-label" for="idTodos">Conta:&nbsp;&nbsp;&nbsp;</label>
-              <select class="form-control form-control-sm" id="selConta" name="conta">
-                {% for k in contas %}
-                  <option value="{{ k }}" {{ 'Selected' if k == conta else '' }}>{{ k }}</option>
-                {% endfor %}
-              </select>
+        <select class="form-control form-control-sm" id="selConta" name="conta">
+          {% for k in contas %}
+            <option value="{{ k }}" {{ 'Selected' if k == conta else '' }}>{{ k }}</option>
+          {% endfor %}
+        </select>
       </div>
       <div class="form-check form-check-inline"><button type="submit" class="btn btn-primary btn-sm" name="Filtrar" value="Filtrar">Filtrar</button></div>
     </form>
-
-
   </div>
   <div class="col-3"></div>
 </div>

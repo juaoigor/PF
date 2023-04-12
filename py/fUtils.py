@@ -9,29 +9,17 @@ from database import sqlQuery
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
-
 def despProcessarTexto(s):
-    r = []
-    i = 1
-    for l in s.split("$"):
-        a = l.split("#")
-        if len(a) == 3:
-            sql = "SELECT COUNT(*) as N FROM Despesas WHERE Datahora = '{}' AND (texto = '{}' OR texto = '{}') and valor = {}".format(
-                date2str(
-                    str2date(a[0].replace('\r', '').replace('\n', ''),
-                             "%d/%m/%Y"),
-                    "%Y-%m-%d",
-                ), a[1], "{} EDITADO".format(a[1]), a[2])
-            n = sqlQuery(sql)
-            r.append({
-                "Data": a[0],
-                "Texto": a[1],
-                "Valor": a[2],
-                "ID": i,
-                "N": n[0]['N']
-            })
-            i = i + 1
-    return r
+  r = []
+  i = 1
+  for l in s.split("$"):
+    a = l.split("#")
+    if len(a) == 3:
+      sql = "SELECT COUNT(*) as N FROM Despesas WHERE Datahora = '{}' AND (texto = '{}' OR texto = '{}') and valor = {}".format(date2str(str2date(a[0].replace('\r', '').replace('\n', ''), "%d/%m/%Y"),"%Y-%m-%d",), a[1], "{} EDITADO".format(a[1]), a[2])
+      n = sqlQuery(sql)
+      r.append({"Data": a[0], "Texto": a[1], "Valor": a[2], "ID": i, "N": n[0]['N']})
+      i = i + 1
+  return r
 
 
 def str2date(s, fmt):
@@ -79,8 +67,10 @@ def MontaTabelaResumo(mes, ano):
     with open("labels.pickle", "rb") as handle:
         labels = pickle.load(handle)
     r = sqlQuery(
-        "SELECT t1.id, t1.datahora, t1.texto, t1.id_conta, t1.id_transfer, t1.valor FROM Despesas t1 where cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t1.texto"
-        .format(ano, mes))
+        "SELECT t1.id, t1.datahora, t1.texto, t1.id_conta, t1.id_transfer, t1.valor FROM Despesas t1 where cast(strftime('%Y', t1.datahora) as integer) = {} and cast(strftime('%m', t1.datahora) as integer) = {} order by t1.datahora, t1.texto".format(
+            ano, mes
+        )
+    )
 
     t = 0
     i = 0
@@ -96,8 +86,9 @@ def MontaTabelaResumo(mes, ano):
         to_predict = [transfTexto(l["texto"])]
         p_count = count_vect.transform(to_predict)
         p_tfidf = tf_transformer.transform(p_count)
-        pbt = pd.DataFrame(calibrated_svc.predict_proba(p_tfidf) * 100,
-                           columns=labels.classes_)
+        pbt = pd.DataFrame(
+            calibrated_svc.predict_proba(p_tfidf) * 100, columns=labels.classes_
+        )
         high_prob = pbt.idxmax(axis=1)[0]
         if high_prob == cts[l["id_conta"]]:
             r[i]["high_prob"] = "ok"
@@ -120,8 +111,8 @@ def getProbLabel(nid):
     from database import sqlQuery
 
     texto = sqlQuery(
-        "SELECT texto from Despesas WHERE id = {} order by id".format(
-            nid))[0]["texto"]
+        "SELECT texto from Despesas WHERE id = {} order by id".format(nid)
+    )[0]["texto"]
     to_predict = [transfTexto(texto)]
 
     import pickle
@@ -139,16 +130,15 @@ def getProbLabel(nid):
 
     import pandas as pd
 
-    pbt = pd.DataFrame(calibrated_svc.predict_proba(p_tfidf) * 100,
-                       columns=labels.classes_)
+    pbt = pd.DataFrame(
+        calibrated_svc.predict_proba(p_tfidf) * 100, columns=labels.classes_
+    )
 
     res = []
     for c in pbt:
-        res.append({
-            "Conta": c,
-            "Prob": pbt[c][0],
-            "Probs": "{:0,.2f}".format(pbt[c][0])
-        })
+        res.append(
+            {"Conta": c, "Prob": pbt[c][0], "Probs": "{:0,.2f}".format(pbt[c][0])}
+        )
     return sorted(res, key=lambda d: d["Prob"], reverse=True)
 
 
@@ -182,8 +172,9 @@ def getProbLabelBulk():
 
     import pandas as pd
 
-    pbt = pd.DataFrame(calibrated_svc.predict_proba(p_tfidf) * 100,
-                       columns=labels.classes_)
+    pbt = pd.DataFrame(
+        calibrated_svc.predict_proba(p_tfidf) * 100, columns=labels.classes_
+    )
 
     topprob = pd.DataFrame()
 
@@ -240,8 +231,9 @@ def getProbLabelBulkCat():
 
     import pandas as pd
 
-    pbt = pd.DataFrame(calibrated_svc.predict_proba(p_tfidf) * 100,
-                       columns=labels.classes_)
+    pbt = pd.DataFrame(
+        calibrated_svc.predict_proba(p_tfidf) * 100, columns=labels.classes_
+    )
 
     topprob = pd.DataFrame()
 
@@ -286,10 +278,9 @@ def LabelTrain():
     from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import LabelEncoder
 
-    X_train, X_test, y_train, y_test = train_test_split(text,
-                                                        labels,
-                                                        random_state=0,
-                                                        test_size=0.01)
+    X_train, X_test, y_train, y_test = train_test_split(
+        text, labels, random_state=0, test_size=0.01
+    )
     count_vect = CountVectorizer()
     X_train_counts = count_vect.fit_transform(X_train)
     tf_transformer = TfidfTransformer().fit(X_train_counts)
@@ -308,8 +299,7 @@ def LabelTrain():
     linear_svc = LinearSVC()
     clf = linear_svc.fit(X_train_transformed, y_train_labels_trf)
 
-    calibrated_svc = CalibratedClassifierCV(base_estimator=linear_svc,
-                                            cv="prefit")
+    calibrated_svc = CalibratedClassifierCV(base_estimator=linear_svc, cv="prefit")
     calibrated_svc.fit(X_train_transformed, y_train_labels_trf)
     predicted = calibrated_svc.predict(X_test_transformed)
 
@@ -333,53 +323,48 @@ def is_number_tryexcept(s):
     except ValueError:
         return False
 
-
 def cpiFactors():
-    fact = {}
-    rs = sqlQuery(
-        "SELECT * from Taxas WHERE indice = 'IPCA' ORDER BY datahora DESC")
-    data_ultima = date(int(rs[0]['datahora'][0:4]), int(
-        rs[0]['datahora'][5:7]), 15) + relativedelta(months=0)
-    # rs.insert(0, {'id': 0, 'datahora': data_ultima.strftime('%Y-%m-%d'), 'indice': 'IPCA', 'valor': rs[0]['valor'] * (rs[0]['valor']/rs[1]['valor'])})
+  fact = {}
+  rs = sqlQuery("SELECT * from Taxas WHERE indice = 'IPCA' ORDER BY datahora DESC")
+  data_ultima = date(int(rs[0]['datahora'][0:4]), int(rs[0]['datahora'][5:7]), 15)  + relativedelta(months=0)
+  # rs.insert(0, {'id': 0, 'datahora': data_ultima.strftime('%Y-%m-%d'), 'indice': 'IPCA', 'valor': rs[0]['valor'] * (rs[0]['valor']/rs[1]['valor'])})
 
-    for i in range(0, len(rs) - 2):
-        dt1 = datetime.strptime(rs[i]['datahora'], '%Y-%m-%d')
-        dt2 = datetime.strptime(rs[i + 1]['datahora'], '%Y-%m-%d')
-        nd = (dt1 - dt2).days
-        for j in range(0, nd):
-            ipca = rs[i]['valor'] + j * (rs[i + 1]['valor'] -
-                                         rs[i]['valor']) / nd
-            dt = dt1 - relativedelta(days=j)
-            fact[dt.strftime('%Y-%m-%d')] = {'IPCA': ipca}
+  for i in range(0,len(rs) - 2):
+    dt1 = datetime.strptime(rs[i]['datahora'], '%Y-%m-%d')
+    dt2 = datetime.strptime(rs[i + 1]['datahora'], '%Y-%m-%d')
+    nd = (dt1-dt2).days
+    for j in range(0, nd):
+      ipca = rs[i]['valor'] + j * (rs[i+1]['valor'] - rs[i]['valor'])/nd
+      dt = dt1 - relativedelta(days=j)
+      fact[dt.strftime('%Y-%m-%d')] = {'IPCA': ipca}
 
-    for i in range(1, 100):
-        dt = data_ultima + relativedelta(days=i)
-        dt2 = dt - relativedelta(days=1)
-        dt1 = date(dt2.year - 1, dt2.month, dt2.day)
-        dt0 = dt1 + relativedelta(days=1)
-        f = fact[dt2.strftime('%Y-%m-%d')]['IPCA'] / fact[dt1.strftime(
-            '%Y-%m-%d')]['IPCA']
-        ipca = fact[dt0.strftime('%Y-%m-%d')]['IPCA'] * f
-        fact[dt.strftime('%Y-%m-%d')] = {'IPCA': ipca}
+  for i in range(1, 100):
+    dt = data_ultima + relativedelta(days=i)
+    dt2 = dt - relativedelta(days=1)
+    dt1 = date(dt2.year - 1, dt2.month, dt2.day)
+    dt0 = dt1 + relativedelta(days=1)
+    f = fact[dt2.strftime('%Y-%m-%d')]['IPCA']/fact[dt1.strftime('%Y-%m-%d')]['IPCA']
+    ipca = fact[dt0.strftime('%Y-%m-%d')]['IPCA'] * f
+    fact[dt.strftime('%Y-%m-%d')] = {'IPCA': ipca}
 
-    i = 0
-    fk = ""
-    for k in sorted(fact):
-        if i == 0:
-            fk = k
-            fact[k]['fator'] = 1
-        else:
-            fact[k]['fator'] = fact[k]['IPCA'] / fact[fk]['IPCA']
-        i = i + 1
+  i = 0
+  fk = ""
+  for k in sorted(fact):
+    if i == 0:
+      fk = k
+      fact[k]['fator'] = 1
+    else:
+      fact[k]['fator'] = fact[k]['IPCA']/fact[fk]['IPCA']
+    i = i + 1
 
-    i = 0
-    fk = ""
-    for k in sorted(fact, reverse=True):
-        if i == 0:
-            fk = k
-            fact[k]['fator_inv'] = 1
-        else:
-            fact[k]['fator_inv'] = fact[fk]['IPCA'] / fact[k]['IPCA']
-        i = i + 1
+  i = 0
+  fk = ""
+  for k in sorted(fact, reverse=True):
+    if i == 0:
+      fk = k
+      fact[k]['fator_inv'] = 1
+    else:
+      fact[k]['fator_inv'] = fact[fk]['IPCA']/fact[k]['IPCA']
+    i = i + 1
 
-    return fact
+  return fact

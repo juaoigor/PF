@@ -141,6 +141,7 @@
                 <th class="d-none d-xl-block">Total</th>
                 <th>Edit</th>
                 <th>Check Conta</th>
+                <th>Transfer</th>
               </tr>
             </thead>
             <tbody>
@@ -178,6 +179,7 @@
                 {% else %}
                   <td class="padrao alncenter">{{ r['high_prob']}}</td>
                 {%- endif -%}
+                <td class="padrao alncenter"><a href="/despesas/transfer?id={{ r['id'] }}&backto=despesasResumo" class="badge badge-info">Transfer</a></td>
               </tr>
               {%- endif -%}
               {%- endfor -%}

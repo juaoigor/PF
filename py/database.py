@@ -1,4 +1,6 @@
 import sqlite3
+import traceback
+import sys
 
 dbs = "db/database.db"
 
@@ -42,13 +44,20 @@ def sqlExec(sql):
 
 
 def InsertValues(table, flds, vals):
-    sql = "INSERT INTO {0} ({1}) VALUES ({2})".format(
-        table, ", ".join(flds), ", ".join(["?"] * len(flds))
-    )
-    db = sqlite3.connect(dbs)
-    db.execute(sql, vals)
-    db.commit()
-    db.close()
+    try:
+        sql = "INSERT INTO {0} ({1}) VALUES ({2})".format(
+            table, ", ".join(flds), ", ".join(["?"] * len(flds)))
+        print(sql)
+        db = sqlite3.connect(dbs)
+        db.execute(sql, vals)
+        db.commit()
+        db.close()
+    except sqlite3.Error as er:
+        print('SQLite error: %s' % (' '.join(er.args)))
+        print("Exception class is: ", er.__class__)
+        print('SQLite traceback: ')
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        print(traceback.format_exception(exc_type, exc_value, exc_tb))
 
 
 # sql = """

@@ -3,7 +3,7 @@
 {% block content %}
 <br>
 <div class="row">
-  <div class="col-3">
+  <div class="col-2">
   </div>
   <div class="col-6">
     <form  action="/despesas/crescimento" method="post">
@@ -18,7 +18,7 @@
       <div class="form-check form-check-inline"><button type="submit" class="btn btn-primary btn-sm" name="Filtrar" value="Filtrar">Filtrar</button></div>
     </form>
   </div>
-  <div class="col-3"></div>
+  <div class="col-2"></div>
 </div>
 
 
@@ -91,7 +91,7 @@
   </div>
   <div class="col-6">
     <div class="card">
-      <div class="card-header">Acumulado</div>
+      <div class="card-header">Acumulado 12M</div>
       <div class="card-body">
         <div class="row">
           <div class="col-12">
@@ -125,7 +125,7 @@
                 }
               }],
               series: [
-                { yAxisIndex: 0, name: 'Valores Desinfla', type: 'bar', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in res['valores_acum'] %}{{ r * 1}}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+                { yAxisIndex: 0, name: 'Valores Desinfla', type: 'bar', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in res['valores_12m'] %}{{ r * 1}}{% if not loop.last %}, {% endif %}{% endfor %} ] }
               ]
             };
 
@@ -372,6 +372,53 @@
               }],
               series: [
                 { yAxisIndex: 0, name: 'Valores Desinfla', type: 'bar', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in res['participacao'] %}{{ r * 1}}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+              ]
+            };
+
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Acumulado</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_evol_8' style='width: 100%;height:300px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_evol_8');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              tooltip: { trigger: 'item', axisPointer: { type: 'cross' } },
+              grid: { left: '8%', right: '1%', top: '10%', bottom: '7%' },
+              legend: {
+                show: false,
+                textStyle: { fontSize: 10 }
+              },
+              xAxis: {
+                type: 'category', data: ["{{ '", "'.join(res['labels']) | safe }}"],
+                axisLabel: { fontSize: 10, rotate: 30, align: 'center', verticalAlign: 'top' },
+                splitLine: {
+                  show: false,
+                  lineStyle: { width: 1, type : 'dashed', dashOffset: 3 }
+                }
+              },
+              yAxis: [{
+                type: 'value', position: 'left', alignTicks: true,
+                splitLine: { show: true },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value, 0); }
+                }
+              }],
+              series: [
+                { yAxisIndex: 0, name: 'Valores Desinfla', type: 'bar', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in res['valores_acum'] %}{{ r * 1}}{% if not loop.last %}, {% endif %}{% endfor %} ] }
               ]
             };
 

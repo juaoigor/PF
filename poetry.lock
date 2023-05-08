@@ -133,14 +133,6 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
-name = "git42"
-version = "2021.1.31"
-description = "git init, add, commit and push with one command"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "idna"
 version = "3.3"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -487,7 +479,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8.0,<3.9"
-content-hash = "54c13a89b4cfd82aa371b60691a4576469fcaf3b7c5db4dc8ebd554ba1ed5a7c"
+content-hash = "3129d438b61a31690692adaa3f3fa3c0d35f87d428b01a9afb75a13446b25ca3"
 
 [metadata.files]
 aiohttp = []
@@ -502,7 +494,6 @@ debugpy = []
 docstring-to-markdown = []
 flask = []
 frozenlist = []
-git42 = []
 idna = []
 importlib-metadata = []
 itsdangerous = []

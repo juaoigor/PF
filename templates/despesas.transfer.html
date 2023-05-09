@@ -5,7 +5,7 @@
 <div class="row">
   <div class="col-6">
     <div class="card">
-      <div class="card-header">Edita r</div>
+      <div class="card-header">Editar</div>
       <div class="card-body">
         <form  action="/despesas/transfer" method="post">
         <input type="hidden" name="backTo" value="{{ backto }}">
@@ -35,7 +35,7 @@
           </div>
           <div class="form-group row">
             <label for="idObs" class="col-2 col-form-label">Obs</label>
-            <div class="col-10"><input type="text" class="form-control form-control-sm" id="idObs" name="obs" value=""></div>
+            <div class="col-10"><input type="text" class="form-control form-control-sm" id="idObs" name="obs" value="" autocomplete="off"></div>
           </div>
           <div class="form-group row">
             <label for="selConta" class="col-2 col-form-label">Conta</label>
@@ -51,7 +51,7 @@
           </div>
           <div class="form-group row">
             <label for="idValor" class="col-2 col-form-label">Valor</label>
-            <div class="col-10"><input type="text" class="form-control form-control-sm" id="idValor" name="valor" value="{{ rs['valor'] }}"></div>
+            <div class="col-10"><input type="text" class="form-control form-control-sm" id="idValor" name="valor" value="{{ rs['valor'] }}"  autocomplete="off"></div>
           </div>
           <div class="form-group row">
             <div class="col-4">

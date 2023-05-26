@@ -2,7 +2,7 @@
 {% block content %}
 <br>
 <div class="row">
-  <div class="col-10">
+  <div class="col-12">
     <form  action="/despesas/editarcontames" method="post">
       <div class="card">
         <div class="card-header">Detalhe do Mes por Conta</div>
@@ -32,7 +32,7 @@
                     <option value="9999">Ignorar</option>
                   </select>
                 </td>
-                <td><input type="text" class="form-control form-control-sm" name="texto_{{ loop.index }}" value="{{ r['texto']}}"></td>
+                <td><input type="text" class="form-control form-control-sm" name="texto_{{ loop.index }}" value="{{ r['texto']}}" size="80"></td>
                 <td class='alnright'>{{ "{:0,.2f}".format(r['valor']) }}</td>
                 <td><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasClassificar" class="badge badge-danger">Edit</a></td>
                 <td><a href="/despesas/transfer?id={{ r['id'] }}&backto=despesasClassificar" class="badge badge-info">Transfer</a></td>

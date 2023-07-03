@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 
 
 def geraRelatorio(il):
-  # il = False
+  # il = True
   if il:
     dd = datetime.now() + relativedelta(months=1)
     udate = date(dd.year, dd.month, 1) - timedelta(days=1)
@@ -177,21 +177,42 @@ def geraRelatorio(il):
   i = 3007
   df = df.reindex(df.index.values.tolist() + [i])
   df = df.fillna(0)
+  df.at[i, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;Retido"
+  df.at[i, "Lvl"] = 3
+  k = df.index[df["Nome"] == "Carteira -> Retido"].tolist()[0]
+  l = df.index[df["Nome"] == "Investimentos -> Caixa -> Retido"].tolist()[0]
+  for c in df:
+    if c != "Nome" and c != "Lvl":
+      df.at[i, c] = (df.at[k, c] + df.at[l, c])
+
+  i = 3020
+  df = df.reindex(df.index.values.tolist() + [i])
+  df = df.fillna(0)
   df.at[i, "Nome"] = "&nbsp;Total Ex Bens/Outros"
   df.at[i, "Lvl"] = 2
   for c in df:
     if c != "Nome" and c != "Lvl":
       df.at[i, c] = df.at[3000, c] - df.at[3001, c] - df.at[3006, c]
 
-  i = 3008
+  i = 3021
   df = df.reindex(df.index.values.tolist() + [i])
   df = df.fillna(0)
   df.at[i, "Nome"] = "&nbsp;Total Ex Bens/Outros/Previdencia"
-  df.at[i, "Lvl"] = 1
+  df.at[i, "Lvl"] = 2
   for c in df:
     if c != "Nome" and c != "Lvl":
       df.at[i, c] = df.at[3000, c] - df.at[3001, c] - df.at[3006,
                                                             c] - df.at[3002, c]
+
+  i = 3022
+  df = df.reindex(df.index.values.tolist() + [i])
+  df = df.fillna(0)
+  df.at[i, "Nome"] = "&nbsp;Total Ex Bens/Outros/Previdencia/Retido"
+  df.at[i, "Lvl"] = 1
+  for c in df:
+    if c != "Nome" and c != "Lvl":
+      df.at[i, c] = df.at[3000, c] - df.at[3001, c] - df.at[3006, c] - df.at[
+        3002, c] - df.at[3007, c]
 
   res = {}
   res["header"] = []
@@ -231,6 +252,7 @@ def geraRelatorio(il):
       elif c == "Lvl":
         res["lvl"].append("{:.0f}".format(int(df.at[k, c])))
       else:
+        # print("{} {}".format(k,c))
         tot = tot + float(df.at[k, c])
         if (len(df.columns) - i - 2) <= 12:
           l.append("{:0,.0f}".format(float(df.at[k, c])))
@@ -277,27 +299,21 @@ def geraRelatorio(il):
     df = df.fillna(0)
     df.at[b[1] + 100, "Nome"] = "RESULTADO {}".format(b[0])
 
+    c_ant = 0
+    for c in df:
+      if c != "Nome":
+        id_mtm = df.index[df["Nome"] == "Carteira -> {}".format(
+          b[0])].tolist()[0]
+        id_cx = df.index[df["Nome"] == "Investimentos -> Caixa -> {}".format(
+          b[0])].tolist()[0]
+        df.at[b[1], c] = (df.at[id_mtm, c] + df.at[id_cx, c])
+        df.at[b[1] + 100, c] = df.at[id_mtm, c] + df.at[id_cx, c]
+
     acct_list = [
       "Carteira -> {}".format(b[0]),
-      "Investimentos -> Caixa -> {}".format(b[0])
+      "Investimentos -> Caixa -> {}".format(b[0]), "TOTAL {}".format(b[0]),
+      "RESULTADO {}".format(b[0])
     ]
-    c_ant = 0
-    for acct in acct_list:
-      x = df.index[df["Nome"] == acct].tolist()
-      if len(x) > 0:
-        acct_id = x[0]
-        for c in df:
-          if c != "Nome":
-            df.at[b[1], c] = df.at[b[1], c] + df.at[acct_id, c]
-            if c_ant != 0 and c_ant != 'Nome':
-              df.at[b[1] + 100, c] = df.at[b[1], c] - df.at[b[1], c_ant]
-          c_ant = c
-      acct_list = [
-        "Carteira -> {}".format(b[0]),
-        "Investimentos -> Caixa -> {}".format(b[0]), "TOTAL {}".format(b[0]),
-        "RESULTADO {}".format(b[0])
-      ]
-
     for acct in acct_list:
       acct_id = df.index[df["Nome"] == acct].tolist()[0]
       l = []
@@ -315,7 +331,10 @@ def geraRelatorio(il):
           else:
             bloco["lvl"].append(3)
         elif c != "Lvl":
-          tot = tot + df.at[acct_id, c]
+          if df.at[acct_id, 'Nome'] == "RESULTADO {}".format(b[0]):
+            tot = df.at[acct_id, c]
+          else:
+            tot = tot + df.at[acct_id, c]
           if (len(df.columns) - i - 2) <= 12:
             tot12 = tot12 + df.at[acct_id, c]
             l.append("{:0,.0f}".format(tot))
@@ -325,6 +344,8 @@ def geraRelatorio(il):
       # RESULTADO 12M
     bloco["nome"].append("RESULTADO 12M")
     bloco["lvl"].append(2)
+    bloco["nome"].append("Sld Avg")
+    bloco["lvl"].append(3)
     bloco["nome"].append("RESULTADO 12M % (P&L/Sld Avg)")
     bloco["lvl"].append(2)
     cx = []
@@ -332,6 +353,7 @@ def geraRelatorio(il):
     mtm_acum = []
     l1 = []
     l2 = []
+    l3 = []
     id_cx = df.index[df["Nome"] == "Investimentos -> Caixa -> {}".format(
       b[0])].tolist()[0]
     id_mtm = df.index[df["Nome"] == "Carteira -> {}".format(b[0])].tolist()[0]
@@ -348,10 +370,13 @@ def geraRelatorio(il):
           saldo_avg = sum(mtm_acum[-12:]) / len(mtm_acum[-12:])
           if saldo_avg == 0:
             l2.append("{:0,.2f}%".format(0))
+            l3.append("{:0,.2f}%".format(0))
           else:
             l2.append("{:0,.2f}%".format(100 * pnl12 / saldo_avg))
+            l3.append("{:0,.2f}".format(saldo_avg))
         i = i + 1
     bloco["tb"].append(l1)
+    bloco["tb"].append(l3)
     bloco["tb"].append(l2)
 
     blocos.append(bloco)
@@ -386,6 +411,9 @@ def geraRelatorio(il):
   bloco["nome"].append("RESULTADO 12M")
   bloco["lvl"].append(2)
 
+  bloco["nome"].append("Sld Avg")
+  bloco["lvl"].append(3)
+
   bloco["nome"].append("RESULTADO 12M % (P&L/Sld Avg)")
   bloco["lvl"].append(2)
 
@@ -398,6 +426,7 @@ def geraRelatorio(il):
   l4 = []
   l5 = []
   l6 = []
+  l7 = []
   restot = []
   i = -1
   cx = 0
@@ -429,6 +458,7 @@ def geraRelatorio(il):
 
         saldo_avg = sum(mtms[-12:]) / len(mtms[-12:])
         l6.append("{:0,.2f}%".format(100 * sum(restot[-12:]) / saldo_avg))
+        l7.append("{:0,.2f}".format(saldo_avg))
 
       tot_ant = cx + mtm
 
@@ -439,6 +469,7 @@ def geraRelatorio(il):
   bloco["tb"].append(l3)
   bloco["tb"].append(l4)
   bloco["tb"].append(l5)
+  bloco["tb"].append(l7)
   bloco["tb"].append(l6)
 
   blocos.append(bloco)

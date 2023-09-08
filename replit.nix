@@ -1,5 +1,7 @@
 { pkgs }: {
   deps = [
+    pkgs.zip
+    pkgs.wget
     pkgs.python38Full
   ];
   env = {

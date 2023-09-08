@@ -216,4 +216,132 @@
 </div>
 {% endfor %}
 
+<br>
+<div class="row">
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">Mark To Market</div>
+      <div class="card-body">
+        <table  class="table table-sm table-hover">
+          <thead>
+            <tr class='alncenter'>
+              <th></th>
+              <th width="10%">RF</th>
+              <th width="10%">RV</th>
+              <th width="10%">Dol</th>
+              <th width="10%">Prev</th>
+              <th width="10%">Subtotal1</th>
+              <th width="10%">Bens</th>
+              <th width="10%">Outros</th>
+              <th width="10%">Subtotal2</th>
+              <th width="10%">Retido</th>
+              <th width="10%">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for v in valtbl[0] %}
+              <tr class="rel_3l">
+                <td class="rel_3l">{{v['dt']|safe}}</td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_rf']}};">{{v['rf']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_rv']}};">{{v['rv']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_dol']}};">{{v['dol']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_prev']}};">{{v['prev']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_subtot1']}};">{{v['subtot1']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_bens']}};">{{v['bens']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_outr']}};">{{v['outr']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_subtot2']}};">{{v['subtot2']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_retido']}};">{{v['retido']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_tot']}};">{{v['total']|safe}}</span></td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<br>
+<div class="row">
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">Mark To Market Delta</div>
+      <div class="card-body">
+        <table  class="table table-sm table-hover">
+          <thead>
+            <tr class='alncenter'>
+              <th></th>
+              <th width="9%">RF</th>
+              <th width="9%">RV</th>
+              <th width="9%">Dol</th>
+              <th width="9%">Prev</th>
+              <th width="9%">Subtot1</th>
+              <th width="9%">Bens</th>
+              <th width="9%">Outros</th>
+              <th width="9%">Subtot2</th>
+              <th width="9%">Retido</th>
+              <th width="9%">Total</th>
+              <th width="9%">Tot 12M</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for v in valtbl[1] %}
+              <tr class="rel_3l">
+                <td class="rel_3l">{{v['dt']|safe}}</td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_rf']}};">{{v['rf']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_rv']}};">{{v['rv']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_dol']}};">{{v['dol']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_prev']}};">{{v['prev']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_subtot1']}};">{{v['subtot1']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_bens']}};">{{v['bens']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_outr']}};">{{v['outr']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_subtot2']}};">{{v['subtot2']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_retido']}};">{{v['retido']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_tot']}};">{{v['total']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_tot']}};">{{v['total_12']|safe}}</span></td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<br>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Result Subtotal1</div>
+      <div class="card-body">
+        <table  class="table table-sm table-hover">
+          <thead>
+            <tr class='alncenter'>
+              <th></th>
+              <th width="20%">Acum</th>
+              <th width="20%">Result</th>
+              <th width="20%">Result 12m</th>
+              <th width="20%">Result 12m Avg</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for v in valtbl[2] %}
+              <tr class="rel_3l">
+                <td class="rel_3l">{{v['dt']|safe}}</td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_res_mes']}};">{{v['tot']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_res_mes']}};">{{v['tot_delta']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_res_mes_12']}};">{{v['tot_delta_12m']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_res_mes_12']}};">{{v['tot_delta_12m_avg']|safe}}</span></td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 {% endblock %}

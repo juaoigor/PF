@@ -678,9 +678,9 @@ def investimentosRelatorios():
         il = True
 
     from JP_Invest import geraRelatorio
-    rel, blocos, part_invest, part_invest_bens, mensal = geraRelatorio(il)
+    rel, blocos, part_invest, part_invest_bens, mensal, valtbl = geraRelatorio(il)
     return render_template("investimentos.relatorios.html", rel=rel, blocos=blocos,
-                           part_invest=part_invest, part_invest_bens=part_invest_bens, mensal=mensal)
+                           part_invest=part_invest, part_invest_bens=part_invest_bens, mensal=mensal, valtbl=valtbl)
   except:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)

@@ -666,7 +666,7 @@ def GeraRelatorioFC():
   ipca = sqlQuery("select * from taxas where indice = 'IPCA' and datahora <= '{}' ORDER BY datahora DESC LIMIT 1".format(dt))[0]['valor']
   res = sqlQuery("SELECT t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz, t3.qtde FROM Bonds t1, BondsFlows t2, BondsCarteira t3 WHERE t1.id = t2.idbond and t1.id = t3.idbond AND t2.data >= '{}'".format(dt))
   for r in res:
-    r['data'] = datetime.strptime(r['data'], '%Y-%m-%d')
+    # r['data'] = datetime.strptime(r['data'], '%Y-%m-%d')
     if r['tipo'] == 'A':
       v = ipca / r['startindex'] * 1000 * r['amtz'] * r['qtde']
       if r['data'] in df.index:
@@ -680,6 +680,7 @@ def GeraRelatorioFC():
       else:
         df.at[r['data'],'Cx'] = v
 
+  df.index = pd.to_datetime(df.index)
   df_mes = df.groupby([(df.index.year), (df.index.month)]).sum()
   df_ano = df.groupby([(df.index.year)]).sum()
 

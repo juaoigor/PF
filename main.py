@@ -655,7 +655,7 @@ def investimentosBondsFlows():
       if request.form["Criar"] == "Criar":
         InsertValues("BondsFlows", ["idbond", "data", "tipo", "yield", "yieldper", "amtz"], [request.form["bond"], request.form["data"], request.form["tipo"], request.form["yield"], request.form["yieldper"], request.form["amtz"]])
     elif request.method == "POST" and "Update" in request.form:
-      sql = "UPDATE Bonds set bond = '{}', startdate = '{}', startindex = {} where id = {}".format(request.form["bond"], request.form["startdate"], request.form["startindex"], request.form["id"])
+      sql = "UPDATE Bonds set idbond = {}, data = '{}', tipo = '{}', yield = {}, yieldper = {}, amtz = {} where id = {}".format(request.form["bond"], request.form["data"], request.form["tipo"], request.form["yield"], request.form["yieldper"], request.form["amtz"], request.form["id"])
       sqlExec(sql)
     elif request.method == "POST" and "Bulk" in request.form:
       for l in request.form["Obs"].split("#"):

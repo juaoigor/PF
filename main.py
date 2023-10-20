@@ -603,6 +603,109 @@ def despesasResumoconta():
     return render_template("despesas.resumoconta.html", tb=tb, labels=labels)
 
 
+
+@app.route("/investimentos/bonds", methods=["GET", "POST"])
+def investimentosBonds():
+  try:
+    from database import sqlQuery, sqlExec, InsertValues
+    modo = "I"
+    eid = 0
+    rs = ""
+    if request.method == "POST":
+      print(request.form)
+
+    if request.method == "GET":
+      if request.args.get("mode") == "edit":
+        modo = "E"
+        eid = request.args.get("id")
+        rs = sqlQuery("SELECT * FROM Bonds WHERE id = {}".format(eid))[0]
+    elif request.method == "POST" and "Criar" in request.form:
+      if request.form["Criar"] == "Criar":
+        InsertValues("Bonds", ["bond", "startdate", "startindex"], [request.form["bond"], request.form["startdate"], request.form["startindex"]])
+    elif request.method == "POST" and "Update" in request.form:
+      sql = "UPDATE Bonds set bond = '{}', startdate = '{}', startindex = {} where id = {}".format(request.form["bond"], request.form["startdate"], request.form["startindex"], request.form["id"])
+      sqlExec(sql)
+    tb = sqlQuery("SELECT * FROM Bonds ORDER BY Bond, StartDate")
+
+    return render_template("investimentos.bonds.html", modo=modo, tb=tb, rs=rs)
+  except:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    msg = "".join("\r\n<br>!! " + line for line in lines)
+    logging.exception("message")
+    return render_template("error.html", msg=msg)
+
+
+@app.route("/investimentos/bondsflows", methods=["GET", "POST"])
+def investimentosBondsFlows():
+  try:
+    from database import sqlQuery, sqlExec, InsertValues
+    modo = "I"
+    eid = 0
+    rs = ""
+    if request.method == "POST":
+      print(request.form)
+
+    if request.method == "GET":
+      if request.args.get("mode") == "edit":
+        modo = "E"
+        eid = request.args.get("id")
+        rs = sqlQuery("SELECT * FROM BondsFlows WHERE id = {}".format(eid))[0]
+    elif request.method == "POST" and "Criar" in request.form:
+      if request.form["Criar"] == "Criar":
+        InsertValues("BondsFlows", ["idbond", "data", "tipo", "yield", "yieldper", "amtz"], [request.form["bond"], request.form["data"], request.form["tipo"], request.form["yield"], request.form["yieldper"], request.form["amtz"]])
+    elif request.method == "POST" and "Update" in request.form:
+      sql = "UPDATE Bonds set bond = '{}', startdate = '{}', startindex = {} where id = {}".format(request.form["bond"], request.form["startdate"], request.form["startindex"], request.form["id"])
+      sqlExec(sql)
+    elif request.method == "POST" and "Bulk" in request.form:
+      for l in request.form["Obs"].split("#"):
+        r = l.split(";")
+        if len(r) == 6:
+          InsertValues("BondsFlows", ["idbond", "data", "tipo", "yield", "yieldper", "amtz"], [r[0], r[1], r[2], r[3], r[4], r[5]])
+
+    tb = sqlQuery("SELECT t1.*, t2.bond FROM BondsFlows t1, Bonds t2 where t1.idbond = t2.id ORDER BY t2.Bond, t1.data, t1.tipo")
+    bonds = sqlQuery("SELECT * FROM Bonds ORDER BY Bond, StartDate")
+    return render_template("investimentos.bondsflows.html", modo=modo, tb=tb, rs=rs, bonds=bonds)
+  except:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    msg = "".join("\r\n<br>!! " + line for line in lines)
+    logging.exception("message")
+    return render_template("error.html", msg=msg)
+
+@app.route("/investimentos/carteira", methods=["GET", "POST"])
+def investimentosCarteira():
+  try:
+    from database import sqlQuery, sqlExec, InsertValues
+    modo = "I"
+    eid = 0
+    rs = ""
+    if request.method == "POST":
+      print(request.form)
+
+    if request.method == "GET":
+      if request.args.get("mode") == "edit":
+        modo = "E"
+        eid = request.args.get("id")
+        rs = sqlQuery("SELECT * FROM BondsCarteira WHERE id = {}".format(eid))[0]
+    elif request.method == "POST" and "Criar" in request.form:
+      if request.form["Criar"] == "Criar":
+        InsertValues("BondsCarteira", ["idbond", "data", "qtde", "cx"], [request.form["bond"], request.form["date"], request.form["qtde"], request.form["cx"]])
+    elif request.method == "POST" and "Update" in request.form:
+      sql = "UPDATE Bonds set bond = '{}', startdate = '{}', startindex = {} where id = {}".format(request.form["bond"], request.form["startdate"], request.form["startindex"], request.form["id"])
+      sqlExec(sql)
+    tb = sqlQuery("SELECT t1.*, t2.bond FROM BondsCarteira t1, Bonds t2 where t1.idbond = t2.id ORDER BY t1.data, t2.Bond")
+    bonds = sqlQuery("SELECT * FROM Bonds ORDER BY Bond, StartDate")
+
+    return render_template("investimentos.carteira.html", modo=modo, tb=tb, rs=rs, bonds=bonds)
+  except:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    msg = "".join("\r\n<br>!! " + line for line in lines)
+    logging.exception("message")
+    return render_template("error.html", msg=msg)
+
+
 @app.route("/investimentos/saldos", methods=["GET", "POST"])
 def investimentosSaldos():
   try:
@@ -681,6 +784,23 @@ def investimentosRelatorios():
     rel, blocos, part_invest, part_invest_bens, mensal, valtbl = geraRelatorio(il)
     return render_template("investimentos.relatorios.html", rel=rel, blocos=blocos,
                            part_invest=part_invest, part_invest_bens=part_invest_bens, mensal=mensal, valtbl=valtbl)
+  except:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    msg = "".join("\r\n<br>!! " + line for line in lines)
+    logging.exception("message")
+    return render_template("error.html", msg=msg)
+
+
+
+@app.route("/investimentos/fluxo", methods=["GET", "POST"])
+def investimentosFluxo():
+  try:
+
+    from JP_Invest import GeraRelatorioFC
+    tb1 = GeraRelatorioFC()
+    print(tb1)
+    return render_template("investimentos.fluxo.html", tb1=tb1)
   except:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
@@ -812,4 +932,5 @@ def uploader():
 def download(filename):
   return send_from_directory(app.config['UPLOAD_FOLDER'],filename)
 
-#app.run(host="0.0.0.0", port=81)
+# app.run(host="0.0.0.0", port=81)
+#app.run(host='0.0.0.0', port= 81, debug=True, )

@@ -106,3 +106,32 @@ CREATE TABLE PBPostsTags (
   id_post INTEGER,
   id_tag INTEGER
 );
+
+DROP TABLE IF EXISTS Bonds;
+CREATE TABLE Bonds (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  bond TEXT,
+  startdate TEXT,
+  startindex DOUBLE,
+);
+
+DROP TABLE IF EXISTS BondsFlows;
+CREATE TABLE BondsFlows (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  idbond INTEGER,
+  data TEXT,
+  tipo TEXT,
+  yield DOUBLE,
+  yieldper DOUBLE,
+  amtz DOUBLE
+);
+
+
+DROP TABLE IF EXISTS BondsCarteira;
+CREATE TABLE BondsCarteira (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  idbond INTEGER,
+  data TEXT,
+  qtde DOUBLE,
+  cx DOUBLE
+);

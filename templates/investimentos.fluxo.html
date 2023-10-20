@@ -1,0 +1,34 @@
+{% extends 'index.html' %}
+{% block content %}
+
+
+<br>
+<div class="row">
+  <div class="col-3">
+    <div class="card">
+      <div class="card-header">Relatorio</div>
+      <div class="card-body">
+        <table  class="table table-sm">
+          <thead>
+              <th>Ano</th>
+              <th>Anual</th>
+              <th>Mensal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in range(0, tb1[0]|length) %}
+              <tr>
+              <td>{{ tb1[0][i] }}</td>
+              <td class="alnright">{{ tb1[1][i] }}</td>
+              <td class="alnright">{{ tb1[2][i] }}</td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

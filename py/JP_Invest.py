@@ -657,3 +657,46 @@ def geraRelatorio(il):
   del mtm_delta[:23]
 
   return res, blocos, [lbs, part_invest], [lbs, part_invest_bens], mensal, [mtm, mtm_delta, resmtm]
+
+
+def GeraRelatorioFC():
+  df = pd.DataFrame()
+
+  dt = datetime.now().date().strftime('%Y-%m-%d')
+  ipca = sqlQuery("select * from taxas where indice = 'IPCA' and datahora <= '{}' ORDER BY datahora DESC LIMIT 1".format(dt))[0]['valor']
+  res = sqlQuery("SELECT t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz, t3.qtde FROM Bonds t1, BondsFlows t2, BondsCarteira t3 WHERE t1.id = t2.idbond and t1.id = t3.idbond AND t2.data >= '{}'".format(dt))
+  for r in res:
+    r['data'] = datetime.strptime(r['data'], '%Y-%m-%d')
+    if r['tipo'] == 'A':
+      v = ipca / r['startindex'] * 1000 * r['amtz'] * r['qtde']
+      if r['data'] in df.index:
+        df.at[r['data'],'Cx'] = df.at[r['data'],'Cx'] + v
+      else:
+        df.at[r['data'],'Cx'] = v
+    elif r['tipo'] == 'J':
+      v = ipca / r['startindex'] * 1000 * (((1 + r['yield'])**r['yieldper'])-1)* (1-r['amtz']) * r['qtde']
+      if r['data'] in df.index:
+        df.at[r['data'],'Cx'] = df.at[r['data'],'Cx'] + v
+      else:
+        df.at[r['data'],'Cx'] = v
+
+  df_mes = df.groupby([(df.index.year), (df.index.month)]).sum()
+  df_ano = df.groupby([(df.index.year)]).sum()
+
+  anos = []
+  valores = []
+  valores12 = []
+  ys = 50
+  for i in range(0, ys + 1):
+    y = (datetime.now().date() + relativedelta(months=i * 12)).year
+    anos.append(y)
+    if y in df_ano.index:
+      valores.append("{:0,.2f}".format(df_ano.at[y, 'Cx']))
+      valores12.append("{:0,.2f}".format(df_ano.at[y, 'Cx']/12))
+    else:
+      valores.append("{:0,.2f}".format(0))
+      valores12.append("{:0,.2f}".format(0))
+
+  tb1 = [anos, valores, valores12]
+
+  return tb1

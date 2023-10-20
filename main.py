@@ -655,7 +655,7 @@ def investimentosBondsFlows():
       if request.form["Criar"] == "Criar":
         InsertValues("BondsFlows", ["idbond", "data", "tipo", "yield", "yieldper", "amtz"], [request.form["bond"], request.form["data"], request.form["tipo"], request.form["yield"], request.form["yieldper"], request.form["amtz"]])
     elif request.method == "POST" and "Update" in request.form:
-      sql = "UPDATE Bonds set idbond = {}, data = '{}', tipo = '{}', yield = {}, yieldper = {}, amtz = {} where id = {}".format(request.form["bond"], request.form["data"], request.form["tipo"], request.form["yield"], request.form["yieldper"], request.form["amtz"], request.form["id"])
+      sql = "UPDATE BondsFlows set idbond = {}, data = '{}', tipo = '{}', yield = {}, yieldper = {}, amtz = {} where id = {}".format(request.form["bond"], request.form["data"], request.form["tipo"], request.form["yield"], request.form["yieldper"], request.form["amtz"], request.form["id"])
       sqlExec(sql)
     elif request.method == "POST" and "Bulk" in request.form:
       for l in request.form["Obs"].split("#"):
@@ -692,7 +692,7 @@ def investimentosCarteira():
       if request.form["Criar"] == "Criar":
         InsertValues("BondsCarteira", ["idbond", "data", "qtde", "cx"], [request.form["bond"], request.form["date"], request.form["qtde"], request.form["cx"]])
     elif request.method == "POST" and "Update" in request.form:
-      sql = "UPDATE Bonds set bond = '{}', startdate = '{}', startindex = {} where id = {}".format(request.form["bond"], request.form["startdate"], request.form["startindex"], request.form["id"])
+      sql = "UPDATE BondsCarteira set idbond = {}, data = '{}', qtde = {}, cx = {} where id = {}".format(request.form["bond"], request.form["date"], request.form["qtde"], request.form["cx"], request.form["id"])
       sqlExec(sql)
     tb = sqlQuery("SELECT t1.*, t2.bond FROM BondsCarteira t1, Bonds t2 where t1.idbond = t2.id ORDER BY t1.data, t2.Bond")
     bonds = sqlQuery("SELECT * FROM Bonds ORDER BY Bond, StartDate")

@@ -880,11 +880,17 @@ def investimentosRiscos():
     elif request.method == "POST" and "Update" in request.form:
       sql = "UPDATE RiscosC set idconta = '{}', idrisco = '{}' where id = {}".format(request.form["conta"], request.form["risco"], request.form["id"])
       sqlExec(sql)
+
+    from JP_Invest import GeraSemCadastro
+    semcad = GeraSemCadastro()
+
     contas = sqlQuery("SELECT * FROM Contas where saldo = 1 order by Conta")
     riscos = sqlQuery("SELECT * FROM Riscos order by Categ, Risco")
     tb = sqlQuery("SELECT t1.id, t2.Conta, t3.Risco, t3.Categ FROM RiscosC t1, Contas t2, Riscos t3 where t1.idConta = t2.id and t1.idRisco = t3.id ORDER BY t3.Categ, t2.Conta")
+
+
     return render_template("investimentos.riscos.html", modo=modo, tb=tb, rs=rs,
-                           contas=contas, riscos=riscos)
+                           contas=contas, riscos=riscos, semcad=semcad)
   except:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)

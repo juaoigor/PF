@@ -762,6 +762,8 @@ def geraRelatorio(il):
     cgat['nome'] = categoria['Categ']
     cgat['id'] = categoria['Categ'].replace(" ", "")
     cgat['vals'] = {}
+    cgat['per'] = {}
+    tot = 0
 
     contas = sqlQuery(
       "SELECT t3.Conta, t2.Risco FROM RiscosC t1, Riscos t2, Contas t3 where t1.idRisco = t2.id and t1.idConta = t3.id and t2.Categ  = '{}'"
@@ -775,10 +777,14 @@ def geraRelatorio(il):
           if c != 'Nome':
             sidx = sidx + df.at[idx, c]
 
+        tot = tot + sidx
         if conta['Risco'] in cgat['vals']:
           cgat['vals'][conta['Risco']] = cgat['vals'][conta['Risco']] + sidx
         else:
           cgat['vals'][conta['Risco']] = sidx
+
+      for k, v in cgat['vals'].items():
+        cgat['per'][k] = "{:0,.0f}%".format(100 * cgat['vals'][k] / tot)
 
     gcats.append(cgat)
 
@@ -840,3 +846,27 @@ def GeraRelatorioFC(sid):
   tb1 = [anos, valores, valores12]
 
   return tb1
+
+
+def GeraSemCadastro():
+  categorias = sqlQuery(
+    "SELECT id, Categ from Riscos GROUP BY Categ ORDER BY Categ")
+  contas = sqlQuery(
+    "SELECT id, Conta from Contas WHERE Saldo = 1 ORDER BY Conta")
+  riscos = sqlQuery("SELECT * from RiscosC")
+
+  def cadastrado(riscos, c, r):
+    res = False
+    for l in riscos:
+      if l['idConta'] == c and l['idRisco'] == r:
+        res = True
+        break
+    return res
+
+  lista = []
+  for categoria in categorias:
+    for conta in contas:
+      if cadastrado(riscos, conta['id'], categoria['id']) == False:
+        lista.append([conta['Conta'], categoria['Categ']])
+
+  return lista

@@ -384,7 +384,8 @@
 
                     {% else %}
                         { value: {{ v }}, name: '{{ k|safe }} - {{ g['per'][k]|safe }}' }
-                    {% endif % }
+                    {% endif %}
+
                     {{- ", " if not loop.last else "" -}}
                     {% endfor %}
                   ],

@@ -380,7 +380,11 @@
                   radius: '60%',
                   data: [
                     {%- for k, v in g['vals'].items() -%}
+                    {% if 'Ignora' == k %}
+
+                    {% else %}
                         { value: {{ v }}, name: '{{ k|safe }} - {{ g['per'][k]|safe }}' }
+                    {% endif % }
                     {{- ", " if not loop.last else "" -}}
                     {% endfor %}
                   ],

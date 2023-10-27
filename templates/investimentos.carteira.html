@@ -2,7 +2,7 @@
 {% block content %}
 <br><br>
 <div class="row">
-  <div class="col-5">
+  <div class="col-8">
     <div class="card">
       <div class="card-header">Bonds</div>
       <div class="card-body">
@@ -15,6 +15,7 @@
               <th scope="col">Qtde</th>
               <th scope="col">Caixa</th>
               <th scope="col"></th>
+              <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
@@ -26,6 +27,7 @@
               <td>{{ d['qtde'] }}</td>
               <td>{{ d['cx'] }}</td>
               <td><a href="/investimentos/carteira?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
+              <td><a href="/investimentos/carteira?mode=view&id={{ d['id'] }}" class="badge badge-info">View</a></td>
             </tr>
             {% endfor %}
           </tbody>
@@ -34,7 +36,7 @@
     </div>
   </div>
   {% if modo == 'I' %}
-  <div class="col-3">
+  <div class="col-4">
     <div class="card">
       <div class="card-header">Adicionar</div>
       <div class="card-body">
@@ -114,4 +116,35 @@
   {% else %}
   {% endif %}
 </div>
+<br>
+{% if modo == 'V' %}
+<br>
+<div class="row">
+  <div class="col-3">
+    <div class="card">
+      <div class="card-header">Relatorio</div>
+      <div class="card-body">
+        <table  class="table table-sm">
+          <thead>
+              <th>Ano</th>
+              <th>Anual</th>
+              <th>Mensal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in range(0, tb1[0]|length) %}
+              <tr>
+              <td>{{ tb1[0][i] }}</td>
+              <td class="alnright">{{ tb1[1][i] }}</td>
+              <td class="alnright">{{ tb1[2][i] }}</td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}

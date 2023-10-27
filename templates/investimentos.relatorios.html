@@ -343,5 +343,65 @@
   </div>
 </div>
 
+{% for g in gcats %}
+<br>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">{{ g['nome'] }}</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_pie_{{ g['id'] }}' style='width: 100%;height:500px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_pie_{{ g['id'] }}');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              title: {
+                show: false,
+                text: 'Referer of a Website',
+                subtext: 'Fake Data',
+                left: 'center'
+              },
+              textStyle: { fontSize: 10 },
+              tooltip: {
+                trigger: 'item'
+              },
+              legend: {
+                show: false,
+                orient: 'vertical',
+                left: 'left'
+              },
+              series: [
+                {
+                  type: 'pie',
+                  radius: '60%',
+                  data: [
+                    {%- for k, v in g['vals'].items() -%}
+                        { value: {{ v }}, name: '{{ k|safe }}' }
+                    {{- ", " if not loop.last else "" -}}
+                    {% endfor %}
+                  ],
+                  emphasis: {
+                    itemStyle: {
+                      shadowBlur: 10,
+                      shadowOffsetX: 0,
+                      shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                  }
+                }
+              ]
+            };
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
 
 {% endblock %}

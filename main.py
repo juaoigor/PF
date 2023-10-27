@@ -144,6 +144,72 @@ def configDebug():
   return render_template("config.debug.html", info=info)
 
 
+@app.route("/config/parametros", methods=["GET", "POST"])
+def configParametros():
+  try:
+    from database import sqlQuery, sqlExec, InsertValues
+    modo = "I"
+    eid = 0
+    rs = ""
+    if request.method == "POST":
+      print(request.form)
+
+    if request.method == "GET":
+      if request.args.get("mode") == "edit":
+        modo = "E"
+        eid = request.args.get("id")
+        rs = sqlQuery("SELECT * FROM Parametros WHERE id = {}".format(eid))[0]
+    elif request.method == "POST" and "Criar" in request.form:
+      if request.form["Criar"] == "Criar":
+        InsertValues("Parametros", ["param", "val"],
+                     [request.form["param"], request.form["val"]])
+    elif request.method == "POST" and "Update" in request.form:
+      sql = "UPDATE Parametros set param = '{}', val = '{}' where id = {}".format(
+        request.form["param"], request.form["val"], request.form["id"])
+      sqlExec(sql)
+    tb = sqlQuery("SELECT * FROM Parametros order by Param")
+    return render_template("config.parametros.html", modo=modo, tb=tb, rs=rs)
+  except:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    msg = "".join("\r\n<br>!! " + line for line in lines)
+    logging.exception("message")
+    return render_template("error.html", msg=msg)
+
+
+@app.route("/config/riscos", methods=["GET", "POST"])
+def configRiscos():
+  try:
+    from database import sqlQuery, sqlExec, InsertValues
+    modo = "I"
+    eid = 0
+    rs = ""
+    if request.method == "POST":
+      print(request.form)
+
+    if request.method == "GET":
+      if request.args.get("mode") == "edit":
+        modo = "E"
+        eid = request.args.get("id")
+        rs = sqlQuery("SELECT * FROM Riscos WHERE id = {}".format(eid))[0]
+    elif request.method == "POST" and "Criar" in request.form:
+      if request.form["Criar"] == "Criar":
+        InsertValues("Riscos", ["risco", "categ"],
+                     [request.form["risco"], request.form["categoria"]])
+    elif request.method == "POST" and "Update" in request.form:
+      sql = "UPDATE Riscos set risco = '{}', categ = '{}' where id = {}".format(
+        request.form["risco"], request.form["categoria"], request.form["id"])
+      sqlExec(sql)
+    tb = sqlQuery("SELECT * FROM Riscos order by Categ, Risco")
+    return render_template("config.riscos.html", modo=modo, tb=tb, rs=rs)
+  except:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    msg = "".join("\r\n<br>!! " + line for line in lines)
+    logging.exception("message")
+    return render_template("error.html", msg=msg)
+
+
 @app.route("/config/setup", methods=["GET", "POST"])
 def configSetup():
   if request.method == "POST":
@@ -790,6 +856,7 @@ def investimentosCarteira():
     modo = "I"
     eid = 0
     rs = ""
+    tb1 = []
     if request.method == "POST":
       print(request.form)
 
@@ -799,6 +866,12 @@ def investimentosCarteira():
         eid = request.args.get("id")
         rs = sqlQuery(
           "SELECT * FROM BondsCarteira WHERE id = {}".format(eid))[0]
+      elif request.args.get("mode") == "view":
+        modo = "V"
+        eid = request.args.get("id")
+        from JP_Invest import GeraRelatorioFC
+        tb1 = GeraRelatorioFC(eid)
+
     elif request.method == "POST" and "Criar" in request.form:
       if request.form["Criar"] == "Criar":
         InsertValues("BondsCarteira", ["idbond", "data", "qtde", "cx"], [
@@ -819,7 +892,8 @@ def investimentosCarteira():
                            modo=modo,
                            tb=tb,
                            rs=rs,
-                           bonds=bonds)
+                           bonds=bonds,
+                           tb1=tb1)
   except:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
@@ -931,7 +1005,7 @@ def investimentosRelatorios():
         il = True
 
     from JP_Invest import geraRelatorio
-    rel, blocos, part_invest, part_invest_bens, mensal, valtbl = geraRelatorio(
+    rel, blocos, part_invest, part_invest_bens, mensal, valtbl, gcats = geraRelatorio(
       il)
     return render_template("investimentos.relatorios.html",
                            rel=rel,
@@ -939,7 +1013,50 @@ def investimentosRelatorios():
                            part_invest=part_invest,
                            part_invest_bens=part_invest_bens,
                            mensal=mensal,
-                           valtbl=valtbl)
+                           valtbl=valtbl,
+                           gcats=gcats)
+  except:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    msg = "".join("\r\n<br>!! " + line for line in lines)
+    logging.exception("message")
+    return render_template("error.html", msg=msg)
+
+
+@app.route("/investimentos/riscos", methods=["GET", "POST"])
+def investimentosRiscos():
+  try:
+    from database import sqlQuery, sqlExec, InsertValues
+    modo = "I"
+    eid = 0
+    rs = ""
+    if request.method == "POST":
+      print(request.form)
+
+    if request.method == "GET":
+      if request.args.get("mode") == "edit":
+        modo = "E"
+        eid = request.args.get("id")
+        rs = sqlQuery("SELECT * FROM RiscosC WHERE id = {}".format(eid))[0]
+    elif request.method == "POST" and "Criar" in request.form:
+      if request.form["Criar"] == "Criar":
+        InsertValues("RiscosC", ["idConta", "idRisco"],
+                     [request.form["conta"], request.form["risco"]])
+    elif request.method == "POST" and "Update" in request.form:
+      sql = "UPDATE RiscosC set idconta = '{}', idrisco = '{}' where id = {}".format(
+        request.form["conta"], request.form["risco"], request.form["id"])
+      sqlExec(sql)
+    contas = sqlQuery("SELECT * FROM Contas where saldo = 1 order by Conta")
+    riscos = sqlQuery("SELECT * FROM Riscos order by Categ, Risco")
+    tb = sqlQuery(
+      "SELECT t1.id, t2.Conta, t3.Risco, t3.Categ FROM RiscosC t1, Contas t2, Riscos t3 where t1.idConta = t2.id and t1.idRisco = t3.id"
+    )
+    return render_template("investimentos.riscos.html",
+                           modo=modo,
+                           tb=tb,
+                           rs=rs,
+                           contas=contas,
+                           riscos=riscos)
   except:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
@@ -953,8 +1070,7 @@ def investimentosFluxo():
   try:
 
     from JP_Invest import GeraRelatorioFC
-    tb1 = GeraRelatorioFC()
-    print(tb1)
+    tb1 = GeraRelatorioFC(0)
     return render_template("investimentos.fluxo.html", tb1=tb1)
   except:
     exc_type, exc_value, exc_traceback = sys.exc_info()

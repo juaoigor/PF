@@ -6,6 +6,7 @@ import pandas as pd
 import string
 
 from database import sqlQuery
+from database import getParam
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
@@ -13,7 +14,7 @@ from dateutil.relativedelta import relativedelta
 
 
 def geraRelatorio(il):
-  # il = True
+  # il = False
   if il:
     dd = datetime.now() + relativedelta(months=1)
     udate = date(dd.year, dd.month, 1) - timedelta(days=1)
@@ -566,7 +567,7 @@ def geraRelatorio(il):
     if c != 'Nome':
       sidx = sidx + df.at[idx, c]
 
-  mintokeep = 200000
+  mintokeep = float(getParam("MinReservaCDB", 200000))
   mensal = "{:0,.2f}".format((sidx - mintokeep) / ms)
 
   ##########
@@ -752,20 +753,54 @@ def geraRelatorio(il):
   del resmtm[:24]
   del mtm_delta[:23]
 
+  ### Grafico Categorias
+  gcats = []
+  categorias = sqlQuery(
+    "SELECT Categ from Riscos GROUP BY Categ ORDER BY Categ")
+  for categoria in categorias:
+    cgat = {}
+    cgat['nome'] = categoria['Categ']
+    cgat['id'] = categoria['Categ'].replace(" ", "")
+    cgat['vals'] = {}
+
+    contas = sqlQuery(
+      "SELECT t3.conta, t2.risco FROM RiscosC t1, Riscos t2, Contas t3 where t1.idRisco = t2.id and t1.idConta = t3.id and t2.Categ  = '{}'"
+      .format(categoria['Categ']))
+    for conta in contas:
+      idx = df.index[df["Nome"] == conta['Conta']].tolist()[0]
+      sidx = 0
+      for c in df:
+        if c != 'Nome':
+          sidx = sidx + df.at[idx, c]
+
+      if conta['Risco'] in cgat['vals']:
+        cgat['vals'][conta['Risco']] = cgat['vals'][conta['Risco']] + sidx
+      else:
+        cgat['vals'][conta['Risco']] = sidx
+
+    gcats.append(cgat)
+
   return res, blocos, [lbs, part_invest], [lbs, part_invest_bens
-                                           ], mensal, [mtm, mtm_delta, resmtm]
+                                           ], mensal, [mtm, mtm_delta,
+                                                       resmtm], gcats
 
 
-def GeraRelatorioFC():
+def GeraRelatorioFC(sid):
   df = pd.DataFrame()
 
   dt = datetime.now().date().strftime('%Y-%m-%d')
   ipca = sqlQuery(
     "select * from taxas where indice = 'IPCA' and datahora <= '{}' ORDER BY datahora DESC LIMIT 1"
     .format(dt))[0]['valor']
-  res = sqlQuery(
-    "SELECT t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz, t3.qtde FROM Bonds t1, BondsFlows t2, BondsCarteira t3 WHERE t1.id = t2.idbond and t1.id = t3.idbond AND t2.data >= '{}'"
-    .format(dt))
+  if sid == 0:
+    res = sqlQuery(
+      "SELECT t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz, t3.qtde FROM Bonds t1, BondsFlows t2, BondsCarteira t3 WHERE t1.id = t2.idbond and t1.id = t3.idbond AND t2.data >= '{}'"
+      .format(dt))
+  else:
+    res = sqlQuery(
+      "SELECT t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz, t3.qtde FROM Bonds t1, BondsFlows t2, BondsCarteira t3 WHERE t1.id = t2.idbond and t1.id = t3.idbond AND t3.id = {}"
+      .format(sid))
+
   for r in res:
     # r['data'] = datetime.strptime(r['data'], '%Y-%m-%d')
     if r['tipo'] == 'A':
@@ -789,7 +824,7 @@ def GeraRelatorioFC():
   anos = []
   valores = []
   valores12 = []
-  ys = 50
+  ys = 60
   for i in range(0, ys + 1):
     y = (datetime.now().date() + relativedelta(months=i * 12)).year
     anos.append(y)

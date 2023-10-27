@@ -120,6 +120,7 @@
             <tr>
               <th scope="col">Conta</th>
               <th scope="col">Categoria</th>
+              <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
@@ -127,6 +128,7 @@
             <tr>
               <td>{{ d[0] }}</td>
               <td>{{ d[1] }}</td>
+              <td><a href="/investimentos/riscos?mode=addig&conta={{ d[0] }}&cat={{ d[1] }}" class="badge badge-danger">Ignore</a></td>
             </tr>
             {% endfor %}
           </tbody>

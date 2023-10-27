@@ -743,12 +743,12 @@ def GeraRelatorioFC(sid):
 def GeraSemCadastro():
   categorias = sqlQuery("SELECT id, Categ from Riscos ORDER BY Categ" )
   contas = sqlQuery("SELECT id, Conta from Contas WHERE Saldo = 1 ORDER BY Conta")
-  riscos = sqlQuery("SELECT * from RiscosC")
+  riscos = sqlQuery("SELECT t3.Conta, t2.Categ FROM RiscosC t1, Riscos t2, Contas t3 where t1.idRisco = t2.id and t1.idConta = t3.id")
 
   def cadastrado(riscos, c, r):
     res = False
     for l in riscos:
-      if l['idConta'] == c and l['idRisco'] == r:
+      if l['Conta'] == c and l['Categ'] == r:
         res = True
         break
     return res
@@ -756,7 +756,7 @@ def GeraSemCadastro():
   lista = []
   for categoria in categorias:
     for conta in contas:
-      if cadastrado(riscos, conta['id'], categoria['id']) == False:
+      if cadastrado(riscos, conta['Conta'], categoria['Categ']) == False:
         lista.append([conta['Conta'], categoria['Categ']])
 
   return lista

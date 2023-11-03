@@ -740,6 +740,51 @@ def GeraRelatorioFC(sid):
 
   return tb1
 
+
+def GeraRelatorioFCAno(ano):
+  # ano = '2024'
+  df = pd.DataFrame()
+
+  dt = datetime.now().date().strftime('%Y-%m-%d')
+  ipca = sqlQuery("select * from taxas where indice = 'IPCA' and datahora <= '{}' ORDER BY datahora DESC LIMIT 1".format(dt))[0]['valor']
+  res = sqlQuery("SELECT t1.bond, t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz, t3.qtde FROM Bonds t1, BondsFlows t2, BondsCarteira t3 WHERE t1.id = t2.idbond and t1.id = t3.idbond and strftime('%Y', t2.data) = '{}' order by t2.data".format(ano))
+
+  bonds = []
+  datasdets = []
+  valoresdets = []
+
+  for r in res:
+    # r['data'] = datetime.strptime(r['data'], '%Y-%m-%d')
+    if r['tipo'] == 'A':
+      v = ipca / r['startindex'] * 1000 * r['amtz'] * r['qtde']
+      if r['data'] in df.index:
+        df.at[r['data'],'Cx'] = df.at[r['data'],'Cx'] + v
+      else:
+        df.at[r['data'],'Cx'] = v
+      bonds.append(r['bond'])
+      datasdets.append(r['data'])
+      valoresdets.append("{:0,.2f}".format(v))
+
+    elif r['tipo'] == 'J':
+      v = ipca / r['startindex'] * 1000 * (((1 + r['yield'])**r['yieldper'])-1)* (1-r['amtz']) * r['qtde']
+      if r['data'] in df.index:
+        df.at[r['data'],'Cx'] = df.at[r['data'],'Cx'] + v
+      else:
+        df.at[r['data'],'Cx'] = v
+      bonds.append(r['bond'])
+      datasdets.append(r['data'])
+      valoresdets.append("{:0,.2f}".format(v))
+
+  datas = []
+  valores = []
+  for k, v in df.iterrows():
+    datas.append(k)
+    valores.append("{:0,.2f}".format(v['Cx']))
+
+
+
+  return [datas, valores], [bonds, datasdets, valoresdets]
+
 def GeraSemCadastro():
   categorias = sqlQuery("SELECT id, Categ from Riscos ORDER BY Categ" )
   contas = sqlQuery("SELECT id, Conta from Contas WHERE Saldo = 1 ORDER BY Conta")

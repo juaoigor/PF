@@ -240,6 +240,30 @@ def geraRelatorio(il):
   df.at[3014, "ToSort"] = 6
   df.at[3014, "Lvl"] = 3
 
+  df = df.reindex(df.index.values.tolist() + [3020])
+  df = df.fillna(0)
+  df.at[3020, "Nome"] = "TOTAL SUJO"
+  df.at[3020, "ToSort"] = 9
+  df.at[3020, "Lvl"] = 2
+
+  df = df.reindex(df.index.values.tolist() + [3021])
+  df = df.fillna(0)
+  df.at[3021, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;1. (+) Total Receitas"
+  df.at[3021, "ToSort"] = 8
+  df.at[3021, "Lvl"] = 3
+
+  df = df.reindex(df.index.values.tolist() + [3022])
+  df = df.fillna(0)
+  df.at[3022, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;2. (-) Bonus"
+  df.at[3022, "ToSort"] = 8
+  df.at[3022, "Lvl"] = 3
+
+  df = df.reindex(df.index.values.tolist() + [3023])
+  df = df.fillna(0)
+  df.at[3023, "Nome"] = "&nbsp;&nbsp;&nbsp;&nbsp;3. (-) Total Despesas"
+  df.at[3023, "ToSort"] = 8
+  df.at[3023, "Lvl"] = 3
+
   id_fixo = df.index[df["Nome"] == "Receitas -> Salario -> Fixo"].tolist()[0]
   id_fixo_d = df.index[df["Nome"] ==
                        "Receitas -> Salario -> Fixo Deduções"].tolist()[0]
@@ -248,6 +272,10 @@ def geraRelatorio(il):
                          "Despesas -> Filhos -> Educacao"].tolist()[0]
   # id_aquisicoes = df.index[df['Nome'] == 'Despesas -> Aquisicao'].tolist()[0]
   # id_manutencao = df.index[df['Nome'] == 'Despesas -> Manutencao'].tolist()[0]
+
+  id_receitas = df.index[df["Nome"] == "Receitas"].tolist()[0]
+  id_bonus = df.index[df["Nome"] ==
+                      "Receitas -> Salario -> Variavel"].tolist()[0]
 
   for c in df:
     if c != "Nome" and c != "Lvl" and c != "ToSort":
@@ -262,6 +290,12 @@ def geraRelatorio(il):
 
       df.at[3010, c] = (df.at[3011, c] + df.at[3012, c] + df.at[3013, c] +
                         df.at[3014, c])
+
+      df.at[3021, c] = df.at[id_receitas, c]
+      df.at[3022, c] = -df.at[id_bonus, c]
+      df.at[3023, c] = df.at[3014, c]
+      df.at[3020, c] = df.at[3021, c] + df.at[3022, c] + df.at[3023, c]
+
   df = df.sort_values(["ToSort", "Nome"])
   df = df.drop("ToSort", axis=1)
   lvl = df.pop("Lvl")

@@ -20,13 +20,15 @@ def getContas():
   return contas
 
 
-def geraTabela(contas, cpiAdj, il):
-  if il is True:
-    dd = datetime.now() + relativedelta(months=1)
-    udate = date(dd.year, dd.month, 1) - timedelta(days=1)
-  else:
-    udate = date(datetime.now().year,
-                 datetime.now().month, 1) - timedelta(days=1)
+def geraTabela(contas, cpiAdj, mes, ano):
+  # if il is True:
+  #   dd = datetime.now() + relativedelta(months=1)
+  #   udate = date(dd.year , dd.month, 1) - timedelta(days=1)
+  # else:
+  #   udate = date(datetime.now().year , datetime.now().month, 1) - timedelta(days=1)
+
+  udate = date(ano, mes, 1) + relativedelta(months=0) - timedelta(days=1)
+  print(udate)
 
   r = sqlQuery(
     "SELECT datahora, cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Despesas t1, Contas t2 where t1.datahora <= date('{}') and t1.id_conta = t2.id and t2.saldo = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id"
@@ -130,16 +132,17 @@ def geraTabela(contas, cpiAdj, il):
   return df
 
 
-def geraRelatorio(il):
-  if il is True:
-    dd = datetime.now() + relativedelta(months=1)
-    udate = date(dd.year, dd.month, 1) - timedelta(days=1)
-  else:
-    udate = date(datetime.now().year,
-                 datetime.now().month, 1) - timedelta(days=1)
+def geraRelatorio(mes, ano):
+  # if il is True:
+  #   dd = datetime.now() + relativedelta(months=1)
+  #   udate = date(dd.year , dd.month, 1) - timedelta(days=1)
+  # else:
+  #   udate = date(datetime.now().year , datetime.now().month, 1) - timedelta(days=1)
+
+  udate = date(ano, mes, 1) + relativedelta(months=0) - timedelta(days=1)
 
   contas = getContas()
-  df = geraTabela(contas, False, il)
+  df = geraTabela(contas, False, mes, ano)
 
   # Evolucao do %
   df_acum = pd.DataFrame().reindex_like(df)

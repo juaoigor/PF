@@ -843,14 +843,33 @@ def investimentosSaldos():
 @app.route("/investimentos/relatorios", methods=["GET", "POST"])
 def investimentosRelatorios():
   try:
-    il = False
+    mes = (datetime.now() + relativedelta(months=-0)).month
+    ano = (datetime.now() + relativedelta(months=-0)).year
     if request.method == "GET":
-      if request.args.get("last") == "on":
-        il = True
+        if request.args.get("mes") is not None:
+            mes = int(request.args.get("mes"))
+        if request.args.get("ano") is not None:
+            ano = int(request.args.get("ano"))
+
+    ant = datetime(int(ano), int(mes), 1) + relativedelta(months=-1)
+    anta = datetime(int(ano), int(mes), 1) + relativedelta(months=-12)
+    anta6 = datetime(int(ano), int(mes), 1) + relativedelta(months=-6)
+    pos = datetime(int(ano), int(mes), 1) + relativedelta(months=1)
+    posa = datetime(int(ano), int(mes), 1) + relativedelta(months=12)
+    posa6 = datetime(int(ano), int(mes), 1) + relativedelta(months=6)
+    links = {
+        "ant": r"/investimentos/relatorios?mes={}&ano={}".format(ant.month, ant.year),
+        "pos": r"/investimentos/relatorios?mes={}&ano={}".format(pos.month, pos.year),
+        "anta": r"/investimentos/relatorios?mes={}&ano={}".format(anta.month, anta.year),
+        "posa": r"/investimentos/relatorios?mes={}&ano={}".format(posa.month, posa.year),
+        "anta6": r"/investimentos/relatorios?mes={}&ano={}".format(anta6.month, anta6.year),
+        "posa6": r"/investimentos/relatorios?mes={}&ano={}".format(posa6.month, posa6.year),
+        "atual": r"/investimentos/relatorios",
+    }
 
     from JP_Invest import geraRelatorio
-    rel, blocos, part_invest, part_invest_bens, mensal, valtbl, gcats = geraRelatorio(il)
-    return render_template("investimentos.relatorios.html", rel=rel, blocos=blocos,
+    rel, blocos, part_invest, part_invest_bens, mensal, valtbl, gcats = geraRelatorio(mes, ano)
+    return render_template("investimentos.relatorios.html", links=links, rel=rel, blocos=blocos,
                            part_invest=part_invest, part_invest_bens=part_invest_bens, mensal=mensal, valtbl=valtbl, gcats=gcats)
   except:
     exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -938,13 +957,33 @@ def despesasRelatorio():
   try:
     from JP_Despesas import geraRelatorio
 
-    il = False
+    mes = (datetime.now() + relativedelta(months=-0)).month
+    ano = (datetime.now() + relativedelta(months=-0)).year
     if request.method == "GET":
-      if request.args.get("last") == "on":
-        il = True
+        if request.args.get("mes") is not None:
+            mes = int(request.args.get("mes"))
+        if request.args.get("ano") is not None:
+            ano = int(request.args.get("ano"))
 
-    rel, contas, graph, evol_pct, pie, pie12 = geraRelatorio(il)
-    return render_template("relatorio.html", rel=rel, contas=contas, graph=graph, evol_pct=evol_pct,pie=pie, pie12=pie12)
+    ant = datetime(int(ano), int(mes), 1) + relativedelta(months=-1)
+    anta = datetime(int(ano), int(mes), 1) + relativedelta(months=-12)
+    anta6 = datetime(int(ano), int(mes), 1) + relativedelta(months=-6)
+    pos = datetime(int(ano), int(mes), 1) + relativedelta(months=1)
+    posa = datetime(int(ano), int(mes), 1) + relativedelta(months=12)
+    posa6 = datetime(int(ano), int(mes), 1) + relativedelta(months=6)
+    links = {
+        "ant": r"/despesas/relatorio?mes={}&ano={}".format(ant.month, ant.year),
+        "pos": r"/despesas/relatorio?mes={}&ano={}".format(pos.month, pos.year),
+        "anta": r"/despesas/relatorio?mes={}&ano={}".format(anta.month, anta.year),
+        "posa": r"/despesas/relatorio?mes={}&ano={}".format(posa.month, posa.year),
+        "anta6": r"/despesas/relatorio?mes={}&ano={}".format(anta6.month, anta6.year),
+        "posa6": r"/despesas/relatorio?mes={}&ano={}".format(posa6.month, posa6.year),
+        "atual": r"/despesas/relatorio",
+    }
+
+
+    rel, contas, graph, evol_pct, pie, pie12 = geraRelatorio(mes, ano)
+    return render_template("relatorio.html", links=links, rel=rel, contas=contas, graph=graph, evol_pct=evol_pct,pie=pie, pie12=pie12)
   except:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)

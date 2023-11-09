@@ -3,10 +3,25 @@
 {% block content %}
 
 <div class="row">
-  <div class="col-2">
-    <a href="/despesas/relatorio?last=on" class="badge badge-warning">Include Last Values</a>
+  <div class="col-3">
+  </div>
+  <div class="col-6">
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item"><a class="page-link" href="{{ links['anta'] }}">-1  Ano</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['anta6'] }}">-6  Meses</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['ant'] }}">-1  Mes</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['atual'] }}">Hoje</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['pos'] }}">+1 Mes</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['posa6'] }}">+6 Meses</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['posa'] }}">+1 Ano</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="col-3">
   </div>
 </div>
+
 
 <br>
 <div class="row">

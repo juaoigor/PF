@@ -4,7 +4,7 @@
 
 <br>
 <div class="row">
-  <div class="col-4">
+  <div class="col-5">
     <div class="card">
       <div class="card-header">Relatorio</div>
       <div class="card-body">
@@ -12,6 +12,7 @@
           <thead>
               <th>Ano</th>
               <th>Anual</th>
+              <th>Acumulado</th>
               <th>Mensal</th>
               <th></th>
             </tr>
@@ -21,6 +22,7 @@
               <tr>
               <td>{{ tb1[0][i] }}</td>
               <td class="alnright">{{ tb1[1][i] }}</td>
+              <td class="alnright">{{ tb1[3][i] }}</td>
               <td class="alnright">{{ tb1[2][i] }}</td>
               <td class="alnright"><a href="/investimentos/fluxo?mode=view&ano={{ tb1[0][i] }}" class="badge badge-info">View</a></td>
               </tr>
@@ -38,6 +40,7 @@
           <thead>
               <th>Data</th>
               <th>Valor</th>
+              <th>Acumulado</th>
             </tr>
           </thead>
           <tbody>
@@ -45,6 +48,7 @@
               <tr>
               <td>{{ tb2a[0][i] }}</td>
               <td class="alnright">{{ tb2a[1][i] }}</td>
+              <td class="alnright">{{ tb2a[2][i] }}</td>
               </tr>
             {%- endfor -%}
           </tbody>

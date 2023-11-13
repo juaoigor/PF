@@ -840,18 +840,23 @@ def GeraRelatorioFC(sid):
   anos = []
   valores = []
   valores12 = []
+  valorest = []
   ys = 60
+  t = 0
   for i in range(0, ys + 1):
     y = (datetime.now().date() + relativedelta(months=i * 12)).year
     anos.append(y)
     if y in df_ano.index:
+      t = t + df_ano.at[y, 'Cx']
       valores.append("{:0,.2f}".format(df_ano.at[y, 'Cx']))
       valores12.append("{:0,.2f}".format(df_ano.at[y, 'Cx'] / 12))
+      valorest.append("{:0,.2f}".format(t))
     else:
       valores.append("{:0,.2f}".format(0))
       valores12.append("{:0,.2f}".format(0))
+      valorest.append("{:0,.2f}".format(0))
 
-  tb1 = [anos, valores, valores12]
+  tb1 = [anos, valores, valores12, valorest]
 
   return tb1
 
@@ -897,11 +902,15 @@ def GeraRelatorioFCAno(ano):
 
   datas = []
   valores = []
+  valorest = []
+  t = 0
   for k, v in df.iterrows():
     datas.append(k)
     valores.append("{:0,.2f}".format(v['Cx']))
+    t = t + v['Cx']
+    valorest.append("{:0,.2f}".format(t))
 
-  return [datas, valores], [bonds, datasdets, valoresdets]
+  return [datas, valores, valorest], [bonds, datasdets, valoresdets]
 
 
 def GeraSemCadastro():

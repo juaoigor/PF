@@ -19,6 +19,7 @@ def getContas():
     contas[r["Conta"]] = str(r["id"])
   return contas
 
+
 def geraTabela(contas, cpiAdj, mes, ano):
   # if il is True:
   #   dd = datetime.now() + relativedelta(months=1)
@@ -26,10 +27,12 @@ def geraTabela(contas, cpiAdj, mes, ano):
   # else:
   #   udate = date(datetime.now().year , datetime.now().month, 1) - timedelta(days=1)
 
-  udate = date(ano , mes, 1) + relativedelta(months=0) - timedelta(days=1)
+  udate = date(ano, mes, 1) + relativedelta(months=0) - timedelta(days=1)
   print(udate)
 
-  r = sqlQuery("SELECT datahora, cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Despesas t1, Contas t2 where t1.datahora <= date('{}') and t1.id_conta = t2.id and t2.saldo = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id".format(udate.strftime('%Y-%m-%d')))
+  r = sqlQuery(
+    "SELECT datahora, cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Despesas t1, Contas t2 where t1.datahora <= date('{}') and t1.id_conta = t2.id and t2.saldo = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id"
+    .format(udate.strftime('%Y-%m-%d')))
   cpi = []
   if cpiAdj is True:
     from fUtils import cpiFactors
@@ -40,9 +43,15 @@ def geraTabela(contas, cpiAdj, mes, ano):
   for l in r:
     df.at[int(l["conta"]), "Nome"] = l["NomeConta"]
     if cpiAdj is True:
-      df.at[int(l["conta"]), "{:02}/{}".format(l["Mes"], int(l["Ano"]) - 2000)] = l["Valor"] * cpi[l['datahora']]['fator_inv']
+      df.at[
+        int(l["conta"]),
+        "{:02}/{}".format(l["Mes"],
+                          int(l["Ano"]) -
+                          2000)] = l["Valor"] * cpi[l['datahora']]['fator_inv']
     else:
-      df.at[int(l["conta"]), "{:02}/{}".format(l["Mes"], int(l["Ano"]) - 2000)] = l["Valor"]
+      df.at[int(l["conta"]),
+            "{:02}/{}".format(l["Mes"],
+                              int(l["Ano"]) - 2000)] = l["Valor"]
 
   df = df.sort_values("Nome")
   df = df.fillna(0)
@@ -70,7 +79,9 @@ def geraTabela(contas, cpiAdj, mes, ano):
     for c in df:
       if c != "Nome":
         # print("Mes {} conta {} recebe {} do total {}".format(c, acct_id, (acct_dist_tot[a] / s), df.at[acct_zero_id, c]))
-        df.at[acct_id, c] = df.at[acct_id, c] + df.at[acct_zero_id, c] * (acct_dist_tot[a] / s)
+        df.at[acct_id,
+              c] = df.at[acct_id,
+                         c] + df.at[acct_zero_id, c] * (acct_dist_tot[a] / s)
   df = df.drop(acct_zero_id)
 
   # Segue
@@ -120,6 +131,7 @@ def geraTabela(contas, cpiAdj, mes, ano):
   df = df.sort_values(["ToSort", "Nome"])
   return df
 
+
 def geraRelatorio(mes, ano):
   # if il is True:
   #   dd = datetime.now() + relativedelta(months=1)
@@ -127,11 +139,10 @@ def geraRelatorio(mes, ano):
   # else:
   #   udate = date(datetime.now().year , datetime.now().month, 1) - timedelta(days=1)
 
-  udate = date(ano , mes, 1) + relativedelta(months=0) - timedelta(days=1)
+  udate = date(ano, mes, 1) + relativedelta(months=0) - timedelta(days=1)
 
   contas = getContas()
   df = geraTabela(contas, False, mes, ano)
-
 
   # Evolucao do %
   df_acum = pd.DataFrame().reindex_like(df)
@@ -151,7 +162,8 @@ def geraRelatorio(mes, ano):
     else:
       df_acum = df_acum.drop(k)
   df_acum = df_acum.drop("ToSort", axis=1)
-  df_acum = df_acum.drop(df.columns[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]], axis=1)
+  df_acum = df_acum.drop(df.columns[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]],
+                         axis=1)
 
   for k, v in df_acum.iterrows():
     df_acum.at[k, "Nome"] = v["Nome"].replace("Despesas -> ", "")
@@ -169,15 +181,13 @@ def geraRelatorio(mes, ano):
         if v["Lvl"] == 3:
           if v["Nome"] not in evol_pct_l3:
             evol_pct_l3[v["Nome"]] = []
-          evol_pct_l3[v["Nome"]].append(
-            df_acum.at[k, c] / df_acum.query("Lvl == 2")[c].sum()
-          )
+          evol_pct_l3[v["Nome"]].append(df_acum.at[k, c] /
+                                        df_acum.query("Lvl == 2")[c].sum())
         elif v["Lvl"] == 2:
           if v["Nome"] not in evol_pct_l2:
             evol_pct_l2[v["Nome"]] = []
-          evol_pct_l2[v["Nome"]].append(
-            df_acum.at[k, c] / df_acum.query("Lvl == 1")[c].sum()
-          )
+          evol_pct_l2[v["Nome"]].append(df_acum.at[k, c] /
+                                        df_acum.query("Lvl == 1")[c].sum())
   df_acum = df_acum.drop("Lvl", axis=1)
 
   evol_pct = [evol_lbs, evol_pct_l2, evol_pct_l3]
@@ -188,7 +198,9 @@ def geraRelatorio(mes, ano):
   df.at[4000, "ToSort"] = 2.1
   df.at[4000, "Lvl"] = 1
 
-  r = sqlQuery("SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, sum(t1.valor) as Valor FROM Despesas t1 where t1.datahora <= date('{}') and t1.id_conta = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer) ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer)".format(udate.strftime('%Y-%m-%d')))
+  r = sqlQuery(
+    "SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, sum(t1.valor) as Valor FROM Despesas t1 where t1.datahora <= date('{}') and t1.id_conta = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer) ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer)"
+    .format(udate.strftime('%Y-%m-%d')))
   for l in r:
     df.at[4000, "{:02}/{}".format(l["Mes"], int(l["Ano"]) - 2000)] = l["Valor"]
   df = df.reindex(df.index.values.tolist() + [3000])
@@ -255,38 +267,37 @@ def geraRelatorio(mes, ano):
   df.at[3023, "ToSort"] = 8
   df.at[3023, "Lvl"] = 3
 
-
-
   id_fixo = df.index[df["Nome"] == "Receitas -> Salario -> Fixo"].tolist()[0]
-  id_fixo_d = df.index[df["Nome"] == "Receitas -> Salario -> Fixo Deduções"].tolist()[0]
+  id_fixo_d = df.index[df["Nome"] ==
+                       "Receitas -> Salario -> Fixo Deduções"].tolist()[0]
   id_ferias = df.index[df["Nome"] == "Despesas -> Lazer -> Ferias"].tolist()[0]
-  id_educacao = df.index[df["Nome"] == "Despesas -> Filhos -> Educacao"].tolist()[0]
+  id_educacao = df.index[df["Nome"] ==
+                         "Despesas -> Filhos -> Educacao"].tolist()[0]
   # id_aquisicoes = df.index[df['Nome'] == 'Despesas -> Aquisicao'].tolist()[0]
   # id_manutencao = df.index[df['Nome'] == 'Despesas -> Manutencao'].tolist()[0]
 
   id_receitas = df.index[df["Nome"] == "Receitas"].tolist()[0]
-  id_bonus = df.index[df["Nome"] == "Receitas -> Salario -> Variavel"].tolist()[0]
-
+  id_bonus = df.index[df["Nome"] ==
+                      "Receitas -> Salario -> Variavel"].tolist()[0]
 
   for c in df:
     if c != "Nome" and c != "Lvl" and c != "ToSort":
       df.at[3000, c] = df.at[2000, c] + df.at[2001, c] + df.at[4000, c]
-      df.at[3001, c] = (df.at[2000, c] + df.at[2001, c] + df.at[2002, c] + df.at[4000, c])
+      df.at[3001, c] = (df.at[2000, c] + df.at[2001, c] + df.at[2002, c] +
+                        df.at[4000, c])
 
       df.at[3011, c] = df.at[id_fixo, c] + df.at[id_fixo_d, c]
       df.at[3012, c] = -df.at[id_educacao, c]
       df.at[3013, c] = -df.at[id_ferias, c]
       df.at[3014, c] = df.at[2001, c] + df.at[4000, c]
 
-      df.at[3010, c] = (df.at[3011, c] + df.at[3012, c] + df.at[3013, c] + df.at[3014, c])
-
+      df.at[3010, c] = (df.at[3011, c] + df.at[3012, c] + df.at[3013, c] +
+                        df.at[3014, c])
 
       df.at[3021, c] = df.at[id_receitas, c]
       df.at[3022, c] = -df.at[id_bonus, c]
       df.at[3023, c] = df.at[3014, c]
       df.at[3020, c] = df.at[3021, c] + df.at[3022, c] + df.at[3023, c]
-
-
 
   df = df.sort_values(["ToSort", "Nome"])
   df = df.drop("ToSort", axis=1)
@@ -331,12 +342,10 @@ def geraRelatorio(mes, ano):
     tot = 0
     for c in df:
       if c == "Nome":
-        res["nome"].append(
-          "{}{}".format(
-            "&nbsp;&nbsp;&nbsp;" * str(df.at[k, c]).count("->"),
-            str(df.at[k, c]),
-          )
-        )
+        res["nome"].append("{}{}".format(
+          "&nbsp;&nbsp;&nbsp;" * str(df.at[k, c]).count("->"),
+          str(df.at[k, c]),
+        ))
         if str(df.at[k, c]) in contas:
           res["contas"].append(contas[str(df.at[k, c])])
         else:
@@ -368,12 +377,12 @@ def geraRelatorio(mes, ano):
     tot12 = sum(lv[-12:])
     res["tot12"].append("{:0,.0f}".format(tot12))
 
-
-
     if lv[-1] > avg12:
-      res["tb"][-1][-1] = '<span style="color: green;">' + res["tb"][-1][-1] + "</span>"
+      res["tb"][-1][
+        -1] = '<span style="color: green;">' + res["tb"][-1][-1] + "</span>"
     elif lv[-1] < avg12:
-      res["tb"][-1][-1] = '<span style="color: red;">' + res["tb"][-1][-1] + "</span>"
+      res["tb"][-1][
+        -1] = '<span style="color: red;">' + res["tb"][-1][-1] + "</span>"
 
     res["davg"].append("{:0,.0f}".format(avg12 - avg))
 
@@ -467,9 +476,10 @@ def geraRelatorio(mes, ano):
   # Return
   return res, contas, graphs, evol_pct, pie_r, pie12_r
 
+
 def geraRelatorioCrescimento(conta, mes, ano):
   contas = getContas()
-  df = geraTabela(contas, False , mes, ano)
+  df = geraTabela(contas, False, mes, ano)
   df_infl = geraTabela(contas, True, mes, ano)
 
   id_conta = df.index[df["Nome"] == conta].tolist()[0]
@@ -490,45 +500,66 @@ def geraRelatorioCrescimento(conta, mes, ano):
   res['parent'] = []
   res['participacao'] = []
 
+  anos = {}
+  anosi = {}
+
   for c in df:
     if c not in ["Nome"]:
       res['labels'].append(c)
       res['valores'].append(df.at[id_conta, c])
       res['valores_acum'].append(sum(res['valores']))
-      res['valores_avg'].append(sum(res['valores'])/len(res['valores']))
-      res['valores_avg12'].append(sum(res['valores'][-12:])/len(res['valores'][-12:]))
+      res['valores_avg'].append(sum(res['valores']) / len(res['valores']))
+      res['valores_avg12'].append(
+        sum(res['valores'][-12:]) / len(res['valores'][-12:]))
       res['valores_12m'].append(sum(res['valores'][-12:]))
 
       res['valores_infl'].append(df_infl.at[id_conta, c])
-      res['valores_infl_avg12'].append(sum(res['valores_infl'][-12:])/len(res['valores_infl'][-12:]))
+      res['valores_infl_avg12'].append(
+        sum(res['valores_infl'][-12:]) / len(res['valores_infl'][-12:]))
 
       res['parent'].append(df.at[id_parent, c])
-      res['participacao'].append(100*sum(res['valores'])/sum(res['parent']))
-  return res, df['Nome'].tolist()
+      res['participacao'].append(100 * sum(res['valores']) /
+                                 sum(res['parent']))
 
+      a = str(int(c.split("/")[1]) + 2000)
+      if a not in anos:
+        anos[a] = df.at[id_conta, c]
+        anosi[a] = df_infl.at[id_conta, c]
+      else:
+        anos[a] = anos[a] + df.at[id_conta, c]
+        anosi[a] = anosi[a] + df_infl.at[id_conta, c]
 
+  return res, df['Nome'].tolist(), [list(anos.keys()), anos, anosi]
 
 
 def getDuplicates():
 
   # Considerando a data
-  rs = sqlQuery("SELECT t1.datahora, t1.texto, t1.valor, count(*) FROM Despesas t1 WHERE texto like '% CCA %' GROUP BY t1.datahora, t1.texto, t1.valor HAVING count(*) > 1 ORDER BY Count(*) DESC")
+  rs = sqlQuery(
+    "SELECT t1.datahora, t1.texto, t1.valor, count(*) FROM Despesas t1 WHERE texto like '% CCA %' GROUP BY t1.datahora, t1.texto, t1.valor HAVING count(*) > 1 ORDER BY Count(*) DESC"
+  )
   tb_dt = []
   for r in rs:
-    l = sqlQuery("SELECT * FROM Despesas t1 WHERE t1.datahora = date('{}') and t1.texto = '{}' and t1.valor = {}".format(r['datahora'], r['texto'], r['valor']))
+    l = sqlQuery(
+      "SELECT * FROM Despesas t1 WHERE t1.datahora = date('{}') and t1.texto = '{}' and t1.valor = {}"
+      .format(r['datahora'], r['texto'], r['valor']))
     ls = []
     for rr in l:
-      ls.append([rr['id'],  rr['datahora'], rr['texto'], rr['valor']])
+      ls.append([rr['id'], rr['datahora'], rr['texto'], rr['valor']])
     tb_dt.append(ls)
 
   # Desconsiderando a data
-  rs = sqlQuery("SELECT t1.texto, t1.valor, count(*) FROM Despesas t1 WHERE texto NOT like '% CCA %' and texto NOT like '(TRANSFER) %' GROUP BY t1.texto, t1.valor HAVING count(*) > 1 ORDER BY Count(*) DESC")
+  rs = sqlQuery(
+    "SELECT t1.texto, t1.valor, count(*) FROM Despesas t1 WHERE texto NOT like '% CCA %' and texto NOT like '(TRANSFER) %' GROUP BY t1.texto, t1.valor HAVING count(*) > 1 ORDER BY Count(*) DESC"
+  )
   tb_sdt = []
   for r in rs:
-    l = sqlQuery("SELECT * FROM Despesas t1 WHERE t1.texto = '{}' and t1.valor = {}".format(r['texto'], r['valor']))
+    l = sqlQuery(
+      "SELECT * FROM Despesas t1 WHERE t1.texto = '{}' and t1.valor = {}".
+      format(r['texto'], r['valor']))
     ls = []
     for rr in l:
-      ls.append([rr['id'],  rr['datahora'], rr['texto'], rr['valor']])
+      ls.append([rr['id'], rr['datahora'], rr['texto'], rr['valor']])
     tb_sdt.append(ls)
 
   return tb_dt, tb_sdt

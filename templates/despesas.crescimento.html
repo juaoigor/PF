@@ -431,4 +431,104 @@
   </div>
 </div>
 
+
+<br>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Anual</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_evol_9' style='width: 100%;height:300px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_evol_9');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              tooltip: { trigger: 'item', axisPointer: { type: 'cross' } },
+              grid: { left: '10%', right: '1%', top: '10%', bottom: '10%' },
+              legend: {
+                show: false,
+                textStyle: { fontSize: 10 }
+              },
+              xAxis: {
+                type: 'category', data: ["{{ '", "'.join(anual[0]) | safe }}"],
+                axisLabel: { fontSize: 10, rotate: 30, align: 'center', verticalAlign: 'top' },
+                splitLine: {
+                  show: false,
+                  lineStyle: { width: 1, type : 'dashed', dashOffset: 3 }
+                }
+              },
+              yAxis: [{
+                type: 'value', position: 'left', alignTicks: true,
+                splitLine: { show: true },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value, 0); }
+                }
+              }],
+              series: [
+                { yAxisIndex: 0, name: 'Valores Desinfla', type: 'bar', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in anual[0] %}{{ anual[1][r] * 1}}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+              ]
+            };
+
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Anual Inflacionado</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_evol_99' style='width: 100%;height:300px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_evol_99');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              tooltip: { trigger: 'item', axisPointer: { type: 'cross' } },
+              grid: { left: '10%', right: '1%', top: '10%', bottom: '10%' },
+              legend: {
+                show: false,
+                textStyle: { fontSize: 10 }
+              },
+              xAxis: {
+                type: 'category', data: ["{{ '", "'.join(anual[0]) | safe }}"],
+                axisLabel: { fontSize: 10, rotate: 30, align: 'center', verticalAlign: 'top' },
+                splitLine: {
+                  show: false,
+                  lineStyle: { width: 1, type : 'dashed', dashOffset: 3 }
+                }
+              },
+              yAxis: [{
+                type: 'value', position: 'left', alignTicks: true,
+                splitLine: { show: true },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value, 0); }
+                }
+              }],
+              series: [
+                { yAxisIndex: 0, name: 'Valores Desinfla', type: 'bar', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in anual[0] %}{{ anual[2][r] * 1}}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+              ]
+            };
+
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 {% endblock %}

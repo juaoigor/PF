@@ -368,9 +368,10 @@ def despesasCrescimento():
       conta = request.form["conta"]
 
     from JP_Despesas import geraRelatorioCrescimento
-    res, contas = geraRelatorioCrescimento(conta, mes, ano)
+    res, contas, anual = geraRelatorioCrescimento(conta, mes, ano)
+    print(anual)
 
-    return render_template("despesas.crescimento.html", res=res, contas=contas, conta=conta)
+    return render_template("despesas.crescimento.html", res=res, contas=contas, conta=conta, anual=anual)
   except:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)

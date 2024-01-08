@@ -360,12 +360,15 @@ def despesasClassNLPCat():
 @app.route("/despesas/crescimento", methods=["GET", "POST"])
 def despesasCrescimento():
   try:
+    mes = (datetime.now() + relativedelta(months=-0)).month
+    ano = (datetime.now() + relativedelta(months=-0)).year
+
     conta = 'Despesas'
     if request.method == "POST":
       conta = request.form["conta"]
 
     from JP_Despesas import geraRelatorioCrescimento
-    res, contas = geraRelatorioCrescimento(conta)
+    res, contas = geraRelatorioCrescimento(conta, mes, ano)
 
     return render_template("despesas.crescimento.html", res=res, contas=contas, conta=conta)
   except:

@@ -703,9 +703,9 @@ def GeraRelatorioFC(sid):
   dt = datetime.now().date().strftime('%Y-%m-%d')
   ipca = sqlQuery("select * from taxas where indice = 'IPCA' and datahora <= '{}' ORDER BY datahora DESC LIMIT 1".format(dt))[0]['valor']
   if sid == 0:
-    res = sqlQuery("SELECT t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz, t3.qtde FROM Bonds t1, BondsFlows t2, BondsCarteira t3 WHERE t1.id = t2.idbond and t1.id = t3.idbond AND t2.data >= '{}'".format(dt))
+    res = sqlQuery("SELECT t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz, sum(t3.qtde) AS qtde FROM Bonds t1, BondsFlows t2, BondsCarteira t3 WHERE t1.id = t2.idbond and t1.id = t3.idbond AND t2.data >= '{}' GROUP BY t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz HAVING SUM(t3.qtde) <> 0".format(dt))
   else:
-    res = sqlQuery("SELECT t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz, t3.qtde FROM Bonds t1, BondsFlows t2, BondsCarteira t3 WHERE t1.id = t2.idbond and t1.id = t3.idbond AND t3.id = {}".format(sid))
+    res = sqlQuery("SELECT t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz, sum(t3.qtde) as qtde FROM Bonds t1, BondsFlows t2, BondsCarteira t3 WHERE t1.id = t2.idbond and t1.id = t3.idbond AND t3.id = {} GROUP BY t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz  HAVING SUM(t3.qtde) <> 0".format(sid))
 
   for r in res:
     # r['data'] = datetime.strptime(r['data'], '%Y-%m-%d')
@@ -756,7 +756,7 @@ def GeraRelatorioFCAno(ano):
 
   dt = datetime.now().date().strftime('%Y-%m-%d')
   ipca = sqlQuery("select * from taxas where indice = 'IPCA' and datahora <= '{}' ORDER BY datahora DESC LIMIT 1".format(dt))[0]['valor']
-  res = sqlQuery("SELECT t1.bond, t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz, t3.qtde FROM Bonds t1, BondsFlows t2, BondsCarteira t3 WHERE t1.id = t2.idbond and t1.id = t3.idbond and strftime('%Y', t2.data) = '{}' order by t2.data".format(ano))
+  res = sqlQuery("SELECT t1.bond, t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz, sum(t3.qtde) as qtde FROM Bonds t1, BondsFlows t2, BondsCarteira t3 WHERE t1.id = t2.idbond and t1.id = t3.idbond and strftime('%Y', t2.data) = '{}' GROUP BY t1.bond, t1.startindex, t2.data, t2.tipo, t2.yield, t2.yieldper, t2.amtz having sum(t3.qtde) <> 0 order by t2.data".format(ano))
 
   bonds = []
   datasdets = []

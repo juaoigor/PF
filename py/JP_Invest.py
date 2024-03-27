@@ -13,6 +13,9 @@ from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
 def geraRelatorio(mes, ano):
+  # mes = 4
+  # ano = 2024
+
   udate = date(ano , mes, 1) + relativedelta(months=0) - timedelta(days=1)
 
   r = sqlQuery("SELECT cast(strftime('%Y', datahora) as integer) as Ano, cast(strftime('%m', datahora) as integer) as Mes, t2.id as conta, t2.Conta as NomeConta, sum(t1.valor) as Valor FROM Despesas t1, Contas t2 where t1.datahora <= date('{}') and t2.Inv = 1 AND t1.id_conta = t2.id and t2.saldo = 0 GROUP BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id, t2.conta ORDER BY cast(strftime('%Y', datahora) as integer), cast(strftime('%m', datahora) as integer), t2.id".format(udate.strftime('%Y-%m-%d')))
@@ -616,12 +619,12 @@ def geraRelatorio(mes, ano):
 
 
       res_mes = subtot1 + df_mes_acum[c].sum()/1000000
-      res_mes_12 = sum(resmtm_val[-12:])
 
       c_res_mes = 'green' if res_mes >= res_mes_ant else 'red'
       c_res_mes_12 = 'green' if res_mes_12 >= res_mes_12_ant else 'red'
 
       resmtm_val.append(res_mes - res_mes_ant)
+      res_mes_12 = sum(resmtm_val[-12:])
       resmtm.append({'dt': c, 'tot': "{:0,.2f}".format(1000*res_mes),
                      'tot_delta': "{:0,.2f}".format(1000*(res_mes - res_mes_ant)),
                      'tot_delta_12m': "{:0,.2f}".format(1000*res_mes_12),

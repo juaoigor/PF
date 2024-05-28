@@ -1,0 +1,61 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">SQL</div>
+      <div class="card-body">
+        <form  action="/config/sql" method="post">
+          <div class="form-group row">
+            <label for="idTexto" class="col-1 col-form-label">SQL</label>
+            <div class="col-11"><input type="text" class="form-control form-control-sm" id="idTexto" name="texto" value=""></div>
+          </div>
+          <div class="form-group row">
+            <div class="col-1">
+              <button type="submit" class="btn btn-primary btn-sm" name="Executar" value="Executar">Executar</button>
+            </div>
+            <div class="col-1">
+              <button type="submit" class="btn btn-primary btn-sm" name="Query" value="Query">Query</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br><br>
+{% if modo == "q" %}
+<div class="row">
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">Result</div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              {% if rs|length > 1 %}
+                {% for k, v in rs[0].items() %}
+                <th scope="col">{{ k }}</th>
+                {% endfor %}
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rs %}
+            <tr>
+              {% for k, v in r.items() %}
+                <td>{{ v }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

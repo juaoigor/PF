@@ -1,0 +1,140 @@
+{% extends 'index.html' %}
+{% block content %}
+<br><br>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Taxas</div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Conta</th>
+              <th scope="col">Risco</th>
+              <th scope="col">Categoria</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in tb %}
+            <tr>
+              <td>{{ d['id'] }}</td>
+              <td>{{ d['Conta'] }}</td>
+              <td>{{ d['Risco'] }}</td>
+              <td>{{ d['Categ'] }}</td>
+              <td><a href="/investimentos/riscos?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% if modo == 'I' %}
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">Adicionar</div>
+      <div class="card-body">
+        <form  action="/investimentos/riscos" method="post">
+          <div class="form-group row">
+            <label for="selConta" class="col-4 col-form-label">Conta</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="selConta" name="conta">
+                {% for d in contas %}
+                  <option value="{{ d['id'] }}">{{ d['Conta'] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="selConta" class="col-4 col-form-label">Conta</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="selConta" name="risco">
+                {% for d in riscos %}
+                  <option value="{{ d['id'] }}">{{ d['Categ'] }} - {{ d['Risco'] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-10">
+              <button type="submit" class="btn btn-primary btn-sm" name="Criar" value="Criar">Criar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% elif modo == 'E' %}
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">Editar</div>
+      <div class="card-body">
+        <form  action="/investimentos/riscos" method="post">
+          <div class="form-group row">
+            <label for="idID" class="col-4 col-form-label">ID</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idID" name="id" value="{{ rs['id'] }}" readonly></div>
+          </div>
+          <div class="form-group row">
+            <label for="selConta" class="col-4 col-form-label">Conta</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="selConta" name="conta">
+                {% for d in contas %}
+                  <option {{ 'Selected' if d['id'] == rs['idConta'] else '' }} value="{{ d['id'] }}">{{ d['Conta'] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="selConta" class="col-4 col-form-label">Conta</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="selConta" name="risco">
+                {% for d in riscos %}
+                  <option {{ 'Selected' if d['id'] == rs['idRisco'] else '' }} value="{{ d['id'] }}">{{ d['Categ'] }} - {{ d['Risco'] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-10">
+              <button type="submit" class="btn btn-primary btn-sm" name="Update" value="Update">Update</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  {% endif %}
+</div>
+
+<br><br>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Sem Cadastro</div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Conta</th>
+              <th scope="col">Categoria</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in semcad %}
+            <tr>
+              <td>{{ d[0] }}</td>
+              <td>{{ d[1] }}</td>
+              <td><a href="/investimentos/riscos?mode=addig&conta={{ d[0] }}&cat={{ d[1] }}" class="badge badge-danger">Ignore</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

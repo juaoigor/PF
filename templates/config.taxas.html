@@ -1,0 +1,95 @@
+{% extends 'index.html' %}
+{% block content %}
+<br><br>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Taxas</div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Data</th>
+              <th scope="col">Destino</th>
+              <th scope="col">Valor</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in tb %}
+            <tr>
+              <td>{{ d['id'] }}</td>
+              <td>{{ d['datahora'] }}</td>
+              <td>{{ d['indice'] }}</td>
+              <td>{{ d['valor'] }}</td>
+              <td><a href="/config/taxas?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% if modo == 'I' %}
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">Adicionar</div>
+      <div class="card-body">
+        <form  action="/config/taxas" method="post">
+          <div class="form-group row">
+            <label for="idData" class="col-4 col-form-label">Data</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idData" name="data" value="" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idIndice" class="col-4 col-form-label">Indice</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idIndice" name="indice" value="" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idValor" class="col-4 col-form-label">Valor</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="valor" value="" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <div class="col-10">
+              <button type="submit" class="btn btn-primary btn-sm" name="Criar" value="Criar">Criar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% elif modo == 'E' %}
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">Editar</div>
+      <div class="card-body">
+        <form  action="/config/taxas" method="post">
+          <div class="form-group row">
+            <label for="idID" class="col-4 col-form-label">ID</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idID" name="id" value="{{ rs['id'] }}" readonly></div>
+          </div>
+          <div class="form-group row">
+            <label for="idData" class="col-4 col-form-label">Data</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idData" name="data" value="{{ rs['datahora'] }}" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idIndice" class="col-4 col-form-label">Indice</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idIndice" name="indice" value="{{ rs['indice'] }}" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idValor" class="col-4 col-form-label">Valor</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="valor" value="{{ rs['valor'] }}" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <div class="col-10">
+              <button type="submit" class="btn btn-primary btn-sm" name="Update" value="Update">Update</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  {% endif %}
+</div>
+{% endblock %}

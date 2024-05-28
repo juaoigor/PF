@@ -1,0 +1,77 @@
+{% extends 'index.html' %}
+{% block content %}
+<br><br>
+<div class="row">
+  <div class="col-9">
+    <div class="card">
+      <div class="card-header">Conta Corrente</div>
+      <div class="card-body">
+        {% for d in tb_dt %}
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col" style="width: 5%;">ID</th>
+              <th scope="col" style="width: 10%;">Data</th>
+              <th scope="col">Texto</th>
+              <th scope="col" style="width: 7%;">Valor</th>
+              <th scope="col" style="width: 5%;"></th>
+              <th scope="col" style="width: 5%;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dd in d %}
+            <tr>
+              <td>{{ dd[0] }}</td>
+              <td>{{ dd[1] }}</td>
+              <td>{{ dd[2] }}</td>
+              <td>{{ dd[3] }}</td>
+              <td class="padrao alncenter"><a href="/despesas/editar?id={{ dd[0] }}&backto=despesasDuplicados" class="badge badge-danger">Edit</a></td>
+              <td class="padrao alncenter"><a href="/despesas/duplicados?modo=remover&id={{ dd[0] }}" class="badge badge-danger">Remover</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <br>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+<br><br>
+<div class="row">
+  <div class="col-9">
+    <div class="card">
+      <div class="card-header">Cartao</div>
+      <div class="card-body">
+        {% for d in tb_sdt %}
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col" style="width: 5%;">ID</th>
+              <th scope="col" style="width: 10%;">Data</th>
+              <th scope="col">Texto</th>
+              <th scope="col" style="width: 7%;">Valor</th>
+              <th scope="col" style="width: 5%;"></th>
+              <th scope="col" style="width: 5%;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dd in d %}
+            <tr>
+              <td>{{ dd[0] }}</td>
+              <td>{{ dd[1] }}</td>
+              <td>{{ dd[2] }}</td>
+              <td>{{ dd[3] }}</td>
+              <td class="padrao alncenter"><a href="/despesas/editar?id={{ dd[0] }}&backto=despesasDuplicados" class="badge badge-danger">Edit</a></td>
+              <td class="padrao alncenter"><a href="/despesas/duplicados?modo=remover&id={{ dd[0] }}" class="badge badge-danger">Remover</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <br>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

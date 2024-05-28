@@ -1,0 +1,483 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-3">
+  </div>
+  <div class="col-6">
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item"><a class="page-link" href="{{ links['anta'] }}">-1  Ano</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['anta6'] }}">-6  Meses</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['ant'] }}">-1  Mes</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['atual'] }}">Hoje</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['pos'] }}">+1 Mes</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['posa6'] }}">+6 Meses</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['posa'] }}">+1 Ano</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="col-3">
+  </div>
+</div>
+
+
+<br>
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">Relatorio</div>
+      <div class="card-body">
+        <table  class="table table-sm">
+          <thead>
+            <tr class='alncenter'>
+              {%- for l in rel['header'] -%}
+                <th>{{l}}</th>
+              {% endfor %}
+              <th style="border-left: 2px solid #dee2e6;">Med12</th>
+              <th>Med</th>
+              <th>Δ</th>
+              <th style="border-left: 2px solid #dee2e6;">Tot12</th>
+              <th>%</th>
+              <th>Tot</th>
+              <th>%</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% set c1 = namespace(value=0) %}
+            {% for l in rel['nome'] %}
+            <tr class="rel_{{ rel['lvl'][c1.value] }}">
+              {%- if rel['lvl'][c1.value] == '3' -%}
+                <td class="rel_{{ rel['lvl'][c1.value] }}"><a href="/despesas/resumoconta?conta={{ rel['contas'][c1.value] }}" style="text-decoration: none; color: inherit;">{{l|safe}}</a></td>
+              {%- else -%}
+                <td class="rel_{{ rel['lvl'][c1.value] }}">{{l|safe}}</td>
+              {% endif %}
+              {% set c2 = namespace(value=0) %}
+              {%- for sl in rel['tb'][c1.value] -%}
+                {%- if rel['lvl'][c1.value] == '3' -%}
+                  <td class="alnright rel_{{ rel['lvl'][c1.value] }}"><a href="/despesas/editarcontames?conta={{ rel['contas'][c1.value] }}&mes={{ rel['mes'][c2.value] }}&ano={{ rel['ano'][c2.value] }}" style="text-decoration: none; color: inherit;">{{sl|safe}}</a></td>
+                {%- else -%}
+                  <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{sl|safe}}</td>
+                {%- endif -%}
+              {% set c2.value = c2.value + 1 %}
+              {% endfor %}
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rel['avg12'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['avg'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['davg'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rel['tot12'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['p12'][c1.value]|safe }}%</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['tot'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['p'][c1.value]|safe }}%</td>
+            </tr>
+            {% set c1.value = c1.value + 1 %}
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type='text/javascript'>
+  function format(number, decimals = 2, decimalSeparator = '.', thousandsSeparator = ',') {
+    const roundedNumber = number.toFixed(decimals);
+    let integerPart = '',
+      fractionalPart = '';
+    if (decimals == 0) {
+      integerPart = roundedNumber;
+      decimalSeparator = '';
+    } else {
+      let numberParts = roundedNumber.split('.');
+      integerPart = numberParts[0];
+      fractionalPart = numberParts[1];
+    }
+    integerPart = integerPart.replace(/(\d)(?=(\d{3})+(?!\d))/g, `$1${thousandsSeparator}`);
+    return `${integerPart}${decimalSeparator}${fractionalPart}`;
+  }
+</script>
+
+<br>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Evoluçao %</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_evol_1' style='width: 100%;height:400px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_evol_1');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              tooltip: { trigger: 'item', axisPointer: { type: 'cross' } },
+              grid: { left: '7%', right: '1%', top: '10%', bottom: '7%' },
+              legend: {
+                show: true,
+                textStyle: { fontSize: 10 }
+              },
+              xAxis: {
+                type: 'category', data: ["{{ '", "'.join(evol_pct[0]) | safe }}"],
+                axisLabel: { fontSize: 10, rotate: 30, align: 'center', verticalAlign: 'top' },
+                splitLine: {
+                  show: false,
+                  lineStyle: { width: 1, type : 'dashed', dashOffset: 3 }
+                }
+              },
+              yAxis: [{
+                type: 'value', position: 'left', alignTicks: true, min: 0,
+                splitLine: { show: true },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value, 0); }
+                }
+              }],
+              series: [
+                {% for k, v in evol_pct[1].items() %}
+                { yAxisIndex: 0, name: '{{k|safe}}', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v %}{{ r * 100 }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+                {{- ", " if not loop.last else "" -}}
+                {% endfor %}
+              ]
+            };
+
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Evoluçao % 12M</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_evol_2' style='width: 100%;height:400px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_evol_2');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              tooltip: { trigger: 'item', axisPointer: { type: 'cross' } },
+              grid: { left: '7%', right: '1%', top: '10%', bottom: '7%' },
+              legend: {
+                show: true,
+                textStyle: { fontSize: 10 }
+              },
+              xAxis: {
+                type: 'category', data: [{% set c1 = namespace(value=0) %} {% for r in evol_pct[0] %} {% if evol_pct[0]|length  -  c1.value <= 13 %} "{{ r }}"  {% if not loop.last %},{% endif %}  {% endif %} {% set c1.value = c1.value + 1 %} {% endfor %} ],
+                axisLabel: { fontSize: 10, rotate: 30, align: 'center', verticalAlign: 'top' },
+                splitLine: {
+                  show: false,
+                  lineStyle: { width: 1, type : 'dashed', dashOffset: 3 }
+                }
+              },
+              yAxis: [{
+                type: 'value', position: 'left', alignTicks: true, min: 0,
+                splitLine: { show: true },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value, 0); }
+                }
+              }],
+              series: [
+                {% for k, v in evol_pct[1].items() %}
+                { yAxisIndex: 0, name: '{{k|safe}}', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% set c1 = namespace(value=0) %} {% for r in v %} {% if evol_pct[0]|length  -  c1.value <= 13 %} {{ r * 100 }} {% if not loop.last %},{% endif %}  {% endif %} {% set c1.value = c1.value + 1 %} {% endfor %} ] }
+                {{- ", " if not loop.last else "" -}}
+                {% endfor %}
+              ]
+            };
+
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<br>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Composicao %</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_pie_1' style='width: 100%;height:500px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_pie_1');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              title: {
+                show: false,
+                text: 'Referer of a Website',
+                subtext: 'Fake Data',
+                left: 'center'
+              },
+              textStyle: { fontSize: 10 },
+              tooltip: {
+                trigger: 'item'
+              },
+              legend: {
+                show: false,
+                orient: 'vertical',
+                left: 'left'
+              },
+              series: [
+                {
+                  type: 'pie',
+                  radius: '60%',
+                  data: [
+                    {%- for k, v in pie.items() -%}
+                        { value: {{ v }}, name: '{{ k|safe }}' }
+                    {{- ", " if not loop.last else "" -}}
+                    {% endfor %}
+                  ],
+                  emphasis: {
+                    itemStyle: {
+                      shadowBlur: 10,
+                      shadowOffsetX: 0,
+                      shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                  }
+                }
+              ]
+            };
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Composicao % 12m</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_pie_2' style='width: 100%;height:500px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_pie_2');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              title: {
+                show: false,
+                text: 'Referer of a Website',
+                subtext: 'Fake Data',
+                left: 'center'
+              },
+              textStyle: { fontSize: 10 },
+              tooltip: {
+                trigger: 'item'
+              },
+              legend: {
+                show: false,
+                orient: 'vertical',
+                left: 'left'
+              },
+              series: [
+                {
+                  type: 'pie',
+                  radius: '60%',
+                  data: [
+                    {%- for k, v in pie12.items() -%}
+                        { value: {{ v }}, name: '{{ k|safe }}' }
+                    {{- ", " if not loop.last else "" -}}
+                    {% endfor %}
+                  ],
+                  emphasis: {
+                    itemStyle: {
+                      shadowBlur: 10,
+                      shadowOffsetX: 0,
+                      shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                  }
+                }
+              ]
+            };
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% for v in graph %}
+<br>
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">{{v['nome']}}</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-6">
+          <div id='chart1_{{loop.index}}' style='width: 100%;height:300px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart1_{{loop.index}}');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+
+
+            option = {
+              tooltip: { trigger: 'item', axisPointer: { type: 'cross' } },
+              grid: { left: '7%', right: '1%', top: '10%', bottom: '7%' },
+              legend: {
+                show: true,
+                textStyle: { fontSize: 10 }
+              },
+              xAxis: {
+                type: 'category', data: ["{{ '", "'.join(v['x']) | safe }}"],
+                axisLabel: { fontSize: 10, rotate: 30, align: 'center', verticalAlign: 'top' },
+                splitLine: {
+                  show: false,
+                  lineStyle: { width: 1, type : 'dashed', dashOffset: 3 }
+                }
+              },
+              yAxis: [{
+                type: 'value', position: 'left', alignTicks: true,
+                splitLine: { show: true },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value/1000, 0); }
+                }
+              },{
+                type: 'value', position: 'right', alignTicks: true,
+                splitLine: { show: false },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value/1000, 0); }
+                }
+              }],
+              series: [
+                { yAxisIndex: 0, name: 'Mes', type: 'bar', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v['y'] %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] },
+                { yAxisIndex: 0, name: 'Media', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v['avg'] %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] },
+                { yAxisIndex: 0, name: 'Media 12m', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v['avg12'] %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+              ]
+            };
+
+            option && myChart.setOption(option);
+          </script>
+          </div>
+
+          <div class="col-6">
+          <div id='chart2_{{loop.index}}' style='width: 100%;height:300px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart2_{{loop.index}}');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              tooltip: { trigger: 'item', axisPointer: { type: 'cross' } },
+              grid: { left: '7%', right: '1%', top: '10%', bottom: '7%' },
+              legend: {
+                show: true,
+                textStyle: { fontSize: 10 }
+              },
+              xAxis: {
+                type: 'category', data: ["{{ '", "'.join(v['x']) | safe }}"],
+                axisLabel: { fontSize: 10, rotate: 30, align: 'center', verticalAlign: 'top' },
+                splitLine: {
+                  show: false,
+                  lineStyle: { width: 1, type : 'dashed', dashOffset: 3 }
+                }
+              },
+              yAxis: [{
+                type: 'value', position: 'left', alignTicks: true,
+                splitLine: { show: true },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value/1000, 0); }
+                }
+              },{
+                type: 'value', position: 'right', alignTicks: true,
+                splitLine: { show: false },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value/1000, 0); }
+                }
+              }],
+              series: [
+                { yAxisIndex: 0, name: 'Mes', type: 'line', areaStyle: { opacity: 0.3 }, symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v['tot'] %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+              ]
+            };
+
+            option && myChart.setOption(option);
+          </script>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+
+<br>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Savings %</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_evol_113' style='width: 100%;height:400px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_evol_113');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              tooltip: { trigger: 'item', axisPointer: { type: 'cross' } },
+              grid: { left: '7%', right: '1%', top: '10%', bottom: '7%' },
+              legend: {
+                show: true,
+                textStyle: { fontSize: 10 }
+              },
+              xAxis: {
+                type: 'category', data: ["{{ '", "'.join(savs[0]) | safe }}"],
+                axisLabel: { fontSize: 10, rotate: 30, align: 'center', verticalAlign: 'top' },
+                splitLine: {
+                  show: false,
+                  lineStyle: { width: 1, type : 'dashed', dashOffset: 3 }
+                }
+              },
+              yAxis: [{
+                type: 'value', position: 'left', alignTicks: true, min: 0, max:100,
+                splitLine: { show: true },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value, 0); }
+                }
+              }],
+              series: [
+                { yAxisIndex: 0, name: 'Savings 12m', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in savs[1] %}{{ r * 100 }}{% if not loop.last %}, {% endif %}{% endfor %} ] },
+                { yAxisIndex: 0, name: 'Savings Total', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in savs[2] %}{{ r * 100 }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+              ]
+            };
+
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

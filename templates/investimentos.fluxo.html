@@ -1,0 +1,86 @@
+{% extends 'index.html' %}
+{% block content %}
+
+
+<br>
+<div class="row">
+  <div class="col-5">
+    <div class="card">
+      <div class="card-header">Relatorio</div>
+      <div class="card-body">
+        <table  class="table table-sm">
+          <thead>
+              <th>Ano</th>
+              <th>Anual</th>
+              <th>Acumulado</th>
+              <th>Mensal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in range(0, tb1[0]|length) %}
+              <tr>
+              <td>{{ tb1[0][i] }}</td>
+              <td class="alnright">{{ tb1[1][i] }}</td>
+              <td class="alnright">{{ tb1[3][i] }}</td>
+              <td class="alnright">{{ tb1[2][i] }}</td>
+              <td class="alnright"><a href="/investimentos/fluxo?mode=view&ano={{ tb1[0][i] }}" class="badge badge-info">View</a></td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-3">
+    <div class="card">
+      <div class="card-header">Relatorio {{ ano }}</div>
+      <div class="card-body">
+        <table  class="table table-sm">
+          <thead>
+              <th>Data</th>
+              <th>Valor</th>
+              <th>Acumulado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in range(0, tb2a[0]|length) %}
+              <tr>
+              <td>{{ tb2a[0][i] }}</td>
+              <td class="alnright">{{ tb2a[1][i] }}</td>
+              <td class="alnright">{{ tb2a[2][i] }}</td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">Detalhado {{ ano }}</div>
+      <div class="card-body">
+        <table  class="table table-sm">
+          <thead>
+              <th>Bond</th>
+              <th>Data</th>
+              <th>Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in range(0, tb2b[0]|length) %}
+              <tr>
+              <td>{{ tb2b[0][i] }}</td>
+              <td>{{ tb2b[1][i] }}</td>
+              <td class="alnright">{{ tb2b[2][i] }}</td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

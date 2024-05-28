@@ -1,0 +1,53 @@
+{% extends 'index.html' %}
+{% block content %}
+<br>
+<div class="row">
+  <div class="col-12">
+    <form  action="/despesas/editarcontames" method="post">
+      <div class="card">
+        <div class="card-header">Detalhe do Mes por Conta</div>
+        <div class="card-body">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col">Data</th>
+                <th scope="col">Conta</th>
+                <th scope="col">Texto</th>
+                <th scope="col">Valor</th>
+                <th scope="col">Total</th>
+                <th scope="col">Edit</th>
+                <th scope="col">Transfer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in tb %}
+              <input type="hidden" name="id_{{ loop.index }}" value="{{ r['id'] }}">
+              <tr>
+                <td>{{ r['datahora']}}</td>
+                <td>
+                  <select class="form-control form-control-sm" name="conta_{{ loop.index }}">
+                    <option value="0"></option>
+                    {% for d in labels %}
+                    <option value="{{ d['id'] }}" {{ 'Selected' if d['id'] == id_conta else '' }}>{{ d['Conta'] }}</option>
+                    {% endfor %}
+                    <option value="9999">Ignorar</option>
+                  </select>
+                </td>
+                <td><input type="text" class="form-control form-control-sm" name="texto_{{ loop.index }}" value="{{ r['texto']}}" size="80"></td>
+                <td class='alnright'>{{ "{:0,.2f}".format(r['valor']) }}</td>
+                <td class='alnright'>{{ "{:0,.2f}".format(r['tot']) }}</td>
+                <td><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasClassificar" class="badge badge-danger">Edit</a></td>
+                <td><a href="/despesas/transfer?id={{ r['id'] }}&backto=despesasClassificar" class="badge badge-info">Transfer</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary btn-sm" name="Update" value="Update">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

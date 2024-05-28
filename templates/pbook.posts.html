@@ -1,0 +1,200 @@
+{% extends 'index.html' %}
+{% block content %}
+<br><br>
+<style>
+  .ce-block__content,
+  .ce-toolbar__content {
+    max-width: unset;
+  }
+  .cdx-list__item {
+    padding: 0px 0 0px 3px;
+    line-height: 1.1em;
+  }
+  .cdx-block {
+    padding: .2em 0;
+  }
+</style>
+<div class="row">
+  <div class="col-3">
+    <div class="card">
+      <div class="card-header">Posts</div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <!-- <th scope="col">Texto</th> -->
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in tb %}
+            <tr>
+              <td>{{ d['id'] }}</td>
+              <!-- <td>{{ d['Texto'] }}</td> -->
+              <td><a href="/pbook/posts?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% if modo == 'I' %}
+  <div class="col-9">
+    <div class="card">
+      <div class="card-header">Adicionar</div>
+      <div class="card-body">
+        <form  action="/pbook/posts" method="post">
+          <div class="form-group row">
+            <label for="idTexto" class="col-2 col-form-label">Texto</label>
+            <div class="col-10">
+              <div id="editorJS"></div>
+              <script>
+                const editor = new EditorJS({
+                  holderId: "editorJS",
+                  tools:{
+                    header: {
+                      class: Header,
+                      inlineToolbar: true
+                    },
+                    image: {
+                      class: ImageTool,
+                        config: {
+                        endpoints: { byFile: '/uploader', byUrl: '/uploader' }
+                      }
+                    },
+                    list: {
+                      class: List,
+                      inlineToolbar: true,
+                      config: { defaultStyle: 'unordered' }
+                    },
+                    table: {
+                      class: Table,
+                      inlineToolbar: true,
+                      config: { rows: 2, cols: 3 }
+                    },
+                    quote: {
+                      class: Quote,
+                      inlineToolbar: true,
+                      config: { quotePlaceholder: 'Enter a quote', captionPlaceholder: 'Quote\'s author', }
+                    },
+                    delimiter: { class: Delimiter },
+                    code: { class: CodeTool },
+                    Marker: { class: Marker }
+                  }
+                });
+                function doSave() {
+                	editor.save().then((outputData) => {
+                    document.getElementById("idTexto").value = JSON.stringify(outputData)
+                  })
+                }
+              </script>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="idTexto" class="col-2 col-form-label">JSON</label>
+            <div class="col-10">
+              <textarea class="form-control form-control-sm" id="idTexto" name="Texto" rows="10" cols="50"></textarea>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-6">
+              <button type="submit" class="btn btn-primary btn-sm" name="Criar" value="Criar">Criar</button>
+            </div>
+            <div class="col-6">
+              <input class="btn btn-primary btn-sm" id="clickMe" type="button" value="Encode" onclick="doSave();" />
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='editor.js') }}"></script>
+  {% elif modo == 'E' %}
+  <div class="col-9">
+    <div class="card">
+      <div class="card-header">Editar</div>
+      <div class="card-body">
+        <form  action="/pbook/posts" method="post">
+          <div class="form-group row">
+            <label for="idID" class="col-2 col-form-label">ID</label>
+            <div class="col-10"><input type="text" class="form-control form-control-sm" id="idID" name="id" value="{{ rs['id'] }}" readonly></div>
+          </div>
+          <div class="form-group row">
+            <label for="idTexto" class="col-2 col-form-label">Texto</label>
+            <div class="col-10">
+              <div id="editorJS"></div>
+              <script>
+                const editor = new EditorJS({
+                  holderId: "editorJS",
+                  data: {{ rs['Texto']|safe }},
+                  tools:{
+                    header: {
+                      class: Header,
+                      inlineToolbar: true
+                    },
+                    image: {
+                      class: ImageTool,
+                        config: {
+                        endpoints: { byFile: '/uploader', byUrl: '/uploader' }
+                      }
+                    },
+                    list: {
+                      class: List,
+                      inlineToolbar: true,
+                      config: { defaultStyle: 'unordered' }
+                    },
+                    table: {
+                      class: Table,
+                      inlineToolbar: true,
+                      config: { rows: 2, cols: 3 }
+                    },
+                    quote: {
+                      class: Quote,
+                      inlineToolbar: true,
+                      config: { quotePlaceholder: 'Enter a quote', captionPlaceholder: 'Quote\'s author', }
+                    },
+                    delimiter: { class: Delimiter },
+                    code: { class: CodeTool },
+                    Marker: { class: Marker }
+                  }
+                });
+                function doSave() {
+                	editor.save().then((outputData) => {
+                    document.getElementById("idTexto").value = JSON.stringify(outputData)
+                  })
+                }
+              </script>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="idTexto" class="col-2 col-form-label">JSON</label>
+            <div class="col-10">
+              <textarea class="form-control form-control-sm" id="idTexto" name="Texto" rows="10" cols="50">{{ rs['Texto'] }}</textarea>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-4">
+              <button type="submit" class="btn btn-primary btn-sm" name="Update" value="Update">Update</button>
+            </div>
+            <div class="col-4">
+              <input class="btn btn-primary btn-sm" id="clickMe" type="button" value="Encode" onclick='doSave();' />
+            </div>
+            <div class="col-4">
+              <button type="submit" class="btn btn-danger btn-sm" name="Delete" value="Delete">Delete</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  {% endif %}
+</div>
+
+
+
+
+
+{% endblock %}

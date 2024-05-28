@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="https://www.unpkg.com/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous"  referrerpolicy="no-referrer">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='main.ccs') }}">
+  <title>PF</title>
+</head>
+
+<script src="https://www.unpkg.com/bootstrap@5.3.3/dist/js/bootstrap.min.js" crossorigin="anonymous"  referrerpolicy="no-referrer"></script>
+
+
+<style>
+
+</style>
+
+<body>
+
+  <br><br>
+  <div class="container-fluid">
+    <div class="row">
+      <div  class="col-3">
+        <form action="/login" method="post">
+          <div class="card text-center">
+            <div class="card-header">Login</div>
+            <div class="card-body">
+              <h5 class="card-title"Login</h5>
+              <div class="mb-3"><input type="text" name="username" class="form-control" id="login1" placeholder="Username" autocomplete="off"></div>
+              <div class="mb-3"><input type="password" name="password" class="form-control" id="login2" placeholder="Password" autocomplete="off"></div>
+            </div>
+            <div class="card-footer text-muted">
+              <button type="submit" class="btn btn-primary btn-sm" name="Login" value="Login">Login</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+</body>
+</html>

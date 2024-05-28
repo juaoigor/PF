@@ -1,0 +1,133 @@
+{% extends 'index.html' %}
+{% block content %}
+<br><br>
+<div class="row">
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">Transfers</div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Origem</th>
+              <th scope="col">Destino</th>
+              <th scope="col">Texto</th>
+              <th scope="col">Dia</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in tb %}
+            <tr>
+              <td>{{ d['id'] }}</td>
+              <td>{{ contas[d['id_conta_de']] }}</td>
+              <td>{{ contas[d['id_conta_para']] }}</td>
+              <td>{{ d['texto'] }}</td>
+              <td>{{ d['dia'] }}</td>
+              <td><a href="/config/transfers?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% if modo == 'I' %}
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">Adicionar</div>
+      <div class="card-body">
+        <form  action="/config/transfers" method="post">
+          <div class="form-group row">
+            <label for="selConta1" class="col-4 col-form-label">Origem</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="selConta1" name="conta_de">
+                {% for d in labels %}
+                  <option value="{{ d['id'] }}">{{ d['Conta'] }}</option>
+                {% endfor %}
+                <option value="9999">Ignorar</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="selConta2" class="col-4 col-form-label">Destino</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="selConta2" name="conta_para">
+                {% for d in labels %}
+                  <option value="{{ d['id'] }}">{{ d['Conta'] }}</option>
+                {% endfor %}
+                <option value="9999">Ignorar</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="idTexto" class="col-4 col-form-label">Texto</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idTexto" name="texto" value=""></div>
+          </div>
+          <div class="form-group row">
+            <label for="idDia" class="col-4 col-form-label">Dia</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idDia" name="dia" value="01"></div>
+          </div>
+          <div class="form-group row">
+            <div class="col-10">
+              <button type="submit" class="btn btn-primary btn-sm" name="Criar" value="Criar">Criar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% elif modo == 'E' %}
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">Editar</div>
+      <div class="card-body">
+        <form  action="/config/transfers" method="post">
+          <div class="form-group row">
+            <label for="idID" class="col-4 col-form-label">ID</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idID" name="id" value="{{ rs['id'] }}" readonly></div>
+          </div>
+          <div class="form-group row">
+            <label for="selConta1" class="col-4 col-form-label">Origem</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="selConta1" name="conta_de">
+                {% for d in labels %}
+                  <option value="{{ d['id'] }}" {{ 'Selected' if d['id'] == rs['id_conta_de'] else '' }}>{{ d['Conta'] }}</option>
+                {% endfor %}
+                <option value="9999">Ignorar</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="selConta2" class="col-4 col-form-label">Destino</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="selConta2" name="conta_para">
+                {% for d in labels %}
+                  <option value="{{ d['id'] }}" {{ 'Selected' if d['id'] == rs['id_conta_para'] else '' }}>{{ d['Conta'] }}</option>
+                {% endfor %}
+                <option value="9999">Ignorar</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="idTexto" class="col-4 col-form-label">Texto</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idTexto" name="texto" value="{{ rs['texto'] }}"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idDia" class="col-4 col-form-label">Dia</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idDia" name="dia" value="{{ rs['dia'] }}"></div>
+          </div>
+          <div class="form-group row">
+            <div class="col-10">
+              <button type="submit" class="btn btn-primary btn-sm" name="Update" value="Update">Update</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  {% endif %}
+</div>
+{% endblock %}

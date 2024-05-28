@@ -1,0 +1,45 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-2">
+    <div class="card">
+      <div class="card-header">Setup</div>
+      <div class="card-body">
+        <form action="/config/setup" method="post">
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary" name="Setup" value="Setup" disabled>Setup</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-2">
+    <div class="card">
+      <div class="card-header">Download Database</div>
+      <div class="card-body">
+        <a href="{{ url_for('static', filename='database.db') }}">Download</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-2">
+    <div class="card">
+      <div class="card-header">Treinar Labels</div>
+      <div class="card-body">
+        <a href="/config/setup?train=1">Download</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-2">
+    <div class="card">
+      <div class="card-header">Backup</div>
+      <div class="card-body">
+        <a href="/config/setup?backup=1">Backup Base</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

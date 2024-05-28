@@ -1,0 +1,433 @@
+{% extends 'index.html' %}
+{% block content %}
+<div class="row">
+  <div class="col-3">
+  </div>
+  <div class="col-6">
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item"><a class="page-link" href="{{ links['anta'] }}">-1  Ano</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['anta6'] }}">-6  Meses</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['ant'] }}">-1  Mes</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['atual'] }}">Hoje</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['pos'] }}">+1 Mes</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['posa6'] }}">+6 Meses</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['posa'] }}">+1 Ano</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="col-3">
+  </div>
+</div>
+
+
+<br>
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">Relatorio</div>
+      <div class="card-body">
+        <table  class="table table-sm">
+          <thead>
+            <tr class='alncenter'>
+              {%- for l in rel['header'] -%}
+                <th>{{l}}</th>
+              {% endfor %}
+              <th>Med12</th>
+              <th>Med</th>
+              <th>Tot12</th>
+              <th>Tot</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% set c1 = namespace(value=0) %}
+            {% for l in rel['nome'] %}
+            <tr class="rel_{{ rel['lvl'][c1.value] }}">
+              <td class="rel_{{ rel['lvl'][c1.value] }}">{{l|safe}}</td>
+              {% set c2 = namespace(value=0) %}
+              {%- for sl in rel['tb'][c1.value] -%}
+                <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{sl|safe}}</td>
+              {% set c2.value = c2.value + 1 %}
+              {% endfor %}
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rel['avg12'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['avg'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}" style="border-left: 2px solid #dee2e6;">{{ rel['tot12'][c1.value]|safe }}</td>
+              <td class="alnright rel_{{ rel['lvl'][c1.value] }}">{{ rel['tot'][c1.value]|safe }}</td>
+            </tr>
+            {% set c1.value = c1.value + 1 %}
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<br>
+<div class="row">
+  <div class="col-12">
+    <p>Valor mensal para investir: {{mensal}}</p>
+  </div>
+</div>
+
+
+<script type='text/javascript'>
+  function format(number, decimals = 2, decimalSeparator = '.', thousandsSeparator = ',') {
+    const roundedNumber = number.toFixed(decimals);
+    let integerPart = '',
+      fractionalPart = '';
+    if (decimals == 0) {
+      integerPart = roundedNumber;
+      decimalSeparator = '';
+    } else {
+      let numberParts = roundedNumber.split('.');
+      integerPart = numberParts[0];
+      fractionalPart = numberParts[1];
+    }
+    integerPart = integerPart.replace(/(\d)(?=(\d{3})+(?!\d))/g, `$1${thousandsSeparator}`);
+    return `${integerPart}${decimalSeparator}${fractionalPart}`;
+  }
+</script>
+
+
+<br>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Evoluçao % Investimentos</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_evol_1' style='width: 100%;height:400px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_evol_1');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              tooltip: { trigger: 'item', axisPointer: { type: 'cross' } },
+              grid: { left: '7%', right: '1%', top: '10%', bottom: '7%' },
+              legend: {
+                show: true,
+                textStyle: { fontSize: 10 }
+              },
+              xAxis: {
+                type: 'category', data: ["{{ '", "'.join(part_invest[0]) | safe }}"],
+                axisLabel: { fontSize: 10, rotate: 30, align: 'center', verticalAlign: 'top' },
+                splitLine: {
+                  show: false,
+                  lineStyle: { width: 1, type : 'dashed', dashOffset: 3 }
+                }
+              },
+              yAxis: [{
+                type: 'value', position: 'left', alignTicks: true, min: 0,
+                splitLine: { show: true },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value, 0); }
+                }
+              }],
+              series: [
+                {% for k, v in part_invest[1].items() %}
+                { yAxisIndex: 0, name: '{{k|safe}}', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+                {{- ", " if not loop.last else "" -}}
+                {% endfor %}
+              ]
+            };
+
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Evoluçao % Total</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_evol_2' style='width: 100%;height:400px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_evol_2');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              tooltip: { trigger: 'item', axisPointer: { type: 'cross' } },
+              grid: { left: '7%', right: '1%', top: '10%', bottom: '7%' },
+              legend: {
+                show: true,
+                textStyle: { fontSize: 10 }
+              },
+              xAxis: {
+                type: 'category', data: ["{{ '", "'.join(part_invest_bens[0]) | safe }}"],
+                axisLabel: { fontSize: 10, rotate: 30, align: 'center', verticalAlign: 'top' },
+                splitLine: {
+                  show: false,
+                  lineStyle: { width: 1, type : 'dashed', dashOffset: 3 }
+                }
+              },
+              yAxis: [{
+                type: 'value', position: 'left', alignTicks: true, min: 0,
+                splitLine: { show: true },
+                axisLabel: {
+                  fontSize: 10,
+                  formatter: function (value, index) { return format(value, 0); }
+                }
+              }],
+              series: [
+                {% for k, v in part_invest_bens[1].items() %}
+                { yAxisIndex: 0, name: '{{k|safe}}', type: 'line', symbol: 'none', smooth: true, showSymbol: false, data: [{% for r in v %}{{ r }}{% if not loop.last %}, {% endif %}{% endfor %} ] }
+                {{- ", " if not loop.last else "" -}}
+                {% endfor %}
+              ]
+            };
+
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- for bloco in blocos -%}
+<br>
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">{{ bloco['titulo'] }}</div>
+      <div class="card-body">
+        <table  class="table table-sm">
+          <thead>
+            <tr class='alncenter'>
+              {%- for l in bloco['header'] -%}
+                <th>{{l}}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% set c1 = namespace(value=0) %}
+            {% for l in bloco['nome'] %}
+            <tr class="rel_{{ bloco['lvl'][c1.value] }}">
+              <td class="rel_{{ bloco['lvl'][c1.value] }}">{{l|safe}}</td>
+              {% set c2 = namespace(value=0) %}
+              {%- for sl in bloco['tb'][c1.value] -%}
+                <td class="alnright rel_{{ bloco['lvl'][c1.value] }}">{{sl|safe}}</td>
+              {% set c2.value = c2.value + 1 %}
+              {% endfor %}
+            </tr>
+            {% set c1.value = c1.value + 1 %}
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<br>
+<div class="row">
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">Mark To Market</div>
+      <div class="card-body">
+        <table  class="table table-sm table-hover">
+          <thead>
+            <tr class='alncenter'>
+              <th></th>
+              <th width="10%">RF</th>
+              <th width="10%">RV</th>
+              <th width="10%">Dol</th>
+              <th width="10%">Prev</th>
+              <th width="10%">Subtotal1</th>
+              <th width="10%">Bens</th>
+              <th width="10%">Outros</th>
+              <th width="10%">Subtotal2</th>
+              <th width="10%">Retido</th>
+              <th width="10%">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for v in valtbl[0] %}
+              <tr class="rel_3l">
+                <td class="rel_3l">{{v['dt']|safe}}</td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_rf']}};">{{v['rf']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_rv']}};">{{v['rv']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_dol']}};">{{v['dol']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_prev']}};">{{v['prev']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_subtot1']}};">{{v['subtot1']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_bens']}};">{{v['bens']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_outr']}};">{{v['outr']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_subtot2']}};">{{v['subtot2']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_retido']}};">{{v['retido']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_tot']}};">{{v['total']|safe}}</span></td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<br>
+<div class="row">
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">Mark To Market Delta</div>
+      <div class="card-body">
+        <table  class="table table-sm table-hover">
+          <thead>
+            <tr class='alncenter'>
+              <th></th>
+              <th width="9%">RF</th>
+              <th width="9%">RV</th>
+              <th width="9%">Dol</th>
+              <th width="9%">Prev</th>
+              <th width="9%">Subtot1</th>
+              <th width="9%">Bens</th>
+              <th width="9%">Outros</th>
+              <th width="9%">Subtot2</th>
+              <th width="9%">Retido</th>
+              <th width="9%">Total</th>
+              <th width="9%">Tot 12M</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for v in valtbl[1] %}
+              <tr class="rel_3l">
+                <td class="rel_3l">{{v['dt']|safe}}</td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_rf']}};">{{v['rf']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_rv']}};">{{v['rv']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_dol']}};">{{v['dol']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_prev']}};">{{v['prev']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_subtot1']}};">{{v['subtot1']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_bens']}};">{{v['bens']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_outr']}};">{{v['outr']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_subtot2']}};">{{v['subtot2']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_retido']}};">{{v['retido']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_tot']}};">{{v['total']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_tot']}};">{{v['total_12']|safe}}</span></td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<br>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Result Subtotal1</div>
+      <div class="card-body">
+        <table  class="table table-sm table-hover">
+          <thead>
+            <tr class='alncenter'>
+              <th></th>
+              <th width="20%">Acum</th>
+              <th width="20%">Result</th>
+              <th width="20%">Result 12m</th>
+              <th width="20%">Result 12m Avg</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for v in valtbl[2] %}
+              <tr class="rel_3l">
+                <td class="rel_3l">{{v['dt']|safe}}</td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_res_mes']}};">{{v['tot']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_res_mes']}};">{{v['tot_delta']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_res_mes_12']}};">{{v['tot_delta_12m']|safe}}</span></td>
+                <td class="alnright rel_3l"><span style="color: {{ v['c_res_mes_12']}};">{{v['tot_delta_12m_avg']|safe}}</span></td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br>
+<div class="row">
+  {% for g in gcats %}
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">{{ g['nome'] }}</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+          <div id='chart_pie_{{ g['id'] }}' style='width: 100%;height:500px;'></div>
+          <script type='text/javascript'>
+            var chartDom = document.getElementById('chart_pie_{{ g['id'] }}');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+              title: {
+                show: false,
+                text: 'Referer of a Website',
+                subtext: 'Fake Data',
+                left: 'center'
+              },
+              textStyle: { fontSize: 10 },
+              tooltip: {
+                trigger: 'item'
+              },
+              legend: {
+                show: false,
+                orient: 'vertical',
+                left: 'left'
+              },
+              series: [
+                {
+                  type: 'pie',
+                  radius: '50%',
+                  data: [
+                    {%- for k, v in g['vals'].items() -%}
+                    {% if 'Ignora' == k %}
+
+                    {% else %}
+                        { value: {{ v }}, name: '{{ k|safe }} - {{ g['per'][k]|safe }}' }
+                    {% endif %}
+
+                    {{- ", " if not loop.last else "" -}}
+                    {% endfor %}
+                  ],
+                  emphasis: {
+                    itemStyle: {
+                      shadowBlur: 10,
+                      shadowOffsetX: 0,
+                      shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                  }
+                }
+              ]
+            };
+            option && myChart.setOption(option);
+          </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% if g['pi'] == 1 %}
+  </div>
+  <br>
+  <div class="row">
+  {% endif %}
+
+  {% endfor %}
+</div>
+
+{% endblock %}

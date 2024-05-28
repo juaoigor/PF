@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="https://www.unpkg.com/bootstrap@4.0.0/dist/css/bootstrap.min.css" crossorigin="anonymous"  referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='main.ccs') }}">
+  <title>PF</title>
+</head>
+
+<!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script src="https://www.unpkg.com/bootstrap@4.0.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"  referrerpolicy="no-referrer"></script>
+
+<script src="https://www.unpkg.com/echarts@5.5.0/dist/echarts.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.26.4/dist/editor.min.js"></script>
+<style>
+  body { font-size: 0.8rem; }
+  table { font-size: 0.7rem; }
+
+  .alnright { text-align: right; }
+  .alncenter { text-align: center; }
+  .boxprob { font-size: 0.9rem; }
+
+  tr.rel_0 {background-color:#dcf3ff;margin:0;border:0;padding:0;font-weight: bold;font-size: 0.7rem; line-height:1.4;}
+  tr.rel_1 {background-color:#d6d6d6;margin:0;border:0;padding:0;font-weight: bold;font-size: 0.7rem; line-height:1.4}
+  tr.rel_2 {background-color:#f4f4f4;margin:0;border:0;padding:0;font-weight: bold;font-size: 0.7rem; line-height:1.4}
+  tr.rel_3 {background-color:#ffffff;margin:0;border:0;padding:0;font-size: 0.7rem;; line-height:1.4}
+  td.rel_0 {margin:0;padding:0; vertical-align:middle}
+  td.rel_1 {margin:0;padding:0; vertical-align:middle}
+  td.rel_2 {margin:0;padding:0; vertical-align:middle}
+  td.rel_3 {margin:0;padding:0; vertical-align:middle;font-style: italic;}
+  td.rel_3l {margin:0;padding:0; vertical-align:middle;}
+
+  tr.padrao {margin:0;border:0;padding:0;font-size: 0.7rem; line-height:1.2;}
+  td.padrao {margin:0;padding:0.1; vertical-align:middle}
+  input.padrao {width: 90%; height:25px}
+  select.padrao {width: 90%; height:25px}
+
+  input.direita { text-align: right; }
+
+  .form-control-sm { font-size: .7rem; line-height:1;}
+  .dropdown-item { font-size: .9rem; line-height:1;}
+
+</style>
+
+<body>
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" href="/">Home</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/despesas/resumo">Resumo</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Despesas</a>
+          <div class="dropdown-menu" aria-labelledby="dropdown01">
+            <a class="dropdown-item" href="/despesas/classificar">Classificar</a>
+            <a class="dropdown-item" href="/despesas/crescimento">Crescimento</a>
+            <a class="dropdown-item" href="/despesas/duplicados">Duplicados</a>
+            <a class="dropdown-item" href="/despesas/ignorados">Ignorados</a>
+            <a class="dropdown-item" href="/despesas/importar">Importar</a>
+            <a class="dropdown-item" href="/despesas/nlp">NLP</a>
+            <a class="dropdown-item" href="/despesas/relatorio">Relatorios</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Investimentos</a>
+          <div class="dropdown-menu" aria-labelledby="dropdown01">
+            <a class="dropdown-item" href="/investimentos/bonds">Bonds</a>
+            <a class="dropdown-item" href="/investimentos/bondsflows">Bonds Flows</a>
+            <a class="dropdown-item" href="/investimentos/carteira">Carteira</a>
+            <a class="dropdown-item" href="/investimentos/fluxo">Fluxo de Caixa</a>
+            <a class="dropdown-item" href="/investimentos/relatorios">Relatorios</a>
+            <a class="dropdown-item" href="/investimentos/riscos">Riscos</a>
+            <a class="dropdown-item" href="/investimentos/saldos">Saldos</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Config</a>
+          <div class="dropdown-menu" aria-labelledby="dropdown01">
+            <a class="dropdown-item" href="/config/autoupdate">Auto Update</a>
+            <a class="dropdown-item" href="/config/contas">Contas</a>
+            <a class="dropdown-item" href="/config/debug">Debug</a>
+            <a class="dropdown-item" href="/config/parametros">Parametros</a>
+            <a class="dropdown-item" href="/config/riscos">Riscos</a>
+            <a class="dropdown-item" href="/config/setup">Setup</a>
+            <a class="dropdown-item" href="/config/sql">SQL</a>
+            <a class="dropdown-item" href="/config/taxas">Taxas</a>
+            <a class="dropdown-item" href="/config/transfers">Transfers</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Pocket Book</a>
+          <div class="dropdown-menu" aria-labelledby="dropdown01">
+            <a class="dropdown-item" href="/pbook/posts">Posts</a>
+            <a class="dropdown-item" href="/pbook/tags">Tags</a>
+            <a class="dropdown-item" href="/pbook/timeline">Timeline</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <br><br>
+  <div class="container-fluid conden">
+  <br><br>
+    {% block content %} {% endblock %}
+  </div>
+  <br><br><br>
+
+
+</body>
+</html>

@@ -1,0 +1,179 @@
+{% extends 'index.html' %}
+{% block content %}
+<br><br>
+<div class="row">
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">Bonds</div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Bond</th>
+              <th scope="col">Data</th>
+              <th scope="col">Qtde</th>
+              <th scope="col">Caixa</th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in tb %}
+            <tr>
+              <td>{{ d['id'] }}</td>
+              <td>{{ d['bond'] }}</td>
+              <td>{{ d['data'] }}</td>
+              <td class="alnright">{{ "{:0,.2f}".format(d['qtde']) }}</td>
+              <td class="alnright">{{ "{:0,.2f}".format(d['cx']) }}</td>
+              <td class="alnright"><a href="/investimentos/carteira?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
+              <td class="alnright"><a href="/investimentos/carteira?mode=view&id={{ d['id'] }}" class="badge badge-info">View</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% if modo == 'I' %}
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">Adicionar</div>
+      <div class="card-body">
+        <form  action="/investimentos/carteira" method="post">
+          <div class="form-group row">
+            <label for="selConta2" class="col-4 col-form-label">Bond</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="selConta2" name="bond">
+                {% for d in bonds %}
+                  <option value="{{ d['id'] }}">{{ d['bond'] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="idIndice" class="col-4 col-form-label">Date</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idIndice" name="date" value="" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idValor" class="col-4 col-form-label">Qtde</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="qtde" value="" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idValor" class="col-4 col-form-label">Caixa</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="cx" value="" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <div class="col-10">
+              <button type="submit" class="btn btn-primary btn-sm" name="Criar" value="Criar">Criar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% elif modo == 'E' %}
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">Editar</div>
+      <div class="card-body">
+        <form  action="/investimentos/carteira" method="post">
+          <div class="form-group row">
+            <label for="idID" class="col-4 col-form-label">ID</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idID" name="id" value="{{ rs['id'] }}" readonly></div>
+          </div>
+          <div class="form-group row">
+            <label for="selConta2" class="col-4 col-form-label">Bond</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="selConta2" name="bond">
+                {% for d in bonds %}
+                  <option {{ 'Selected' if d['id'] == rs['idbond'] else '' }} value="{{ d['id'] }}">{{ d['bond'] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="idIndice" class="col-4 col-form-label">Date</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idIndice" name="date" value="{{ rs['data'] }}" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idValor" class="col-4 col-form-label">Qtde</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="qtde" value="{{ rs['qtde'] }}" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idValor" class="col-4 col-form-label">Caixa</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="cx" value="{{ rs['cx'] }}" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <div class="col-10">
+              <button type="submit" class="btn btn-primary btn-sm" name="Update" value="Update">Update</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  {% endif %}
+</div>
+<br>
+{% if modo == 'V' %}
+<br>
+<div class="row">
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">Relatorio</div>
+      <div class="card-body">
+        <table  class="table table-sm">
+          <thead>
+              <th>Ano</th>
+              <th>Anual</th>
+              <th>Acumulado</th>
+              <th>Mensal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in range(0, tb1[0]|length) %}
+              <tr>
+              <td>{{ tb1[0][i] }}</td>
+              <td class="alnright">{{ tb1[1][i] }}</td>
+              <td class="alnright">{{ tb1[3][i] }}</td>
+              <td class="alnright">{{ tb1[2][i] }}</td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<br>
+<div class="row">
+  <div class="col-3">
+    <div class="card">
+      <div class="card-header">Resumo</div>
+      <div class="card-body">
+        <table  class="table table-sm">
+          <thead>
+              <th>Bond</th>
+              <th>Qtde</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in tb_res %}
+              <tr>
+              <td>{{ l['bond'] }}</td>
+              <td class="alnright">{{ l['qtde'] }}</td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'index.html' %}
+{% block content %}
+<br>
+{% for k, v in tb.items() %}
+<div class="row">
+  <div class="col-8">
+    <form  action="/despesas/classnlpcat" method="post">
+      <div class="card">
+        <div class="card-header">{{ k }}</div>
+        <div class="card-body">
+          <input type="hidden" name="conta" value="{{ k }}">
+          <table  class="table table-sm">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Texto</th>
+                <th>Texto</th>
+                <th>Valor</th>
+                <th>Probabilidade</th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            {% for x,y in v.iterrows() %}
+            <input type="hidden" name="id_{{ x }}" value="{{ y['ID'] }}">
+            <tr>
+              <td>{{ y['ID'] }}</td>
+              <td>{{ y['Texto'] }}</td>
+              <td class='alnright'>{{ y['Valor'] }}</td>
+              {% if y['MaxVal1'] >= 80 %}
+              <td class='alnright boxprob'><span class="badge badge-success">{{ y['MaxVal1'] }}</span></td>
+              {% elif y['MaxVal1'] >= 60 %}
+              <td class='alnright boxprob'><span class="badge badge-warning">{{ y['MaxVal1'] }}</span></td>
+              {% else %}
+              <td class='alnright boxprob'><span class="badge badge-danger">{{ y['MaxVal1'] }}</span></td>
+              {% endif %}
+              <td>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" name="check_{{ x }}">
+                </div>
+              </td>
+              <td><a href="/despesas/editar?id={{ y['ID'] }}&backto=despesasClassNLPCat" class="badge badge-danger">Edit</a></td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary btn-sm" name="Update" value="Update">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<br>
+{% endfor %}
+{% endblock %}

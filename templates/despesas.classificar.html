@@ -1,0 +1,73 @@
+{% extends 'index.html' %}
+{% block content %}
+<br>
+<div class="row">
+  <div class="col-3">
+  </div>
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">Filtrar</div>
+      <div class="card-body">
+        <form  action="/despesas/classificar" method="get">
+          <div class="form-check form-check-inline">
+            <label class="form-check-label" for="idTexto">Texto:&nbsp;&nbsp;&nbsp;</label>
+            <input type="text" class="form-control form-control-sm" id="idTexto" name="texto" value="" autocomplete="off">
+          </div>
+          <div class="form-check form-check-inline">
+            <label class="form-check-label" for="idTodos">Todos:&nbsp;&nbsp;&nbsp;</label>
+            <input class="form-check-input" type="checkbox" name="todos" value="" id="idTodos">
+          </div>
+          <div class="form-check form-check-inline">
+            <button type="submit" class="btn btn-primary btn-sm" name="Filtrar" value="Filtrar">Filtrar</button>
+          </div>
+      </div>
+      </form>
+    </div>
+  </div>
+  <div class="col-3"></div>
+</div>
+<br>
+<div class="row">
+  <div class="col-12">
+    <form  action="/despesas/classificar" method="post">
+      <div class="card">
+        <div class="card-header">Classificar</div>
+        <div class="card-body">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Texto</th>
+                <th>Valor</th>
+                <th>Conta</th>
+                <th>Edit</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in tb %}
+              <tr class="padrao">
+                <td class="padrao"><input type="text" class="form-control form-control-sm padrao" name="{{ loop.index }}_ID" value="{{ r['id']}}" size="1" readonly></td>
+                <td class="padrao">{{ r['datahora']}}</td>
+                <td class="padrao">{{ r['texto'] | replace("DDU", "(Dia Util)") | replace("DDF", "(Fim de Semana)") | replace("WDA", "(Domingo)") | replace("WDB", "(Segunda-feira)") | replace("WDC", "(Terça-feira)") | replace("WDD", "(Quarta-feira)")  | replace("WDE", "(Quinta-feira)") | replace("WDF", "(Sexta-feira)") | replace("WDG", "(Sabado)") }} </td>
+                <td class="padrao alnright">{{ "{:0,.2f}".format(r['valor']) }}&nbsp;&nbsp;&nbsp;</td>
+                <td class="padrao">
+                  <select class="form-control form-control-sm padrao" name="{{ loop.index }}_Conta">
+                    <option value="0"></option>
+                    {% for d in labels %}<option value="{{ d['id'] }}" {{ 'Selected' if d['id'] == r['id_conta'] else '' }}>{{ d['Conta'] }}</option>{% endfor %}
+                  </select>
+                </td>
+                <td class="padrao"><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasClassificar" class="badge badge-danger">Edit</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary btn-sm" name="Salvar" value="Salvar">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

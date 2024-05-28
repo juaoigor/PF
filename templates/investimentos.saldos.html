@@ -1,0 +1,60 @@
+{% extends 'index.html' %}
+{% block content %}
+<br>
+<div class="row">
+  <div class="col-3">
+  </div>
+  <div class="col-6">
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item"><a class="page-link" href="{{ links['anta'] }}">-1  Ano</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['anta6'] }}">-6  Meses</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['ant'] }}">-1  Mes</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['atual'] }}">Hoje</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['pos'] }}">+1 Mes</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['posa6'] }}">+6 Meses</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['posa'] }}">+1 Ano</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="col-3">
+  </div>
+</div>
+<br>
+<div class="row">
+  <div class="col-6">
+    <form  action="{{ links['atual'] }}" method="post">
+      <input type="hidden" name="mes" value="{{ mes }}">
+      <input type="hidden" name="ano" value="{{ ano }}">
+      <div class="card">
+        <div class="card-header">Saldos</div>
+        <div class="card-body">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Conta</th>
+                <th>Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {%- for l in labels -%}
+              <tr class="padrao">
+                <input type="hidden" name="{{ loop.index }}_ID_CONTA" value="{{ l['id'] }}">
+                <input type="hidden" name="{{ loop.index }}_ID_SALDO" value="{{ ids[l['id']] }}">
+                <td class="padrao"><input type="text" class="form-control form-control-sm padrao " name="{{ loop.index }}_DATA" value="{{ ano }}-{{ mes }}-01" size="1" readonly></td>
+                <td class="padrao"><input type="text" class="form-control form-control-sm padrao" name="{{ loop.index }}_CONTA" value="{{ l['Conta'] }}" size="15" readonly></td>
+                <td class="padrao"><input type="text" class="form-control form-control-sm padrao direita" name="{{ loop.index }}_VALOR" value="{{ vals[l['id']] }}" size="2" autocomplete="off"></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary btn-sm" name="Update" value="Update">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

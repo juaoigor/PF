@@ -1,0 +1,112 @@
+{% extends 'index.html' %}
+{% block content %}
+<br><br>
+<style>
+  .ce-block__content,
+  .ce-toolbar__content {
+    max-width: unset;
+  }
+  .cdx-list__item {
+    padding: 0px 0 0px 3px;
+    line-height: 1.1em;
+  }
+  .cdx-block {
+    padding: .2em 0;
+  }
+</style>
+
+<div class="row">
+  <div class="col-12">
+    {% for tag in tb['avail_tags'] %}
+      <a href="/pbook/timeline?filter={{ filt }},{{ tb['tbTags'][tag] }}" class="badge badge-warning">{{ tb['tbTags'][tag] }}</a>
+    {% endfor %}
+  </div>
+</div>
+<br><br><br>
+
+<div class="row">
+{% for d in tb['Posts'] %}
+  <div class="col-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+            <div id="editorJS_{{ d['id']}}"></div>
+            <script>
+              const editor_{{ d['id']}} = new EditorJS({
+                holderId: "editorJS_{{ d['id']}}",
+                readOnly: true,
+                data: {{ d['texto']|safe }},
+                tools:{
+                  header: { class: Header, inlineToolbar: true },
+                  image: {
+                    class: ImageTool,
+                      config: {
+                      endpoints: { byFile: '/uploader', byUrl: '/uploader' }
+                    }
+                  },
+                  list: {
+                    class: List,
+                    inlineToolbar: true,
+                    config: { defaultStyle: 'unordered' }
+                  },
+                  table: {
+                    class: Table,
+                    inlineToolbar: true,
+                    config: { rows: 2, cols: 3, },
+                  },
+                  quote: {
+                    class: Quote,
+                    inlineToolbar: true,
+                    config: { quotePlaceholder: 'Enter a quote', captionPlaceholder: 'Quote\'s author', }
+                  },
+                  delimiter: { class: Delimiter },
+                  code: { class: CodeTool },
+                  Marker: { class: Marker }
+                }
+              });
+            </script>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="row">
+          <div class="col-12">
+            {% if d['id'] in tb['Rel'] %}
+              {% for tag in tb['Rel'][d['id']] %}
+                <a href="/pbook/timeline?filter={{ filt }},{{ tb['tbTags'][tag] }}" class="badge badge-warning">{{ tb['tbTags'][tag] }}</a>
+              {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-8"></div>
+          <div class="col">
+            <form class="form-group row" action="/pbook/timeline" method="post"> <input type="hidden" name="id" value="{{ d['id'] }}"> <input type="hidden" name="action" value="ADD_TAG">
+              <div class="col">
+                <select class="form-select form-select-sm" name="tag">
+                  {% for t in tb['Tags'] %}
+                    {% if t['id'] not in tb['Rel'][d['id']] %}
+                      <option value="{{ t['id'] }}">{{ t['Texto'] }}</option>
+                     {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col"> <button type="submit" class="btn btn-primary btn-sm">Add</button> </div>
+            </form>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-8"></div>
+          <div class="col-2"><a href="/pbook/posts?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></div>
+          <div class="col-2"><p><small>{{ d['datahora'] }}</small></p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+{{ loop.cycle(''|safe, '</div><br><div class="row">'|safe) }}
+
+{% endfor %}
+</div>
+
+{% endblock %}

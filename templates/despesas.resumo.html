@@ -1,0 +1,201 @@
+{% extends 'index.html' %}
+{% block content %}
+<br>
+<div class="row">
+  <div class="col-xl-2">
+  </div>
+  <div class="col-6">
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item"><a class="page-link" href="{{ links['anta'] }}">-1  Ano</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['anta6'] }}">-6  Meses</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['ant'] }}">-1  Mes</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['atual'] }}">Hoje</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['pos'] }}">+1 Mes</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['posa6'] }}">+6 Meses</a></li>
+        <li class="page-item"><a class="page-link" href="{{ links['posa'] }}">+1 Ano</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="col-4">
+    <div id="accordion">
+      <div class="card">
+        <div class="card-header" id="headingOne">
+          <h5 class="mb-0">
+            <button class="btn btn-link btn-sm collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+              Transfer
+            </button>
+          </h5>
+        </div>
+        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+          <div class="card-body">
+            <form action="{{ links['atual'] }}" method="post">
+              <input type="hidden" name="mes" value="{{ mes }}">
+              <input type="hidden" name="ano" value="{{ ano }}">
+              <input type="hidden" name="id_transfer" value="0">
+              <div class="form-group row">
+                <label for="idTData" class="col-4 col-form-label">Data</label>
+                <div class="col-8"><input type="text" class="form-control form-control-sm" id="idTData" name="data" value="{{ ano }}-{{ mes }}-01" autocomplete="off"></div>
+              </div>
+              <div class="form-group row">
+                <label for="idTexto" class="col-4 col-form-label">Texto</label>
+                <div class="col-8"><input type="text" class="form-control form-control-sm" id="idTexto" name="texto" value="" autocomplete="off"></div>
+              </div>
+              <div class="form-group row">
+                <label for="selConta" class="col-4 col-form-label">Conta Origem</label>
+                <div class="col-8">
+                  <select class="form-control form-control-sm" id="selContaOrigem" name="contaOrigem">
+                    <option value="0">Vazio</option>
+                    {% for d in labels %}
+                      <option value="{{ d['id'] }}">{{ d['Conta'] }}</option>
+                    {% endfor %}
+                    <option value="9999">Ignorar</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="selConta" class="col-4 col-form-label">Conta Destino</label>
+                <div class="col-8">
+                  <select class="form-control form-control-sm" id="selContaDestino" name="contaDestino">
+                    <option value="0">Vazio</option>
+                    {% for d in labels %}
+                      <option value="{{ d['id'] }}">{{ d['Conta'] }}</option>
+                    {% endfor %}
+                    <option value="9999">Ignorar</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="idValor" class="col-4 col-form-label">Valor</label>
+                <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="valor" value="" autocomplete="off"></div>
+              </div>
+              <div class="form-group row">
+                <div class="col-10">
+                  <button type="submit" class="btn btn-primary btn-sm" name="Transfer" value="Transfer">Transfer</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if transfers|length > 0 %}
+<br><br>
+<div class="row">
+  <div class="col-xl-12">
+    <div class="card">
+      <div class="card-header">Transfers Pendentes</div>
+      <div class="card-body">
+        {% for t in transfers %}
+        <div class="row">
+          <div class="col-xl-12">
+          <form class="form-inline" action="{{ links['atual'] }}" method="post">
+            <input type="hidden" name="id_transfer" value="{{ t['id'] }}">
+            <input type="hidden" name="mes" value="{{ mes }}">
+            <input type="hidden" name="ano" value="{{ ano }}">
+            <input type="hidden" name="contaOrigem" value="{{ t['id_conta_de'] }}">
+            <input type="hidden" name="contaDestino" value="{{ t['id_conta_para'] }}">
+
+            <label class="" for="idData">Data:&nbsp;</label>
+            <input type="text" class="form-control form-control-sm" name="data" id="idData" size="8" value="{{ ano }}-{{ mes }}-{{ '%02d' % t['dia'] }}">
+            <label class="" for="idContaDe">&nbsp;Origem:&nbsp;</label>
+            <input type="text" class="form-control form-control-sm" id="idContaDe" size="30" value="{{ contas[t['id_conta_de']]}}" readonly>
+            <label class="" for="idContaPara">&nbsp;Destino:&nbsp;</label>
+            <input type="text" class="form-control form-control-sm" id="idContaPara" size="30" value="{{ contas[t['id_conta_para']]}}" readonly>
+            <label class="" for="idTexto">&nbsp;Texto:&nbsp;</label>
+            <input type="text" class="form-control form-control-sm" name="texto" id="idTexto" size="30" value="{{ t['texto'] }}" readonly>
+            <label class="" for="idValor">&nbsp;Valor:&nbsp;</label>
+            <input type="text" class="form-control form-control-sm" name="valor" id="idValor" size="8"  placeholder="Valor"  autocomplete="off">
+            <label class="" for="">&nbsp;&nbsp;&nbsp;</label>
+            <button type="submit" class="btn btn-primary btn-sm" name="Transfer" value="Transfer">Adicionar</button>
+          </form>
+          </div>
+        </div>
+        <br>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<br>
+<div class="row">
+  <div class="col-xl-12">
+    <form  action="{{ links['atual'] }}" method="post">
+      <input type="hidden" name="mes" value="{{ mes }}">
+      <input type="hidden" name="ano" value="{{ ano }}">
+      <div class="card">
+        <div class="card-header">Detalhe do Mes</div>
+        <div class="card-body">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Conta</th>
+                <th>Texto</th>
+                <th>Valor</th>
+                <th class="d-none d-xl-block">Total</th>
+                <th>Edit</th>
+                <th>Check Conta</th>
+                <th>Transfer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {%- for r in tb['detalhe'] -%}
+              {%- if r['conta'] == 'Ignorar' -%}
+              {%- elif r['conta'] == 'SemClass' -%}
+              <input type="hidden" name="id_{{ loop.index }}" value="{{ r['id'] }}">
+              <tr>
+                <td>{{ r['datahora']}}</td>
+                <td>
+                  <select class="form-control form-control-sm" name="conta_{{ loop.index }}">
+                    <option value="0"></option>
+                    {% for d in labels %}
+                    <option value="{{ d['id'] }}">{{ d['Conta'] }}</option>
+                    {% endfor %}
+                    <option value="9999">Ignorar</option>
+                  </select>
+                </td>
+                <td>{{ r['texto']}}</td>
+                <td class='alnright'>{{r['valor']}}</td>
+                <td class="d-none d-xl-block alnright">{{r['total']}}</td>
+                <td></td>
+                <td></td>
+              </tr>
+              {% else %}
+              <tr class="padrao">
+                <td class="padrao">{{ r['datahora']}}</td>
+                <td class="padrao">{{ r['conta']}}</td>
+                <td class="padrao">{{ r['texto']}}</td>
+                <td class="padrao alnright">{{r['valor']}}</td>
+                <td class="d-none d-xl-block padrao alnright">{{r['total']}}</td>
+                <td class="padrao alncenter"><a href="/despesas/editar?id={{ r['id'] }}&backto=despesasResumo" class="badge badge-danger">Edit</a></td>
+                {%- if r['high_prob'] == 'ok' -%}
+                <td class="padrao alncenter">Ok</td>
+                {% else %}
+                  <td class="padrao alncenter">{{ r['high_prob']}}</td>
+                {%- endif -%}
+                <td class="padrao alncenter"><a href="/despesas/transfer?id={{ r['id'] }}&backto=despesasResumo" class="badge badge-info">Transfer</a></td>
+              </tr>
+              {%- endif -%}
+              {%- endfor -%}
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary btn-sm" name="Update" value="Update">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<br>
+
+
+
+
+{% endblock %}

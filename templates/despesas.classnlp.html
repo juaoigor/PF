@@ -1,0 +1,90 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<br>
+
+<div class="row">
+  <div class="col-10">
+    <div class="card">
+      <div class="card-header">Processado</div>
+      <div class="card-body">
+        <form  action="/despesas/classnlp" method="post">
+          <table  class="table table-sm">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Texto</th>
+                <th>Valor</th>
+                <th colspan="2">Probabilidade</th>
+              </tr>
+            </thead>
+            {% for k,v in tb.iterrows() %}
+             <input type="hidden" name="id_{{ k }}" value="{{ v['ID'] }}">
+            <tr>
+              <td rowspan="4">{{ v['ID'] }}</td>
+              <td rowspan="4">{{ v['Texto'] }}</td>
+              <td rowspan="4" class='alnright'>{{ v['Valor'] }}</td>
+              <td>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="c_{{ k }}" id="radio{{ k }}_1" value="{{ v['IDMax1']}}">
+                  <label class="form-check-label" for="radio{{ k }}_1">{{ v['Max1'] }}</label>
+                </div>
+              </td>
+              {% if v['MaxVal1'] >= 80 %}
+                <td class='alnright boxprob'><span class="badge badge-success">{{ v['MaxVal1'] }}</span></td>
+              {% elif v['MaxVal1'] >= 60 %}
+                <td class='alnright boxprob'><span class="badge badge-warning">{{ v['MaxVal1'] }}</span></td>
+              {% else %}
+                <td class='alnright boxprob'><span class="badge badge-danger">{{ v['MaxVal1'] }}</span></td>
+              {% endif %}
+            </tr>
+            <tr>
+              <td>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="c_{{ k }}" id="radio{{ k }}_2" value="{{ v['IDMax2']}}">
+                  <label class="form-check-label" for="radio{{ k }}_2">{{ v['Max2'] }}</label>
+                </div>
+              </td>
+              {% if v['MaxVal2'] >= 80 %}
+                <td class='alnright boxprob'><span class="badge badge-success">{{ v['MaxVal2'] }}</span></td>
+              {% elif v['MaxVal2'] >= 60 %}
+                <td class='alnright boxprob'><span class="badge badge-warning">{{ v['MaxVal2'] }}</span></td>
+              {% else %}
+                <td class='alnright boxprob'><span class="badge badge-danger">{{ v['MaxVal2'] }}</span></td>
+              {% endif %}
+            </tr>
+            <tr>
+              <td>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="c_{{ k }}" id="radio{{ k }}_3" value="{{ v['IDMax3']}}">
+                  <label class="form-check-label" for="radio{{ k }}_3">{{ v['Max3'] }}</label>
+                </div>
+              </td>
+              {% if v['MaxVal3'] >= 80 %}
+                <td class='alnright boxprob'><span class="badge badge-success">{{ v['MaxVal3'] }}</span></td>
+              {% elif v['MaxVal3'] >= 60 %}
+                <td class='alnright boxprob'><span class="badge badge-warning">{{ v['MaxVal3'] }}</span></td>
+              {% else %}
+                <td class='alnright boxprob'><span class="badge badge-danger">{{ v['MaxVal3'] }}</span></td>
+              {% endif %}
+            </tr>
+            <tr>
+              <td>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="c_{{ k }}" id="radio{{ k }}_4" value="0" checked>
+                  <label class="form-check-label" for="radio{{ k }}_4">Nenhuma</label>
+                </div>
+              </td>
+              <td></td>
+            </tr>
+            {% endfor %}
+          </table>
+          <button type="submit" class="btn btn-primary" name="Update" value="Update">Update</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

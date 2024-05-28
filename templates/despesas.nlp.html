@@ -1,0 +1,61 @@
+{% extends 'index.html' %}
+{% block content %}
+<br>
+<div class="row">
+  <div class="col-4">
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item"><a class="page-link" href="/despesas/nlp?id={{lprox['id']}}">Proximo</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="col-1">
+    <a class="btn btn-primary btn-sm" href="/despesas/classnlp" role="button">Bulk</a>
+  </div>
+  <div class="col-1">
+    <a class="btn btn-primary btn-sm" href="/despesas/classnlpcat" role="button">Categorias</a>
+  </div>
+</div>
+<br>
+<div class="row">
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">Info</div>
+      <div class="card-body">
+        {{ linfo['texto'] }}
+      </div>
+    </div>
+  </div>
+</div>
+<br>
+<div class="row">
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">Processado</div>
+      <div class="card-body">
+        <table  class="table table-sm">
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Prob</th>
+              <th>Selecionar</th>
+            </tr>
+          </thead>
+          {% for r in tb %}
+          <tr>
+            <td>{{ r['Conta'] }}</td>
+            {% if r['Prob'] >= 80 %}
+            <td class='alnright boxprob'><span class="badge badge-success">{{ r['Probs'] }}</span></td>
+            {% elif r['Prob'] >= 60 %}
+            <td class='alnright boxprob'><span class="badge badge-warning">{{ r['Probs'] }}</span></td>
+            {% else %}
+            <td class='alnright boxprob'><span class="badge badge-danger">{{ r['Probs'] }}</span></td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

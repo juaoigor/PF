@@ -1,0 +1,53 @@
+{% extends 'index.html' %}
+{% block content %}
+<br><br>
+<div class="row">
+  <div class="col-8">
+    <form  action="/despesas/importar" method="post">
+      <div class="card">
+        <div class="card-header">Despesas</div>
+        <div class="card-body">
+          <div class="form-group row">
+            <label for="idTexto" class="col-2 col-form-label">Texto</label>
+            <div class="col-10"><textarea id="idTexto" name="texto" rows="20" cols="80"></textarea></div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary btn-sm" name="Processar" value="Processar">Processar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<br><br>
+<div class="row">
+  <div class="col-8">
+    <form  action="/despesas/importar" method="post">
+      <div class="card">
+        <div class="card-header">Processado</div>
+        <div class="card-body">
+          <table>
+            <tr>
+              <th>Data</th>
+              <th>Texto</th>
+              <th>Valor</th>
+              <th>Existe</th>
+            </tr>
+            {% for r in tb %}
+            <tr>
+              <td><input type="text" class="form-control form-control-sm" size="10" name="{{ r['ID']}}_Data" value="{{ r['Data']}}"></td>
+              <td><input type="text" class="form-control form-control-sm" size="80" name="{{ r['ID']}}_Texto" value="{{ r['Texto']}}"></td>
+              <td><input type="text" class="form-control form-control-sm" size="10" name="{{ r['ID']}}_Valor" value="{{ r['Valor']}}"></td>
+              <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input class="form-check-input" type="checkbox" name="{{ r['ID']}}_Inserir" id="flexCheckDefault" {{ 'checked' if r['N'] == 0 else '' }} ><label class="form-check-label" for="flexCheckDefault">Inserir</label></td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary btn-sm" name="Inserir" value="Inserir">Inserir</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

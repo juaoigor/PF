@@ -1,0 +1,162 @@
+{% extends 'index.html' %}
+{% block content %}
+<br><br>
+<div class="row">
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">Bonds</div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Bond</th>
+              <th scope="col">Data</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Yield</th>
+              <th scope="col">Yield Per</th>
+              <th scope="col">Amtz</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in tb %}
+            <tr>
+              <td>{{ d['id'] }}</td>
+              <td>{{ d['bond'] }}</td>
+              <td>{{ d['data'] }}</td>
+              <td>{{ d['tipo'] }}</td>
+              <td>{{ d['yield'] }}</td>
+              <td>{{ d['yieldper'] }}</td>
+              <td>{{ d['amtz'] }}</td>
+              <td><a href="/investimentos/bondsflows?mode=edit&id={{ d['id'] }}" class="badge badge-danger">Edit</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% if modo == 'I' %}
+  <div class="col-4">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">Adicionar</div>
+          <div class="card-body">
+            <form  action="/investimentos/bondsflows" method="post">
+              <div class="form-group row">
+                <label for="selConta2" class="col-4 col-form-label">Bond</label>
+                <div class="col-8">
+                  <select class="form-control form-control-sm" id="selConta2" name="bond">
+                    {% for d in bonds %}
+                      <option value="{{ d['id'] }}">{{ d['bond'] }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="idData" class="col-4 col-form-label">Data</label>
+                <div class="col-8"><input type="text" class="form-control form-control-sm" id="idData" name="data" value="" autocomplete="off"></div>
+              </div>
+              <div class="form-group row">
+                <label for="idIndice" class="col-4 col-form-label">Tipo</label>
+                <div class="col-8"><input type="text" class="form-control form-control-sm" id="idIndice" name="tipo" value="" autocomplete="off"></div>
+              </div>
+              <div class="form-group row">
+                <label for="idValor" class="col-4 col-form-label">Yield</label>
+                <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="yield" value="" autocomplete="off"></div>
+              </div>
+              <div class="form-group row">
+                <label for="idValor" class="col-4 col-form-label">Yield Periodo</label>
+                <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="yieldper" value="" autocomplete="off"></div>
+              </div>
+              <div class="form-group row">
+                <label for="idValor" class="col-4 col-form-label">Amtz</label>
+                <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="amtz" value="" autocomplete="off"></div>
+              </div>
+              <div class="form-group row">
+                <div class="col-10">
+                  <button type="submit" class="btn btn-primary btn-sm" name="Criar" value="Criar">Criar</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">Adicionar em Massa</div>
+            <div class="card-body">
+              <form  action="/investimentos/bondsflows" method="post">
+                <div class="form-group row">
+                  <label class="form-label">ID;Data;Tipo;Yield;Yield Per;Amtz#</label><textarea type="text" name="Obs" class="form-control form-control-sm" rows="20"></textarea>
+                </div>
+                <div class="form-group row">
+                  <div class="col-10">
+                    <button type="submit" class="btn btn-primary btn-sm" name="Bulk" value="Bulk">Bulk</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% elif modo == 'E' %}
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">Editar</div>
+      <div class="card-body">
+        <form  action="/investimentos/bondsflows" method="post">
+          <div class="form-group row">
+            <label for="idID" class="col-4 col-form-label">ID</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idID" name="id" value="{{ rs['id'] }}" readonly></div>
+          </div>
+          <div class="form-group row">
+            <label for="selConta2" class="col-4 col-form-label">Bond</label>
+            <div class="col-8">
+              <select class="form-control form-control-sm" id="selConta2" name="bond">
+                {% for d in bonds %}
+                  <option {{ 'Selected' if d['id'] == rs['idbond'] else '' }} value="{{ d['id'] }}">{{ d['bond'] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="idData" class="col-4 col-form-label">Data</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idData" name="data" value="{{ rs['data'] }}" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idIndice" class="col-4 col-form-label">Tipo</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idIndice" name="tipo" value="{{ rs['tipo'] }}" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idValor" class="col-4 col-form-label">Yield</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="yield" value="{{ rs['yield'] }}" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idValor" class="col-4 col-form-label">Yield Periodo</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="yieldper" value="{{ rs['yieldper'] }}" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <label for="idValor" class="col-4 col-form-label">Amtz</label>
+            <div class="col-8"><input type="text" class="form-control form-control-sm" id="idValor" name="amtz" value="{{ rs['amtz'] }}" autocomplete="off"></div>
+          </div>
+          <div class="form-group row">
+            <div class="col-10">
+              <button type="submit" class="btn btn-primary btn-sm" name="Update" value="Update">Update</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  {% endif %}
+</div>
+{% endblock %}

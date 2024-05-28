@@ -1,0 +1,154 @@
+DROP TABLE IF EXISTS Contas;
+CREATE TABLE Contas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  Conta TEXT NOT NULL,     /* Nome da Conta */
+  RecDes INTEGER DEFAULT 0, /* 0: RECEITA - 1: DESPESA */
+  FixVar INTEGER DEFAULT 0, /* 0: Fixa - 1: Variavel */
+  Inv INTEGER DEFAULT 0, /* 0: Nao - 1: Sim */
+  Saldo INTEGER DEFAULT 0, /* 0: Nao - 1: Sim */
+  Antigas INTEGER DEFAULT 0 /* 0: Nao - 1: Sim */
+);
+
+DROP TABLE IF EXISTS Pessoas;
+CREATE TABLE Pessoas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  Nome TEXT NOT NULL
+);
+INSERT INTO Pessoas (Nome) VALUES ('#N/A');
+INSERT INTO Pessoas (Nome) VALUES ('Juao');
+INSERT INTO Pessoas (Nome) VALUES ('Simone');
+INSERT INTO Pessoas (Nome) VALUES ('Vicente');
+
+DROP TABLE IF EXISTS Bens;
+CREATE TABLE Bens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  Nome TEXT NOT NULL
+);
+INSERT INTO Bens (Nome) VALUES ('#N/A');
+INSERT INTO Bens (Nome) VALUES ('Ap GP');
+INSERT INTO Bens (Nome) VALUES ('Corolla');
+INSERT INTO Bens (Nome) VALUES ('SH150');
+
+DROP TABLE IF EXISTS Despesas;
+CREATE TABLE Despesas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_conta INTEGER,
+  id_cartao INTEGER,
+  id_bem INTEGER,
+  id_pessoa INTEGER,
+  id_transfer INTEGER,
+  datahora TEXT,
+  texto TEXT,
+  valor DOUBLE
+);
+
+DROP TABLE IF EXISTS Saldos;
+CREATE TABLE Saldos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_conta INTEGER,
+  datahora TEXT,
+  valor DOUBLE
+);
+
+DROP TABLE IF EXISTS AutoUpdate;
+CREATE TABLE AutoUpdate (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_conta INTEGER,
+  texto TEXT
+);
+
+DROP TABLE IF EXISTS Transfers;
+CREATE TABLE Transfers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_conta_de INTEGER,
+  id_conta_para INTEGER,
+  dia INTEGER,
+  texto TEXT
+);
+
+DROP TABLE IF EXISTS Taxas;
+CREATE TABLE Taxas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  datahora TEXT,
+  indice TEXT,
+  valor DOUBLE
+);
+
+DROP TABLE IF EXISTS Textos;
+CREATE TABLE Textos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  texto_de TEXT,
+  texto_para TEXT
+);
+
+DROP TABLE IF EXISTS Riscos;
+CREATE TABLE Riscos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  Risco TEXT,
+  Categ TEXT
+);
+
+DROP TABLE IF EXISTS RiscosC;
+CREATE TABLE RiscosC (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  idConta INTEGER,
+  idRisco INTEGER
+);
+
+
+DROP TABLE IF EXISTS PBTags;
+CREATE TABLE PBTags (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  Texto TEXT
+);
+
+DROP TABLE IF EXISTS PBPosts;
+CREATE TABLE PBPosts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  datahora TEXT,
+  Texto TEXT
+);
+
+DROP TABLE IF EXISTS PBPostsTags;
+CREATE TABLE PBPostsTags (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_post INTEGER,
+  id_tag INTEGER
+);
+
+DROP TABLE IF EXISTS Bonds;
+CREATE TABLE Bonds (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  bond TEXT,
+  startdate TEXT,
+  startindex DOUBLE,
+);
+
+DROP TABLE IF EXISTS BondsFlows;
+CREATE TABLE BondsFlows (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  idbond INTEGER,
+  data TEXT,
+  tipo TEXT,
+  yield DOUBLE,
+  yieldper DOUBLE,
+  amtz DOUBLE
+);
+
+
+DROP TABLE IF EXISTS BondsCarteira;
+CREATE TABLE BondsCarteira (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  idbond INTEGER,
+  data TEXT,
+  qtde DOUBLE,
+  cx DOUBLE
+);
+
+
+DROP TABLE IF EXISTS Parametros;
+CREATE TABLE Parametros (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  param TEXT,
+  val TEXT
+);
